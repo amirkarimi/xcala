@@ -1,0 +1,27 @@
+@(collectionField: Field)(inputBuilder: Field => Html)(implicit lang: Lang, fieldConstructor: helper.FieldConstructor)
+
+@collectionFieldBuilder(field: Field) = {
+    <div class="row collection-field">
+        <div class="col-sm-10">
+            @inputBuilder(field)
+        </div>
+        <div class="col-sm-2">
+        </div>
+        <a class="btn btn-danger collection-remove-btn">@Messages("remove")</a>
+    </div>
+}
+
+@helper.input(collectionField, '_ignoreFormControlClass -> true) { (id, name, value, args) =>
+    <div id="@id" class="collection-input" data-collection-scope="@name">
+        <div>
+            <a class="btn btn-success collection-new-btn">@Messages("new")</a>
+        </div>
+        @helper.repeat(collectionField, 0) { field =>
+            @collectionFieldBuilder(field)
+        }    
+        
+        <script class="collection-template" type="text/tempalte">
+            @collectionFieldBuilder(collectionField("[x]"))
+        </script>
+    </div>
+}

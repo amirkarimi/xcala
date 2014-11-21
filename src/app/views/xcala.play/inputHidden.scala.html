@@ -1,0 +1,5 @@
+@(field: Field, renderIfEmpty: Boolean = false)
+
+@if(renderIfEmpty || field.value.nonEmpty){
+    <input type="hidden" name="@field.name" id="@field.id" value="@field.value.getOrElse("")">
+}

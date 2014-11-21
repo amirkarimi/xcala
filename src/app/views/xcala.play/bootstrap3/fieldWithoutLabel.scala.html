@@ -1,0 +1,12 @@
+@(elements: views.html.helper.FieldElements)
+
+@{
+    elements.args.get('_ignoreFormControlClass) match {
+        case Some(r: Boolean) if r =>
+            elements.input 
+        case _ =>
+            Html(elements.input.toString()
+                .replaceFirst("<(input|textarea|select)([^>]*)(class=[\"'])(.*)>", "<$1$2$3form-control $4>")
+                .replaceFirst("<(input|textarea|select)(((?!class).)*)>", "<$1 class=\"form-control\"$2>"))
+    }
+}

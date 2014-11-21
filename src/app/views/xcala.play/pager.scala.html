@@ -1,0 +1,86 @@
+@(paginated: Paginated[_], updateTarget: String = "")
+
+@getMiddlePages = @{
+    val startOffset = if (paginated.pageCount > 8 && paginated.queryOptions.page > 4) { 1 } else { 0 }
+    val endOffset = if (paginated.pageCount > 8 && paginated.pageCount - paginated.queryOptions.page <= 4) { 1 } else { 0 }
+    
+    val start = Math.max(2, Math.min(paginated.queryOptions.page - 2, paginated.pageCount - 6))
+    val end = Math.min(start + 5, paginated.pageCount) - startOffset + endOffset
+    
+    start to end
+}
+
+<div class="pager-container">
+<ul class="pagination">
+    <li @if(!paginated.hasPrevPage) { class="disabled" }>
+        <a data-ajax="true" data-ajax-update-target="@updateTarget"
+            @if(paginated.hasPrevPage) { href="?@paginated.prevPage.toQueryString" }>
+        &laquo;
+        </a>
+    </li>
+    <li @if(paginated.queryOptions.page==1){class="active"}>
+        <a data-ajax="true" data-ajax-update-target="@updateTarget" href="?@paginated.gotoPage(1).toQueryString">
+            1
+        </a>
+    </li>
+    
+    @if(paginated.pageCount > 8 && paginated.queryOptions.page > 4){
+    <li class="disabled">
+        <a>
+            ...
+        </a>
+    </li>        
+    }
+    @for(page <- getMiddlePages){
+	<li @if(paginated.queryOptions.page==page){class="active"}>
+        <a data-ajax="true" data-ajax-update-target="@updateTarget" href="?@paginated.gotoPage(page).toQueryString">
+            @page
+        </a>
+    </li>
+	}
+    @if(paginated.pageCount > 8 && paginated.queryOptions.page < paginated.pageCount - 4){
+    <li class="disabled">
+        <a>
+            ...
+        </a>
+    </li>        
+    }
+    @if(paginated.pageCount > 8){
+	    <li @if(paginated.queryOptions.page==paginated.pageCount){class="active"}>
+	        <a data-ajax="true" data-ajax-update-target="@updateTarget" href="?@paginated.gotoPage(paginated.pageCount).toQueryString">
+	            @paginated.pageCount
+	        </a>
+	    </li>
+    }
+	<li @if(!paginated.hasNextPage) { class="disabled" } >
+        <a data-ajax="true" data-ajax-update-target="@updateTarget"
+            @if(paginated.hasNextPage) { href="?@paginated.nextPage.toQueryString" }>
+        &raquo;
+        </a>
+    </li>
+</ul>
+</div>
+
+@*
+Simple next/prev pagination
+<ul class="pager">
+	<li @if(!paginated.hasPrevPage) { class="disabled" }>
+ 		<a data-ajax="true" data-ajax-update-target="@updateTarget"
+ 			@if(paginated.hasPrevPage) { href="?@paginated.prevPage.toQueryString" }>
+ 			&laquo; قبلی
+ 		</a>
+	</li>
+	<li>
+		صفحه
+		@paginated.queryOptions.page
+		از
+		@paginated.pageCount
+	</li>
+ 	<li	@if(!paginated.hasNextPage) { class="disabled" } >
+ 		<a data-ajax="true" data-ajax-update-target="@updateTarget"
+ 			@if(paginated.hasNextPage) { href="?@paginated.nextPage.toQueryString" }>
+ 			بعدی &raquo;
+		</a>
+	</li>
+</ul>
+*@

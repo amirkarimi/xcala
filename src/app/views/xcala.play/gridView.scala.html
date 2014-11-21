@@ -1,0 +1,20 @@
+@(columns: Seq[Col[_]], rows: Seq[Seq[(Col[_], String, Option[String])]], paginated: Paginated[_], updateTarget: String)(implicit lang: Lang)
+
+<table class="table table-striped">
+	<tr>
+		@columns.map { column => 
+			<th@column.headerCssClass.map(c => Html(s" class='${c}'"))>
+				@gridHeader(column.name, column.sortExpression, paginated, updateTarget)
+			</th>
+		}
+	</tr>
+	@rows.map { row =>
+		<tr>
+			@row.map { case (col, value, css) =>
+				<td@css.map(c => Html(s" class='${c}'"))>
+					@Html(value)
+				</td>
+			}
+		</tr> 
+	}
+</table>

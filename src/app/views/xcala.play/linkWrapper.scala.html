@@ -1,0 +1,9 @@
+@(url: Option[String], openInNewWindow: Boolean)(content: Html)
+
+@url.map { url =>
+	<a href="@url" @if(openInNewWindow){target="_blank"}>
+		@content
+	</a>
+}.getOrElse{
+	@content
+}

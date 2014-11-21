@@ -1,0 +1,30 @@
+@(field: Field, hasTimePicker: Boolean, args: (Symbol,Any)*)(implicit lang: Lang)
+
+@htmlArgs = @{args.filter(arg => !arg._1.name.startsWith("_") && arg._1 != 'id).toMap}
+
+<input type="hidden"
+	class="datetimepicker"
+	id="@field.id"
+	name="@field.name"
+	data-datepickerculture="@if(lang.code=="fa"){fa}else{en}"
+	data-datepicker="@(field.id)DatePicker"
+	@if(hasTimePicker){data-timepicker="@(field.id)TimePicker"}
+	@field.value.map{value=>value="@value"}>
+<div class="row">
+	<div class="col-sm-@if(hasTimePicker){7}else{12}">
+		<input type="text"
+			class="form-control datetime-datepicker"
+			id="@(field.id)DatePicker"
+			name="@(field.name)DatePicker"
+			@toHtmlArgs(htmlArgs)>
+	</div>
+	@if(hasTimePicker){
+	<div class="col-sm-5">
+		<input type="text"
+			class="form-control datetime-timepicker"
+			id="@(field.id)TimePicker"
+			name="@(field.name)TimePicker"
+			@toHtmlArgs(htmlArgs)>
+	</div>
+	}
+</div>

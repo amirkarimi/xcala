@@ -1,0 +1,20 @@
+@(updateTarget: String = "#result", collapsed: Boolean = true, action: Option[Call] = None, title: Option[String] = None)(body: Html)(implicit lang: Lang)
+
+<div class="panel panel-default filter-panel-container">
+  <div class="panel-heading filter-panel-expander" data-filter-panel=".filter-panel">
+	<div class="expander-icon glyphicon glyphicon-plus"></div> <strong>@title.getOrElse(Messages("search"))</strong>
+  </div>
+  <div class="panel-body filter-panel @if(collapsed){filter-panel-collapsed}">
+	<div class="">
+		<form class="form-horizontal" role="form" method="GET" data-ajax="true" data-ajax-update-target="@updateTarget" @action.map{a=>action="@a"}>
+			@body
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+			    	<button type="submit" class="btn btn-primary">@Messages("search")</button>
+			    	<button type="reset" class="btn btn-default">@Messages("clear")</button>
+				</div>
+			</div>
+		</form>
+	</div>
+  </div>
+</div>
