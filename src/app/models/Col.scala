@@ -12,7 +12,7 @@ object Col {
       (field: A) =>
 	      "<div class='btn-group'>" +
 	      commands.map(command => command(field)).map { rowCommand =>
-					s"<a href='${rowCommand.route}' class='btn btn-default' ${getConfirmationAttribute(rowCommand)}>${rowCommand.title}</a>"
+					s"<a href='${rowCommand.route}' class='btn btn-default' ${getConfirmationAttribute(rowCommand)} ${getTargetAttribute(rowCommand)}>${rowCommand.title}</a>"
 	    	}.mkString +
 	      "</div>",
       "",
@@ -27,4 +27,9 @@ object Col {
       ""
     }
   } 
+  
+  def getTargetAttribute(rowCommand: RowCommand): String = rowCommand.openInNewWindow match {
+    case true => "target=\"_blank\""
+    case false => ""
+  }
 }
