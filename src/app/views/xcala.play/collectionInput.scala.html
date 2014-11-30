@@ -1,17 +1,15 @@
-@(collectionField: Field)(inputBuilder: Field => Html)(implicit lang: Lang, fieldConstructor: helper.FieldConstructor)
+@(collectionField: Field, args: (Symbol, Any)*)(inputBuilder: Field => Html)(implicit lang: Lang, fieldConstructor: helper.FieldConstructor)
 
 @collectionFieldBuilder(field: Field) = {
     <div class="row collection-field">
         <div class="col-sm-10">
             @inputBuilder(field)
         </div>
-        <div class="col-sm-2">
-        </div>
         <a class="btn btn-danger collection-remove-btn">@Messages("remove")</a>
     </div>
 }
 
-@helper.input(collectionField, '_ignoreFormControlClass -> true) { (id, name, value, args) =>
+@helper.input(collectionField, Seq('_ignoreFormControlClass -> true, '_inputDivCol -> 10) ++ args:_*) { (id, name, value, args) =>
     <div id="@id" class="collection-input" data-collection-scope="@name">
         <div>
             <a class="btn btn-success collection-new-btn">@Messages("new")</a>
@@ -20,8 +18,8 @@
             @collectionFieldBuilder(field)
         }    
         
-        <script class="collection-template" type="text/tempalte">
+        <div style="display: none" class="collection-template">
             @collectionFieldBuilder(collectionField("[x]"))
-        </script>
+        </div>
     </div>
 }
