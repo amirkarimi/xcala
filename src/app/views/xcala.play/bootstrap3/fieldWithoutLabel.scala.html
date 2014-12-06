@@ -5,8 +5,6 @@
         case Some(r: Boolean) if r =>
             elements.input 
         case _ =>
-            Html(elements.input.toString()
-                .replaceFirst("<(input|textarea|select)([^>]*)(class=[\"'])(.*)>", "<$1$2$3form-control $4>")
-                .replaceFirst("<(input|textarea|select)(((?!class).)*)>", "<$1 class=\"form-control\"$2>"))
+            Html(InputParser.addClass(elements.input.toString(), "form-control"))
     }
 }
