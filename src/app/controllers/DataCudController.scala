@@ -44,40 +44,40 @@ trait DataCudController[A] extends Controller with WithFormBinding with WithComp
     }
   }
 
-  def edit(lang: Lang, id: BSONObjectID) = Action(lang) { implicit request =>
-    implicit val implicitLang = lang
-
-    CudService.findById(id).flatMap { modelOption =>
-      modelOption match {
-        case Some(model) => editView(defaultForm.fill(model), model)
-        case None => Future.successful(NotFound)
+  def edit(lang: Lang, id: BSONObjectID) = WithLang(lang) { implicit lang =>
+    Action { implicit request =>
+      CudService.findById(id).flatMap { modelOption =>
+        modelOption match {
+          case Some(model) => editView(defaultForm.fill(model), model)
+          case None => Future.successful(NotFound)
+        }
       }
     }
-  }
-
-  def editPost(lang: Lang, id: BSONObjectID) = Action(lang) { implicit request =>
-    implicit val implicitLang = lang
-
-    CudService.findById(id) flatMap {
-      case None => Future.successful(NotFound)
-      case Some(model) =>
-        val boundForm = defaultForm.fill(model)
-        val filledFormFuture = bindForm(boundForm)
-
-        filledFormFuture flatMap { filledForm =>
-          filledForm.fold(
-            formWithErrors => {
-              DataCudController.logger.debug("Form Error on Edit: " + formWithErrors.errors)
-              editView(formWithErrors, model)
-            },
-            model =>
-              CudService.save(model).map { objectId =>
-                successfulResult(Messages("message.successfulSave"))
-              } recoverWith {
-                case throwable: Throwable => recoverSaveError(throwable, filledForm)
-              }
-          )
-        }
+  } 
+  
+  def editPost(lang: Lang, id: BSONObjectID) = WithLang(lang) { implicit lang =>
+    Action { implicit request =>
+      CudService.findById(id) flatMap {
+        case None => Future.successful(NotFound)
+        case Some(model) =>
+          val boundForm = defaultForm.fill(model)
+          val filledFormFuture = bindForm(boundForm)
+  
+          filledFormFuture flatMap { filledForm =>
+            filledForm.fold(
+              formWithErrors => {
+                DataCudController.logger.debug("Form Error on Edit: " + formWithErrors.errors)
+                editView(formWithErrors, model)
+              },
+              model =>
+                CudService.save(model).map { objectId =>
+                  successfulResult(Messages("message.successfulSave"))
+                } recoverWith {
+                  case throwable: Throwable => recoverSaveError(throwable, filledForm)
+                }
+            )
+          }
+      }
     }
   }
 
@@ -85,12 +85,12 @@ trait DataCudController[A] extends Controller with WithFormBinding with WithComp
     createView(filledForm.withGlobalError(throwable.getMessage()))
   }
 
-  def delete(lang: Lang, id: BSONObjectID) = Action(lang) { implicit request =>
-    implicit val implicitLang = lang
-
-    CudService.remove(id).map {
-      case error if error.ok => successfulResult(Messages("message.successfulDelete"))
-      case _ => NotFound
+  def delete(lang: Lang, id: BSONObjectID) = WithLang(lang) { implicit lang =>
+    Action { implicit request =>
+      CudService.remove(id).map {
+        case error if error.ok => successfulResult(Messages("message.successfulDelete"))
+        case _ => NotFound
+      }
     }
   }
 

@@ -14,12 +14,12 @@ trait DataSingleViewController[A] extends WithComposableActions with WithoutImpl
 
   def singleView(model: A)(implicit request: RequestType, lang: Lang): Future[Result]
 
-  def view(lang: Lang, id: BSONObjectID) = Action(lang) { implicit request =>
-    implicit val implicitLang = lang
-
-    readService.findById(id) flatMap {
-      case None => Future.successful(NotFound)
-      case Some(model) => singleView(model)
+  def view(lang: Lang, id: BSONObjectID) = WithLang(lang) { implicit lang =>
+    Action { implicit request =>
+      readService.findById(id) flatMap {
+        case None => Future.successful(NotFound)
+        case Some(model) => singleView(model)
+      }
     }
   }
 }
