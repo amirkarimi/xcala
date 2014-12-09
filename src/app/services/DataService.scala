@@ -78,6 +78,8 @@ trait DataReadService[A] {
   def count(query: BSONDocument): Future[Int]
 
   def find(query: BSONDocument, queryOptions: QueryOptions): Future[DataWithTotalCount[A]]
+  
+  def find(query: BSONDocument, sortOptions: SortOptions): Future[Seq[A]]
 }
 
 /**
@@ -114,7 +116,7 @@ trait DataReadServiceImpl[A] extends DataCollectionService
   def findOne(query: BSONDocument): Future[Option[A]] = collection.find(query).one[A]
 
   def count(query: BSONDocument): Future[Int] = db.command(Count(collectionName, Some(query)))
-
+  
   def find(query: BSONDocument, queryOptions: QueryOptions): Future[DataWithTotalCount[A]] = {
     val sortDocs = applyDefaultSort(queryOptions.sortInfos) map { sortInfo =>
       (sortInfo.field -> BSONInteger(sortInfo.direction))
@@ -128,6 +130,17 @@ trait DataReadServiceImpl[A] extends DataCollectionService
       data <- queryBuilder.cursor[A].collect[List](queryOptions.pageSize)
       totalCount <- count(query)
     } yield DataWithTotalCount(data, totalCount)
+  }
+
+  def find(query: BSONDocument, sortOptions: SortOptions): Future[List[A]] = {
+    val sortDocs = applyDefaultSort(sortOptions.sortInfos) map { sortInfo =>
+      (sortInfo.field -> BSONInteger(sortInfo.direction))
+    }
+
+    collection.find(query)
+      .sort(BSONDocument(sortDocs))
+      .cursor[A]
+      .collect[List]()
   }
 
   protected def applyDefaultSort(sortInfos: List[SortInfo]): List[SortInfo] = sortInfos match {
