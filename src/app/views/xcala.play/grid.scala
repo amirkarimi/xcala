@@ -18,8 +18,15 @@ object grid {
 }
 
 object gridWithPager {
-  def apply[A](paginated: Paginated[A], updateTarget: String = "")(columns: Col[A]*)(implicit lang: Lang): HtmlFormat.Appendable = {
-    Html(grid.renderGrid(paginated, updateTarget, columns, lang) + pager(paginated).body)
+  def apply[A](paginated: Paginated[A], renderSinglePagePager: Boolean = true, updateTarget: String = "")(columns: Col[A]*)(implicit lang: Lang): HtmlFormat.Appendable = {
+    Html(
+      grid.renderGrid(paginated, updateTarget, columns, lang) +
+      (if (!renderSinglePagePager && paginated.pageCount <= 1) {
+        ""
+      } else {
+        pager(paginated).body
+      })
+    )
   }
 }
 

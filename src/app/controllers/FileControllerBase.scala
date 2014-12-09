@@ -165,20 +165,20 @@ abstract class FileControllerBase(fileService: FileService) extends Controller w
   
   def upload(folderId: Option[BSONObjectID] = None) = authenticated {
     Action.async(parse.multipartFormData) { implicit request =>
-	    request.body.files.headOption map { filePart =>
-	      val gfs = fileService.gridFS
-	      val file = filePart.ref.file
-	      val enumerator = Enumerator.fromFile(file)
-	      val future = gfs.save(enumerator, DefaultFileToSave(filePart.filename, filePart.contentType))
+      request.body.files.headOption map { filePart =>
+        val gfs = fileService.gridFS
+        val file = filePart.ref.file
+        val enumerator = Enumerator.fromFile(file)
+        val future = gfs.save(enumerator, DefaultFileToSave(filePart.filename, filePart.contentType))
 
-	      future flatMap { readFile =>
-		      fileService.setFileFolder(readFile, folderId) map { lastErrorOpt =>
-		        Ok(s"""{"id":"${stringify(readFile.id)}", "label":"${readFile.filename}"}""")
-		      }
-        }
-	    } getOrElse {
-	      Future.successful(BadRequest)
-	    }
+        future flatMap { readFile =>
+          fileService.setFileFolder(readFile, folderId) map { lastErrorOpt =>
+            Ok(s"""{"id":"${stringify(readFile.id)}", "label":"${readFile.filename}"}""")
+          }
+        } 
+      } getOrElse {
+        Future.successful(BadRequest)
+      }
 	  }
   }
   

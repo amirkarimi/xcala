@@ -8,5 +8,5 @@ import scala.concurrent.Future
 trait WithComposableActions {
   type RequestType <: Request[_]
 
-  def Action[A](block: RequestType => Future[Result])(implicit lang: Lang): play.api.mvc.Action[AnyContent]
+  def Action(block: RequestType => Future[Result])(implicit lang: Lang): play.api.mvc.Action[AnyContent]
 }

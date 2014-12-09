@@ -20,6 +20,12 @@ class FileService(folderService: FolderService) extends GridFSDataService {
         BSONDocument("$set" -> BSONDocument("folderId" -> folderId))).map(Some(_))
   }
   
+  def setFileAsHidden(file: ReadFile[BSONValue]): Future[Option[LastError]] = {
+    gridFS.files.update(
+      BSONDocument("_id" -> file.id), 
+      BSONDocument("$set" -> BSONDocument("isHidden" -> true))).map(Some(_))
+  }
+  
   def createFolder(folder: Folder) = folderService.save(folder)
   
   def getFile(fileId: BSONObjectID): Future[Option[FileEntry]] = {
@@ -30,6 +36,7 @@ class FileService(folderService: FolderService) extends GridFSDataService {
     gridFS.find(
       BSONDocument("$and" -> 
         List(
+          BSONDocument("isHidden" -> BSONDocument("$exists" -> false)),
           BSONDocument("folderId" -> BSONDocument("$exists" -> folderId.isDefined)),
 	        BSONDocument("folderId" -> folderId),
 	        BSONDocument("contentType" -> fileType.map(BSONRegex(_, "i")))

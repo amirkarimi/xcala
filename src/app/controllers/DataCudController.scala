@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait DataCudController[A] extends Controller with WithFormBinding with WithComposableActions with WithoutImplicitLang {
-  protected def CudService: DataReadService[A] with DataSaveService[A] with DataRemoveService
+  protected def cudService: DataReadService[A] with DataSaveService[A] with DataRemoveService
 
   def mainPageRoute(implicit lang: Lang): Call
 
@@ -35,7 +35,7 @@ trait DataCudController[A] extends Controller with WithFormBinding with WithComp
           createView(formWithErrors)
         },
         model => {
-          CudService.insert(model) map { objectId =>
+          cudService.insert(model) map { objectId =>
             successfulResult(Messages("message.successfulSave"))
           } recoverWith {
             case throwable: Throwable => recoverSaveError(throwable, filledForm)
@@ -46,7 +46,7 @@ trait DataCudController[A] extends Controller with WithFormBinding with WithComp
 
   def edit(lang: Lang, id: BSONObjectID) = WithLang(lang) { implicit lang =>
     Action { implicit request =>
-      CudService.findById(id).flatMap { modelOption =>
+      cudService.findById(id).flatMap { modelOption =>
         modelOption match {
           case Some(model) => editView(defaultForm.fill(model), model)
           case None => Future.successful(NotFound)
@@ -57,7 +57,7 @@ trait DataCudController[A] extends Controller with WithFormBinding with WithComp
   
   def editPost(lang: Lang, id: BSONObjectID) = WithLang(lang) { implicit lang =>
     Action { implicit request =>
-      CudService.findById(id) flatMap {
+      cudService.findById(id) flatMap {
         case None => Future.successful(NotFound)
         case Some(model) =>
           val boundForm = defaultForm.fill(model)
@@ -70,7 +70,7 @@ trait DataCudController[A] extends Controller with WithFormBinding with WithComp
                 editView(formWithErrors, model)
               },
               model =>
-                CudService.save(model).map { objectId =>
+                cudService.save(model).map { objectId =>
                   successfulResult(Messages("message.successfulSave"))
                 } recoverWith {
                   case throwable: Throwable => recoverSaveError(throwable, filledForm)
@@ -87,7 +87,7 @@ trait DataCudController[A] extends Controller with WithFormBinding with WithComp
 
   def delete(lang: Lang, id: BSONObjectID) = WithLang(lang) { implicit lang =>
     Action { implicit request =>
-      CudService.remove(id).map {
+      cudService.remove(id).map {
         case error if error.ok => successfulResult(Messages("message.successfulDelete"))
         case _ => NotFound
       }
