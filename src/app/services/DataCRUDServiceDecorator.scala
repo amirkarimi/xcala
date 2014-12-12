@@ -17,23 +17,23 @@ trait DataCrudServiceDecorator[A, B]
 		with DataRemoveService 
 		with DataSaveService[A]
 
-  def mapBackModel(source: B): A
+  def mapBackModel(source: B): Future[A]
   
-  def copyBackModel(source: B, destination: A): A
+  def copyBackModel(source: B, destination: A): Future[A]
   
 	def remove(query: BSONDocument): Future[LastError] = service.remove(query)
   
-  def insert(model: B) = service.insert(mapBackModel(model))
+  def insert(model: B) = mapBackModel(model).flatMap(service.insert)
 	
   def save(model: B) = {
     getIdFromModel(model) match {
       case Some(id) =>
-        service.findById(id).flatMap {          
-          case Some(originalModel) => service.save(copyBackModel(model, originalModel))
+        service.findById(id).flatMap {
+          case Some(originalModel) => copyBackModel(model, originalModel).flatMap(service.save)
           case None => Future.failed(new Throwable("Save error: Model ID not found to be updated."))
         }
       case _ => 
-        service.save(mapBackModel(model))
+        mapBackModel(model).flatMap(service.save)
     }
   }
 }

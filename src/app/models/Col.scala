@@ -11,8 +11,12 @@ object Col {
     Col[A]("",
       (field: A) =>
 	      "<div class='btn-group'>" +
-	      commands.map(command => command(field)).map { rowCommand =>
-					s"<a href='${rowCommand.route}' class='btn btn-default' ${getConfirmationAttribute(rowCommand)} ${getTargetAttribute(rowCommand)}>${rowCommand.title}</a>"
+	      commands.map(_(field)).map { rowCommand =>
+          if (rowCommand.show) {
+            s"<a href='${rowCommand.route}' class='btn btn-default' ${getConfirmationAttribute(rowCommand)} ${getTargetAttribute(rowCommand)}>${rowCommand.title}</a>"
+          } else {
+            ""
+          }
 	    	}.mkString +
 	      "</div>",
       "",
