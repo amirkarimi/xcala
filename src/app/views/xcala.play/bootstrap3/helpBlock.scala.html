@@ -2,8 +2,8 @@
 @defining(elements.lang) { implicit lang =>
     @* this template displays help text and error messages, it is reused amongst the forms types *@
     @if(elements.hasErrors) {
-    	<p class="help-block">@elements.errors.mkString(", ")</p>
+    	<p class="help-block">@Html(elements.errors.mkString(", "))</p>
     } else {
-    	<p class="help-block">@elements.infos.mkString(", ")</p>
+    	<p class="help-block">@Html(elements.infos.mkString(", "))</p>
     }
 }
