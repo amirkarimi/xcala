@@ -45,7 +45,8 @@ abstract class AuthenticationService[A <: Credential](accountService: AccountSer
   
   private def validateUserToken(request: RequestHeader): Future[Option[UserToken]] = {
     try {
-      val userToken = UserToken.decodeFromCookie(request.cookies.get(UserToken.COOKIE_NAME))
+      val cookieBaker = UserTokenCookieBaker(accountType)
+      val userToken = cookieBaker.decodeFromCookie(request.cookies.get(cookieBaker.COOKIE_NAME))
       userTokenService.validateToken(userToken)
     } catch {
       case ex: NoSuchElementException => Future.successful(None)

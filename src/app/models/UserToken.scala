@@ -1,6 +1,5 @@
 package xcala.play.models
 
-import reactivemongo.bson.BSONObjectID
 import play.api.mvc.CookieBaker
 import scala.util.Random
 import play.api.Play
@@ -12,19 +11,21 @@ case class UserToken(username: String, remember: Boolean, accountType: String, t
   }
 }
 
-object UserToken extends CookieBaker[UserToken] {
-  val COOKIE_NAME = "au_u"
-	val UserNameKey = "au_user"
-  val UserTokenKey = "au_token"
-  val UserRememberKey = "au_rem"
-  val UserAccountTypeKey = "au_acct"
-  val DefaultMaxAge = 60*60*24*365 // Set the cookie max age to 1 year
+object UserToken {
+  def newToken = Random.nextLong()
   
   def apply(username: String, remember: Boolean, accountType: String): UserToken = {
     UserToken(username, remember, accountType, newToken)
   }
-  
-  def newToken = Random.nextLong()
+}
+
+case class UserTokenCookieBaker(accountType: String) extends CookieBaker[UserToken] {
+  val COOKIE_NAME = "au_u_" + accountType
+  val UserNameKey = "au_user"
+  val UserTokenKey = "au_token"
+  val UserRememberKey = "au_rem"
+  val UserAccTypeKey = "au_acctype"
+  val DefaultMaxAge = 60*60*24*365 // Set the cookie max age to 1 year
 
   val emptyCookie = UserToken("", false, "", 0)
 
@@ -35,7 +36,7 @@ object UserToken extends CookieBaker[UserToken] {
     UserToken(
       data(UserNameKey), 
       data(UserRememberKey).toBoolean,
-      data(UserAccountTypeKey),
+      data(UserAccTypeKey).toString,
       data(UserTokenKey).toLong)
   }
 
@@ -43,7 +44,7 @@ object UserToken extends CookieBaker[UserToken] {
     Map(
       UserNameKey -> userToken.username, 
       UserRememberKey -> userToken.remember.toString,
-      UserAccountTypeKey -> userToken.accountType,
+      UserAccTypeKey -> userToken.accountType,
       UserTokenKey -> userToken.token.toString)
   }
   
@@ -54,5 +55,5 @@ object UserToken extends CookieBaker[UserToken] {
     } else {
       originalCookie.copy(maxAge = None)
     }
-  }
+  }  
 }

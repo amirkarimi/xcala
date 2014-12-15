@@ -1,10 +1,9 @@
 package xcala.play.controllers
 
-import xcala.play.models.{UserToken, Credential}
+import xcala.play.models.{Credential, UserTokenCookieBaker, UserToken}
 import play.api.i18n.Lang
 import play.api.mvc._
 import xcala.play.services.AuthenticationService
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -25,7 +24,7 @@ abstract class Authenticated[A, B <: Credential](val authenticationService: Auth
         // There is no token to be renewed
         case None => result
         // There was a token and renewed so update the cookie
-        case Some(userToken) => result.withCookies(UserToken.encodeAsCookie(userToken))
+        case Some(userToken) => result.withCookies(UserTokenCookieBaker(authenticationService.accountType).encodeAsCookie(userToken))
       }
     }
   }
