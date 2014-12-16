@@ -1,0 +1,9 @@
+@(flash: Map[String, String])
+
+@flash.get("success").map { message =>
+    @xcala.play.alert("success")(Html(message))
+}
+
+@flash.get("error").map { message =>
+    @xcala.play.alert("danger")(Html(message))
+}
