@@ -11,5 +11,5 @@ import scala.concurrent.Future
 
 class FolderService extends DataCrudService[Folder] {
   val collectionName = "folders"
-  val documentHandler = Macros.handler[Folder]
+  val documentHandler = Macros.handler[Folder]  
 }

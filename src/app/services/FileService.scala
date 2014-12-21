@@ -84,7 +84,7 @@ class FileService(folderService: FolderService) extends GridFSDataService {
   }
   
   def renameFolder(id: BSONObjectID, newName: String) = {
-    folderService.update(BSONDocument("_id" -> id), BSONDocument("$set" -> BSONDocument("name" -> newName)))
+    folderService.collection.update(BSONDocument("_id" -> id), BSONDocument("$set" -> BSONDocument("name" -> newName)))
   }
   
   def removeFolder(id: BSONObjectID): Future[LastError] = removeFolder(BSONDocument("_id" -> id))
@@ -100,5 +100,4 @@ class FileService(folderService: FolderService) extends GridFSDataService {
       }
     }
   }
-  
 }

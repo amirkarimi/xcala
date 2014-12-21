@@ -12,6 +12,7 @@ import play.api.libs.iteratee.Enumerator
 import xcala.play.models._
 import xcala.play.extensions.Handlers._
 import reactivemongo.api.gridfs.GridFS
+import org.joda.time.DateTime
 
 /**
  * Represents the data service foundation.
@@ -152,7 +153,7 @@ trait DataReadServiceImpl[A] extends DataCollectionService
 }
 
 /**
- * Represents the Crud service.
+ * Represents the CRUD service.
  */
 trait DataCrudService[A] extends DataCollectionService
   with DataDocumentHandler[A]
@@ -163,22 +164,32 @@ trait DataCrudService[A] extends DataCollectionService
   def remove(query: BSONDocument): Future[LastError] = collection.remove(query)
 
   def insert(model: A): Future[BSONObjectID] = {
-    val doc = documentHandler.write(model)
-    val objectId = doc.getAs[BSONObjectID]("_id").getOrElse(BSONObjectID.generate)
-    val newDoc = BSONDocument(doc.elements.filter(_._1 != "_id") :+ ("_id" -> objectId))
+    val (newDoc, objectId) = getDocWithId(model)
 
-    collection.insert(newDoc).map(_ => objectId)
+    collection.insert(addCreateAndUpdateTime(newDoc)).map(_ => objectId)
   }
 
   def save(model: A): Future[BSONObjectID] = {
-    val doc = documentHandler.write(model)
-    val objectId = doc.getAs[BSONObjectID]("_id").getOrElse(BSONObjectID.generate)
-    val newDoc = BSONDocument(doc.elements.filter(_._1 != "_id") :+ ("_id" -> objectId))
+    val (newDoc, objectId) = getDocWithId(model)
 
-    collection.save(newDoc).map(_ => objectId)
+    collection.save(addCreateAndUpdateTime(newDoc)).map(_ => objectId)
   }
-
-  def update(selector: BSONDocument, update: BSONDocument, upsert: Boolean = false, multi: Boolean = false): Future[LastError] = {
-    collection.update(selector, update, upsert = upsert, multi = multi)
+  
+  private def getDocWithId(model: A) = {
+    val fieldName = "_id"
+    val doc = documentHandler.write(model)
+    val objectId = doc.getAs[BSONObjectID](fieldName).getOrElse(BSONObjectID.generate)
+    val newDoc = BSONDocument(doc.elements.filter(_._1 != fieldName) :+ (fieldName -> objectId))
+    (newDoc, objectId)
+  }
+  
+  private def addCreateAndUpdateTime(doc: BSONDocument) = {
+    // Set create time if it wasn't available
+    val createTime = doc.getAs[DateTime]("createTime").getOrElse(DateTime.now)
+    val docWithCreateTime = BSONDocument(doc.elements.filter(_._1 != "createTime") :+ ("createTime" -> new BSONDateTime(createTime.getMillis)))
+    
+    // Always set update time
+    val updateTime = DateTime.now
+    BSONDocument(docWithCreateTime.elements.filter(_._1 != "updateTime") :+ ("updateTime" -> new BSONDateTime(updateTime.getMillis)))
   }
 }
