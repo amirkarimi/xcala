@@ -29,9 +29,10 @@ class UserTokenService extends DataCrudService[UserToken] {
   
   override def save(model: UserToken): Future[BSONObjectID] = {
     // Remove old token if exists
-    remove(BSONDocument("username" -> model.username, "accountType" -> model.accountType))    
-    // Save new one
-    super.save(model)
+    remove(BSONDocument("username" -> model.username, "accountType" -> model.accountType)) flatMap { _ =>
+      // Save new one
+      super.save(model)
+    }
   }
   
   private def getQuery(userToken: UserToken) = BSONDocument("username" -> userToken.username, "accountType" -> userToken.accountType, "token" -> userToken.token) 
