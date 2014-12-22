@@ -166,13 +166,24 @@ trait DataCrudService[A] extends DataCollectionService
   def insert(model: A): Future[BSONObjectID] = {
     val (newDoc, objectId) = getDocWithId(model)
 
-    collection.insert(addCreateAndUpdateTime(newDoc)).map(_ => objectId)
+    collection.insert(setCreateAndUpdateTime(newDoc)).map(_ => objectId)
   }
 
   def save(model: A): Future[BSONObjectID] = {
     val (newDoc, objectId) = getDocWithId(model)
 
-    collection.save(addCreateAndUpdateTime(newDoc)).map(_ => objectId)
+    collection.save(setCreateAndUpdateTime(newDoc)).map(_ => objectId)
+  }
+  
+  def update(selector: BSONDocument, update: BSONDocument, upsert: Boolean = false, multi: Boolean = false, setUpdateTime: Boolean = true): Future[LastError] = {
+    val finalUpdateDoc = setUpdateTime match {
+      case false => update
+      case true => 
+        val updateTime = DateTime.now
+        update ++ BSONDocument("$set" -> BSONDocument("updateTime" -> new BSONDateTime(updateTime.getMillis)))
+    }
+    
+    collection.update(selector, finalUpdateDoc, upsert = upsert, multi = multi)
   }
   
   private def getDocWithId(model: A) = {
@@ -183,13 +194,17 @@ trait DataCrudService[A] extends DataCollectionService
     (newDoc, objectId)
   }
   
-  private def addCreateAndUpdateTime(doc: BSONDocument) = {
+  private def setCreateAndUpdateTime(doc: BSONDocument) = {
     // Set create time if it wasn't available
     val createTime = doc.getAs[DateTime]("createTime").getOrElse(DateTime.now)
     val docWithCreateTime = BSONDocument(doc.elements.filter(_._1 != "createTime") :+ ("createTime" -> new BSONDateTime(createTime.getMillis)))
     
     // Always set update time
+    setUpdateTime(docWithCreateTime)
+  }
+  
+  private def setUpdateTime(doc: BSONDocument) = {
     val updateTime = DateTime.now
-    BSONDocument(docWithCreateTime.elements.filter(_._1 != "updateTime") :+ ("updateTime" -> new BSONDateTime(updateTime.getMillis)))
+    BSONDocument(doc.elements.filter(_._1 != "updateTime") :+ ("updateTime" -> new BSONDateTime(updateTime.getMillis)))    
   }
 }
