@@ -1,4 +1,4 @@
-package views
+package views.html.xcala.play
 
 import org.specs2.mutable._
 import org.specs2.runner._
