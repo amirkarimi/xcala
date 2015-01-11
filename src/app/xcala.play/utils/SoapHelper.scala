@@ -1,6 +1,6 @@
 package xcala.play
 
-import scala.xml.{Elem,XML,NodeSeq}
+import scala.xml.{Elem,XML,Node}
 
 object SoapHelper {
   def wrap(xml: String) : String = {
@@ -12,7 +12,7 @@ object SoapHelper {
     </SOAP-ENV:Envelope>"""
   }
   
-  def unwrap(elem: Elem): NodeSeq = {
-    (elem \\ "Envelope" \\ "Body").flatMap(_.child)
+  def unwrap(elem: Elem): Node = {
+    (elem \\ "Envelope" \\ "Body").flatMap(_.child).head
   }
 }

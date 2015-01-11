@@ -53,6 +53,10 @@ trait DataCollectionService extends DataService {
   protected def onCollectionInitialized(collection: BSONCollection) = {}
 }
 
+trait WithExternalCollectionAccess extends DataService {
+  protected def collection(collectionName: String) = db.collection(collectionName)
+}
+
 /**
  * Represents the document handler.
  */

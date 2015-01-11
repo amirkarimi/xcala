@@ -10,10 +10,8 @@ import xcala.play.services._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait DataCudController[A] extends Controller with WithFormBinding with WithComposableActions with WithoutImplicitLang {
+trait DataCudController[A] extends Controller with WithMainPageResults with WithFormBinding with WithComposableActions with WithoutImplicitLang {
   protected def cudService: DataReadService[A] with DataSaveService[A] with DataRemoveService
-
-  def mainPageRoute(implicit lang: Lang): Call
 
   def defaultForm: Form[A]
 
@@ -92,14 +90,6 @@ trait DataCudController[A] extends Controller with WithFormBinding with WithComp
         case _ => NotFound
       }
     }
-  }
-
-  protected def successfulResult(message: String)(implicit lang: Lang): Result = {
-    Redirect(mainPageRoute).flashing("success" -> message)
-  }
-
-  protected def failedResult(message: String)(implicit lang: Lang): Result = {
-    Redirect(mainPageRoute).flashing("error" -> message)
   }
 }
 
