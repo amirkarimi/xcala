@@ -2,6 +2,7 @@ package xcala.play.extensions
 
 import reactivemongo.bson._
 import org.joda.time.DateTime
+import xcala.play.models.Range
 
 object Handlers {
   implicit object BSONDateTimeHandler extends BSONHandler[BSONDateTime, DateTime] {
@@ -16,5 +17,13 @@ object Handlers {
       case d: BSONLong => BigDecimal(d.value)
     }
     def write(value: BigDecimal) = new BSONDouble(value.toDouble)
+  }
+
+  implicit def rangeHandler[A](implicit handler: BSONHandler[_ <: BSONValue, A]) = new BSONHandler[BSONValue, Range[A]] {
+    def read(value: BSONValue) = value match {
+      case doc: BSONDocument => new Range(from = doc.getAs[A]("from").get, to = doc.getAs[A]("to").get)
+    }
+    
+    def write(range: Range[A]) = BSONDocument("from" -> range.from, "to" -> range.to)
   }
 }
