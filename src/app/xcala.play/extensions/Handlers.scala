@@ -26,4 +26,9 @@ object Handlers {
     
     def write(range: Range[A]) = BSONDocument("from" -> range.from, "to" -> range.to)
   }
+  
+  implicit def optionHandler[A <: BSONValue, B](implicit handler: BSONHandler[A, B]): BSONHandler[A, Option[B]] = new BSONHandler[A, Option[B]] {
+    def read(value: A): Option[B] = handler.readOpt(value)
+    def write(value: Option[B]): A = handler.write(value.get)
+  }
 }
