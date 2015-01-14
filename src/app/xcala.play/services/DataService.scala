@@ -10,7 +10,7 @@ import reactivemongo.api.collections._
 import play.api.Play
 import play.api.libs.iteratee.Enumerator
 import xcala.play.models._
-import xcala.play.extensions.Handlers._
+import xcala.play.extensions.BSONHandlers._
 import reactivemongo.api.gridfs.GridFS
 import org.joda.time.DateTime
 

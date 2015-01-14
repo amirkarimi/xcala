@@ -8,7 +8,7 @@ import reactivemongo.bson.Macros
 import reactivemongo.bson._
 import play.Logger
 import reactivemongo.api.indexes._
-import xcala.play.extensions.Handlers._
+import xcala.play.extensions.BSONHandlers._
 import org.joda.time.DateTime
 
 trait IndexableService[A <: Indexable] extends DataService with DataCollectionService with DataRemoveService with DataSaveService[A] with DataDocumentHandler[A] {
