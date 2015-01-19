@@ -1,12 +1,13 @@
 package xcala.play.services
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits._
+import scala.concurrent.ExecutionContext
 import xcala.play.models._
 import org.mindrot.jbcrypt.BCrypt
 import reactivemongo.bson.BSONObjectID
+import xcala.play.utils.WithExecutionContext
 
-trait AccountService[A <: Credential] {
+trait AccountService[A <: Credential] extends WithExecutionContext {
   def getAccount(username: String): Future[Option[A]]
   
   def changePassword(account: A, newPassword: String): Future[Boolean]

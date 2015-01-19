@@ -6,10 +6,10 @@ import reactivemongo.bson._
 import xcala.play.models._
 import xcala.play.services._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import xcala.play.utils.WithExecutionContext
 
-trait MultilangDataSingleViewController[A <: WithLang] extends Results with WithComposableActions {
+trait MultilangDataSingleViewController[A <: WithLang] extends Results with WithComposableActions with WithExecutionContext {
   
   protected val readService: DataReadService[A]
   

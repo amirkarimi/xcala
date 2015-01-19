@@ -1,13 +1,14 @@
 package xcala.play.services
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import reactivemongo.bson._
 import reactivemongo.core.commands.LastError
 import xcala.play.models.{ QueryOptions, SortOptions, DataWithTotalCount }
 import reactivemongo.api.collections.GenericQueryBuilder
+import xcala.play.utils.WithExecutionContext
 
-trait DataReadServiceDecorator[A, B] extends DataReadService[B] {
+trait DataReadServiceDecorator[A, B] extends DataReadService[B] with WithExecutionContext {
   val service: DataDocumentHandler[A] 
     with DataReadService[A] 
     with DataRemoveService 

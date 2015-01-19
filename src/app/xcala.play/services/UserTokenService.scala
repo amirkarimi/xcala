@@ -1,6 +1,6 @@
 package xcala.play.services
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import xcala.play.models._
 import reactivemongo.bson._
@@ -8,7 +8,7 @@ import reactivemongo.bson.Macros
 import scala.util.Random
 import reactivemongo.core.commands.LastError
 
-class UserTokenService extends DataCrudService[UserToken] {
+class UserTokenService(implicit val ec: ExecutionContext) extends DataCrudService[UserToken] {
   val collectionName = "userTokens"
 
   val documentHandler = Macros.handler[UserToken]

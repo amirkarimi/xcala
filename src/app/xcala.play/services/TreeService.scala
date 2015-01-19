@@ -1,13 +1,14 @@
 package xcala.play.services
 
 import xcala.play.services._
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import reactivemongo.bson._
 import play.api.i18n.Lang
 import xcala.play.models._
+import xcala.play.utils.WithExecutionContext
 
-trait TreeService[A, B <: TreeModelBase[B]] extends DataReadService[A] with DataDocumentHandler[A] {
+trait TreeService[A, B <: TreeModelBase[B]] extends DataReadService[A] with DataDocumentHandler[A] with WithExecutionContext {
   def getModel(entity: A, children: List[B]): B
   
   def find(lang: Option[Lang]): Future[List[B]] = {

@@ -4,10 +4,15 @@ import xcala.play.models.{Credential, UserTokenCookieBaker, UserToken}
 import play.api.i18n.Lang
 import play.api.mvc._
 import xcala.play.services.AuthenticationService
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
-abstract class Authenticated[A, B <: Credential](val authenticationService: AuthenticationService[B], val authorizationRules: Seq[AuthorizationRule[B]], val action: Action[A]) extends Action[A] {
+import scala.concurrent.ExecutionContext
+import xcala.play.utils.WithExecutionContext
+ 
+abstract class Authenticated[A, B <: Credential](
+  val authenticationService: AuthenticationService[B], 
+  val authorizationRules: Seq[AuthorizationRule[B]], 
+  val action: Action[A])(implicit ec: ExecutionContext)
+  extends Action[A] {
 
   def apply(request: Request[A]): Future[Result] = {
     val accountFuture = authenticationService.getAccountIdentity(request)

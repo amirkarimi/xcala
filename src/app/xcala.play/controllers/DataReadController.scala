@@ -5,11 +5,10 @@ import play.api.i18n.Lang
 import play.api.mvc._
 import reactivemongo.bson._
 import xcala.play.services._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import xcala.play.utils.WithExecutionContext
 
-trait DataReadController[A] extends Controller with WithComposableActions with WithoutImplicitLang {
+trait DataReadController[A] extends Controller with WithComposableActions with WithoutImplicitLang with WithExecutionContext {
 
   protected def readService: DataReadService[A]
 

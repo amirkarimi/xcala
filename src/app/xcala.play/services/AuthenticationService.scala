@@ -1,14 +1,15 @@
 package xcala.play.services
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import play.api.mvc.Request
 import play.api.mvc.RequestHeader
 import xcala.play.models._
 import reactivemongo.core.commands.LastError
 import reactivemongo.bson.BSONObjectID
+import xcala.play.utils.WithExecutionContext
 
-abstract class AuthenticationService[A <: Credential](accountService: AccountService[A], userTokenService: UserTokenService) {
+abstract class AuthenticationService[A <: Credential](accountService: AccountService[A], userTokenService: UserTokenService) extends WithExecutionContext {
   
   def accountType: String
   

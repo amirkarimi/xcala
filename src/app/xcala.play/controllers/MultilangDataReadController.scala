@@ -5,10 +5,10 @@ import reactivemongo.bson._
 import xcala.play.models._
 import xcala.play.services._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import xcala.play.utils.WithExecutionContext
 
-trait MultilangDataReadController[A <: WithLang] extends DataReadController[A] {
+trait MultilangDataReadController[A <: WithLang] extends DataReadController[A] with WithExecutionContext {
   
   protected val readService: DataReadService[A]
 

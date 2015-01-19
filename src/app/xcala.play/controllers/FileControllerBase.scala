@@ -16,11 +16,10 @@ import reactivemongo.api.gridfs._
 import reactivemongo.bson._
 import xcala.play.models._
 import xcala.play.services.FileService
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import xcala.play.utils.WithExecutionContext
 
-abstract class FileControllerBase(fileService: FileService) extends Controller with MongoController with WithoutImplicitLang {
+abstract class FileControllerBase(fileService: FileService) extends Controller with MongoController with WithoutImplicitLang with WithExecutionContext {
 
   type RequestType[_] <: Request[_]
 

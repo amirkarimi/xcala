@@ -2,14 +2,14 @@ package xcala.play.services
 
 import xcala.play.services._
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import reactivemongo.bson._
 import reactivemongo.api.gridfs._
 import reactivemongo.core.commands.LastError
 import xcala.play.models._
 import xcala.play.models.FileEntry.BSONDocumentReader
 
-class FileService(folderService: FolderService) extends GridFSDataService {
+class FileService(folderService: FolderService)(implicit val ec: ExecutionContext) extends GridFSDataService {
   implicit val folderDocumentHandler = Macros.handler[Folder]
   
   def setFileFolder(file: ReadFile[BSONValue], folderId: Option[BSONObjectID]): Future[Option[LastError]] = folderId match {

@@ -2,15 +2,15 @@ package xcala.play.controllers
 
 import play.api.i18n.Lang
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import xcala.play.services.DataReadCriteriaService
 import reactivemongo.bson._
 import play.api.mvc._
 import play.api.data.Form
 import scala.concurrent.Future
 import xcala.play.models._
+import xcala.play.utils.WithExecutionContext
 
-trait WithCriteria[A, B] extends DataReadController[A] with WithFormBinding {
+trait WithCriteria[A, B] extends DataReadController[A] with WithFormBinding with WithExecutionContext {
   self: Controller =>
     
   protected val readCriteriaService: DataReadCriteriaService[A, B]

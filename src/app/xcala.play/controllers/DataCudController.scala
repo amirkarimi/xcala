@@ -6,11 +6,11 @@ import play.api.i18n.{Lang, Messages}
 import play.api.mvc._
 import reactivemongo.bson.BSONObjectID
 import xcala.play.services._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
+import xcala.play.utils.WithExecutionContext
 
-trait DataCudController[A] extends Controller with WithMainPageResults with WithFormBinding with WithComposableActions with WithoutImplicitLang {
+trait DataCudController[A] extends Controller with WithMainPageResults with WithFormBinding with WithComposableActions with WithoutImplicitLang with WithExecutionContext {
   protected def cudService: DataReadService[A] with DataSaveService[A] with DataRemoveService
 
   def defaultForm: Form[A]

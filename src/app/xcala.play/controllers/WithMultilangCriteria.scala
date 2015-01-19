@@ -1,14 +1,14 @@
 package xcala.play.controllers
 
-import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 import play.api.mvc.Controller
 import xcala.play.services._
 import play.api.data.Form
 import xcala.play.models._
 import play.api.i18n.Lang
+import xcala.play.utils.WithExecutionContext
 
-trait WithMultilangCriteria[A <: WithLang, B] extends MultilangDataReadController[A] {
+trait WithMultilangCriteria[A <: WithLang, B] extends MultilangDataReadController[A] with WithExecutionContext {
   protected val readService: DataReadCriteriaService[A, B]
 
   def criteriaForm: Form[B]

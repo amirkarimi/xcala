@@ -1,7 +1,7 @@
 package xcala.play.services
 
 import xcala.play.models._
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import reactivemongo.core.commands.LastError
 import reactivemongo.bson.Macros

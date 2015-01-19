@@ -1,6 +1,6 @@
 package xcala.play.services
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import reactivemongo.bson._
 import reactivemongo.api._
@@ -13,11 +13,11 @@ import xcala.play.models._
 import xcala.play.extensions.BSONHandlers._
 import reactivemongo.api.gridfs.GridFS
 import org.joda.time.DateTime
-
+import xcala.play.utils.WithExecutionContext
 /**
  * Represents the data service foundation.
  */
-trait DataService {
+trait DataService extends WithExecutionContext {
   private[services] lazy val driver: MongoDriver = DataService.driver
   private[services] lazy val connection: MongoConnection = DataService.connection
   private[services] lazy val db: DefaultDB = DataService.db
@@ -33,7 +33,7 @@ object DataService {
 
   lazy val driver: MongoDriver = new MongoDriver
   lazy val connection: MongoConnection = driver.connection(parsedUri)
-  lazy val db: DefaultDB = connection.db(parsedUri.db.get)
+  def db(implicit ex: ExecutionContext): DefaultDB = connection.db(parsedUri.db.get)
 }
 
 /**
