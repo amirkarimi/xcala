@@ -21,17 +21,17 @@ object PersianUtils {
 	  
 	  def toGlobalDateString(implicit lang: Lang) = toGlobalDateTimeString(lang, false)
 	  
-	  def toGlobalYear(implicit lang: Lang) = {
+	  def toGlobalYear(implicit lang: Lang): Int = {
 	    if (lang.code == "fa") {
 	      val gDate = SimpleDate(dateTime.year.get, dateTime.monthOfYear.get, dateTime.dayOfMonth.get)
 	      val pDate = gregorianToPersian(gDate)
 	      pDate.year
 	    } else {
-	      dateTime.toString("yyyy")
+	      dateTime.getYear
 	    }
 	  }
 	  
-	  def toGlobalMonth(implicit lang: Lang) = {
+	  def toGlobalMonthName(implicit lang: Lang): String = {
 	    if (lang.code == "fa") {
 	      val gDate = SimpleDate(dateTime.year.get, dateTime.monthOfYear.get, dateTime.dayOfMonth.get)
 	      val pDate = gregorianToPersian(gDate)
