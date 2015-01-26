@@ -41,4 +41,10 @@ object PersianUtils {
 	    }	    
 	  }
 	}
+  
+  def convertToPersianChars(text: String) = {
+    text
+      .replace("ي", "ی")
+      .replace("ك", "ک")
+  }
 }
