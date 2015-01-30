@@ -12,14 +12,27 @@ object PersianUtils {
 	    if (lang.code == "fa") {
 	      val gDate = SimpleDate(dateTime.year.get, dateTime.monthOfYear.get, dateTime.dayOfMonth.get)
 	      val pDate = gregorianToPersian(gDate)
-	      s"${pDate.year}/${pDate.month}/${pDate.day} " + 
-      		(if (addTime) { dateTime.toString("HH:mm") } else { "" })
+	      s"${pDate.year}/${pDate.month}/${pDate.day}" + 
+      		(if (addTime) { " " + dateTime.toString("HH:mm") } else { "" })
 	    } else {
 	      dateTime.toString("yyyy-MM-dd" + (if (addTime) { " HH:mm" } else { "" }))
 	    }
 	  }
-	  
+
+    def toGlobalLongDateTimeString(implicit lang: Lang, addTime: Boolean = true) = {
+      if (lang.code == "fa") {
+        val gDate = SimpleDate(dateTime.year.get, dateTime.monthOfYear.get, dateTime.dayOfMonth.get)
+        val pDate = gregorianToPersian(gDate)
+        s"${pDate.day} ${monthNames(pDate.month - 1)} ${pDate.year}" + 
+          (if (addTime) { " " + dateTime.toString("HH:mm") } else { "" })
+      } else {
+        dateTime.toString("MMMM dd, yyyy" + (if (addTime) { " HH:mm" } else { "" }))
+      }
+    }
+    
 	  def toGlobalDateString(implicit lang: Lang) = toGlobalDateTimeString(lang, false)
+
+    def toGlobalLongDateString(implicit lang: Lang) = toGlobalLongDateTimeString(lang, false)
 	  
 	  def toGlobalYear(implicit lang: Lang): Int = {
 	    if (lang.code == "fa") {
