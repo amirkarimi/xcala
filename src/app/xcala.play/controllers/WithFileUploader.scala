@@ -13,6 +13,7 @@ import reactivemongo.bson._
 import play.api.mvc.Result
 import play.api.data.FormError
 import xcala.play.utils.WithExecutionContext
+import xcala.play.extensions.FormHelper._
 import play.api.data.Form
 
 object WithFileUploader {
@@ -24,8 +25,18 @@ trait WithFileUploader extends WithExecutionContext {
   
   protected val fileService: FileService
   
-  def bindWithFiles[A](form: Form[A])(implicit request: Request[MultipartFormData[TemporaryFile]]): Future[Form[A]] = {
-    val fileKeyValueFutures = request.body.files.filter(_.key.endsWith("." + AutoUploadSuffix)).map { filePart =>
+  def bindWithFiles[A](form: Form[A], maxLength: Option[Long] = None)(implicit request: Request[MultipartFormData[TemporaryFile]]): Future[Form[A]] = {
+    val validFiles = request.body.files.filter { f =>
+      f.key.endsWith("." + AutoUploadSuffix) && maxLength.map(_ >= f.ref.file.length).getOrElse(true)
+    }
+    
+    val errors = request.body.files.filter { f =>
+      f.key.endsWith("." + AutoUploadSuffix) && maxLength.exists(_ < f.ref.file.length)
+    } map { f =>
+      FormError(f.key.dropRight(AutoUploadSuffix.length + 1), "error.fileToLarge", Seq(maxLength.get / 1024))
+    }
+    
+    val fileKeyValueFutures = validFiles.map { filePart =>
       val fieldName = filePart.key.dropRight(AutoUploadSuffix.length + 1)
       
       val removeOldFileFuture = form.data.get(fieldName) match {
@@ -42,7 +53,7 @@ trait WithFileUploader extends WithExecutionContext {
     
     Future.sequence(fileKeyValueFutures) map { fileKeyValues =>
       val newData = form.data ++ fileKeyValues.toMap
-      form.discardingErrors.bind(newData)
+      form.discardingErrors.bind(newData).withErrors(errors)
     }
   }
   

@@ -1,6 +1,7 @@
 package xcala.play.extensions
 
 import play.api.data.Form
+import play.api.data.FormError
 import play.api.i18n.Lang
 
 object FormHelper {
@@ -11,6 +12,13 @@ object FormHelper {
       } else {
         form
       }
+    }
+    
+    def withErrors(formErrors: Seq[FormError]): Form[A] = {
+      formErrors match {
+        case Nil => form
+        case head :: tail => new AdvancedForm(form.withError(head)).withErrors(tail)
+      }      
     }
   }
   
