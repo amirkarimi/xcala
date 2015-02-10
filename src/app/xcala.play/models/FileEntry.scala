@@ -42,4 +42,5 @@ object FileEntry {
 object FileType {
   val Image = "^image.*$"
   val Video = "^video.*$"
+  val Audio = "^audio.*$"
 }
