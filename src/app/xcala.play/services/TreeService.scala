@@ -15,14 +15,14 @@ trait TreeService[A, B <: TreeModelBase[B]] extends DataReadService[A] with Data
     findItemsUnder(None, lang)
   }
   
-  private def findItemsUnder(parent: Option[BSONObjectID], lang: Option[Lang] = None): Future[List[B]] = {
-    val query = (parent, lang) match {
+  private def findItemsUnder(parentId: Option[BSONObjectID], lang: Option[Lang] = None): Future[List[B]] = {
+    val query = (parentId, lang) match {
       case (None, lang) => 
         BSONDocument(
           "lang" -> lang.map(_.code), 
-          "parent" -> BSONDocument("$exists" -> false))
+          "parentId" -> BSONDocument("$exists" -> false))
           
-      case (Some(id), None) => BSONDocument("parent" -> id)
+      case (Some(id), None) => BSONDocument("parentId" -> id)
       case _ => throw new IllegalArgumentException
     }
     
