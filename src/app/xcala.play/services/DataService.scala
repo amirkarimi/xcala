@@ -14,26 +14,21 @@ import xcala.play.extensions.BSONHandlers._
 import reactivemongo.api.gridfs.GridFS
 import org.joda.time.DateTime
 import xcala.play.utils.WithExecutionContext
+
 /**
  * Represents the data service foundation.
  */
 trait DataService extends WithExecutionContext {
-  private[services] lazy val driver: MongoDriver = DataService.driver
-  private[services] lazy val connection: MongoConnection = DataService.connection
-  private[services] lazy val db: DefaultDB = DataService.db
+  protected def databaseConfig: DatabaseConfig = DefaultDatabaseConfig
+  
+  private[services] lazy val db: DefaultDB = databaseConfig.db
 }
 
+/**
+ * Represents grid FS data service.
+ */
 trait GridFSDataService extends DataService {
   lazy val gridFS = GridFS(db)
-}
-
-object DataService {
-  lazy val mongoUri = Play.current.configuration.getString("mongodb.uri").get
-  lazy val parsedUri: MongoConnection.ParsedURI = MongoConnection.parseURI(mongoUri).get
-
-  lazy val driver: MongoDriver = new MongoDriver
-  lazy val connection: MongoConnection = driver.connection(parsedUri)
-  def db(implicit ex: ExecutionContext): DefaultDB = connection.db(parsedUri.db.get)
 }
 
 /**
@@ -51,6 +46,10 @@ trait DataCollectionService extends DataService {
   }
 
   protected def onCollectionInitialized(collection: BSONCollection) = {}
+}
+
+trait WithDbCommand extends DataService {
+  def dbCommand[A](command: Command[A], readPreference: ReadPreference = ReadPreference.primary)(implicit ec: ExecutionContext) = db.command(command) 
 }
 
 trait WithExternalCollectionAccess extends DataService {
