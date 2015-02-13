@@ -10,38 +10,61 @@ import play.Logger
 import reactivemongo.api.indexes._
 import xcala.play.extensions.BSONHandlers._
 import org.joda.time.DateTime
+import xcala.play.utils.WithExecutionContext
+import reactivemongo.api.collections._
+import reactivemongo.api.collections.default._
 
-trait IndexableService[A <: Indexable] extends DataService with DataCollectionService with DataRemoveService with DataSaveService[A] with DataDocumentHandler[A] {
-  implicit val indexedItemHandler = Macros.handler[IndexedItem]
-  
-  lazy val indexedItemCollection = {    
-    val coll = db.collection("indexedItems")    
-    collection.indexesManager.ensure(Index(Seq("itemType" -> IndexType.Ascending, "lang" -> IndexType.Ascending, "title" -> IndexType.Ascending, "content" -> IndexType.Ascending), unique = false))
-    coll
-  }
-  
-  abstract override def save(model: A): Future[BSONObjectID] = {
-    val document = documentHandler.write(model)
-    
-    val result = super.save(model)
-    
+trait IndexableService[A <: Indexable]
+  extends WithExecutionContext
+  with DataReadService[A]
+  with DataRemoveService
+  with DataSaveService[A] {
+
+  val indexedItemService: IndexedItemService
+
+  abstract override def insert(model: A): Future[BSONObjectID] = {
+    val result = super.insert(model)
+
     result.map { objectId =>
       saveItem(objectId, model).recover {
-        case err => Logger.error("Saving indexed item error: " + err.toString)        
-      }      
+        case err => Logger.error("Inserting indexed item error: " + err.toString)
+      }
     }
-    
+
     result
   }
-  
-  private def saveItem(id: BSONObjectID, model: Indexable): Future[LastError] = {
-    val existingItem = indexedItemCollection.find(BSONDocument("itemId" -> id, "itemType" -> model.itemType)).one[IndexedItem]
-    val indexedItemFuture = existingItem.map(updateOrNewIndexedItem(_, id, model))
-    indexedItemFuture flatMap { indexedItem =>
-      indexedItemCollection.save(indexedItem)
+
+  abstract override def save(model: A): Future[BSONObjectID] = {
+    val result = super.save(model)
+
+    result.map { objectId =>
+      saveItem(objectId, model).recover {
+        case err => Logger.error("Saving indexed item error: " + err.toString)
+      }
+    }
+
+    result
+  }
+
+  abstract override def remove(query: BSONDocument): Future[LastError] = {
+    for {
+      models <- find(query)
+      modelIds = models.map(_.id.get)
+      indexedItemRemoveError <- indexedItemService.remove(BSONDocument("itemId" -> BSONDocument("$in" -> modelIds)))
+      removeError <- super.remove(query)
+    } yield {
+      removeError
     }
   }
-  
+
+  private def saveItem(id: BSONObjectID, model: Indexable): Future[BSONObjectID] = {
+    val existingItem = indexedItemService.findOne(BSONDocument("itemId" -> id, "itemType" -> model.itemType))
+    val indexedItemFuture = existingItem.map(updateOrNewIndexedItem(_, id, model))
+    indexedItemFuture flatMap { indexedItem =>
+      indexedItemService.save(indexedItem)
+    }
+  }
+
   private def updateOrNewIndexedItem(indexedItem: Option[IndexedItem], id: BSONObjectID, model: Indexable) = {
     IndexedItem(
       id = indexedItem.flatMap(_.id),
@@ -50,7 +73,6 @@ trait IndexableService[A <: Indexable] extends DataService with DataCollectionSe
       lang = model.lang,
       title = model.title,
       content = model.content,
-      updateTime = DateTime.now
-    )
+      updateTime = DateTime.now)
   }
 }
