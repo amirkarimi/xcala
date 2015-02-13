@@ -24,7 +24,8 @@ libraryDependencies ++= Seq(
   "com.sksamuel.scrimage" %% "scrimage-core" % "1.4.1",
   "com.bahmanm" %% "persianutils" % "1.0",
   "net.tanesha.recaptcha4j" % "recaptcha4j" % "0.0.7",
-  "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.0"
+  "com.typesafe.play.plugins" %% "play-plugins-mailer" % "2.3.0",
+  "com.netaporter" %% "scala-uri" % "0.4.4"
 )
 
 includeFilter in (Assets, LessKeys.less) := "*.less"
