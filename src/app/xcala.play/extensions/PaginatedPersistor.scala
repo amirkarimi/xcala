@@ -11,6 +11,14 @@ object PaginatedPersistor {
       call.copy(url = call.toString ? (keyName -> paginated.toQueryString))
     }
     
+    def copyPaginatedUrl(keyName: String = "paginatedParams")(implicit request: RequestHeader) = {
+      val url = request.queryString.get(keyName) match {
+        case None => call.toString
+        case Some(values) => (call.toString ? (keyName -> values.mkString)).toString
+      }
+      call.copy(url = url)
+    }
+    
     def withPaginatedQueryStringUrl(keyName: String = "paginatedParams")(implicit request: RequestHeader) = {
       val url = request.queryString.get(keyName) match {
         case None => call.toString
