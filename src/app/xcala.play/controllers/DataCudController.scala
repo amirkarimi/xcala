@@ -15,15 +15,15 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
 
   def defaultForm: Form[A]
 
-  def createView(form: Form[A])(implicit request: RequestType, lang: Lang): Future[Result]
+  def createView(form: Form[A])(implicit request: RequestType[_], lang: Lang): Future[Result]
 
-  def editView(form: Form[A], model: A)(implicit request: RequestType, lang: Lang): Future[Result]
+  def editView(form: Form[A], model: A)(implicit request: RequestType[_], lang: Lang): Future[Result]
 
-  def create(implicit lang: Lang) = Action { implicit request =>
+  def create(implicit lang: Lang) = action { implicit request =>
     createView(defaultForm.bindFromRequest.discardingErrors)
   }
 
-  def createPost(implicit lang: Lang) = Action { implicit request =>
+  def createPost(implicit lang: Lang) = action { implicit request =>
     val filledFormFuture = bindForm(defaultForm)
 
     filledFormFuture flatMap { filledForm =>
@@ -42,53 +42,47 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
     }
   }
 
-  def edit(lang: Lang, id: BSONObjectID) = WithLang(lang) { implicit lang =>
-    Action { implicit request =>
-      cudService.findById(id).flatMap { modelOption =>
-        modelOption match {
-          case Some(model) => editView(defaultForm.fill(model), model)
-          case None => Future.successful(NotFound)
-        }
+  def edit(lang: Lang, id: BSONObjectID) = action(lang) { implicit request => implicit lang =>
+    cudService.findById(id).flatMap { modelOption =>
+      modelOption match {
+        case Some(model) => editView(defaultForm.fill(model), model)
+        case None => Future.successful(NotFound)
       }
     }
   } 
   
-  def editPost(lang: Lang, id: BSONObjectID) = WithLang(lang) { implicit lang =>
-    Action { implicit request =>
-      cudService.findById(id) flatMap {
-        case None => Future.successful(NotFound)
-        case Some(model) =>
-          val boundForm = defaultForm.fill(model)
-          val filledFormFuture = bindForm(boundForm)
-  
-          filledFormFuture flatMap { filledForm =>
-            filledForm.fold(
-              formWithErrors => {
-                DataCudController.logger.debug("Form Error on Edit: " + formWithErrors.errors)
-                editView(formWithErrors, model)
-              },
-              model =>
-                cudService.save(model).map { objectId =>
-                  successfulResult(Messages("message.successfulSave"))
-                } recoverWith {
-                  case throwable: Throwable => recoverSaveError(throwable, filledForm)
-                }
-            )
-          }
-      }
+  def editPost(lang: Lang, id: BSONObjectID) = action(lang) { implicit request => implicit lang =>
+    cudService.findById(id) flatMap {
+      case None => Future.successful(NotFound)
+      case Some(model) =>
+        val boundForm = defaultForm.fill(model)
+        val filledFormFuture = bindForm(boundForm)
+
+        filledFormFuture flatMap { filledForm =>
+          filledForm.fold(
+            formWithErrors => {
+              DataCudController.logger.debug("Form Error on Edit: " + formWithErrors.errors)
+              editView(formWithErrors, model)
+            },
+            model =>
+              cudService.save(model).map { objectId =>
+                successfulResult(Messages("message.successfulSave"))
+              } recoverWith {
+                case throwable: Throwable => recoverSaveError(throwable, filledForm)
+              }
+          )
+        }
     }
   }
 
-  protected def recoverSaveError(throwable: Throwable, filledForm: Form[A])(implicit request: RequestType, lang: Lang): Future[Result] = {
+  protected def recoverSaveError(throwable: Throwable, filledForm: Form[A])(implicit request: RequestType[_], lang: Lang): Future[Result] = {
     createView(filledForm.withGlobalError(throwable.getMessage()))
   }
 
-  def delete(lang: Lang, id: BSONObjectID) = WithLang(lang) { implicit lang =>
-    Action { implicit request =>
-      cudService.remove(id).map {
-        case error if error.ok => successfulResult(Messages("message.successfulDelete"))
-        case _ => NotFound
-      }
+  def delete(lang: Lang, id: BSONObjectID) = action(lang) { implicit request => implicit lang =>
+    cudService.remove(id).map {
+      case error if error.ok => successfulResult(Messages("message.successfulDelete"))
+      case _ => NotFound
     }
   }
 }

@@ -13,18 +13,17 @@ trait MultilangDataSingleViewController[A <: WithLang] extends Results with With
   
   protected val readService: DataReadService[A]
   
-  def singleView(model: A)(implicit request: RequestType, lang: Lang): Future[Result]
+  def singleView(model: A)(implicit request: RequestType[_], lang: Lang): Future[Result]
   
   def view(id: BSONObjectID): EssentialAction = play.api.mvc.Action.async { implicit request =>
     readService.findById(id) flatMap {
       case None => Future.successful(NotFound)
       case Some(model) =>
-        implicit val lang = Lang(model.lang)
-        ContextResult(lang) { implicit request =>
+        val actionWithLang = action(Lang(model.lang)) { implicit request => implicit lang =>
           singleView(model)
         }
+      
+        actionWithLang(request)
     }
   }
-
-  def ContextResult(lang: Lang)(block: RequestType => Future[Result])(implicit request: Request[_]): Future[Result]
 }

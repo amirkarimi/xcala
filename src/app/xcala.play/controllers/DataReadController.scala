@@ -12,11 +12,11 @@ trait DataReadController[A] extends Controller with WithComposableActions with W
 
   protected def readService: DataReadService[A]
 
-  def indexView(paginated: Paginated[A])(implicit request: RequestType, lang: Lang): Future[Result]
+  def indexView(paginated: Paginated[A])(implicit request: RequestType[_], lang: Lang): Future[Result]
 
-  def indexResultView(paginated: Paginated[A])(implicit request: RequestType, lang: Lang): Future[Result]
+  def indexResultView(paginated: Paginated[A])(implicit request: RequestType[_], lang: Lang): Future[Result]
 
-  def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType, lang: Lang): Future[Paginated[A]] = {
+  def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_], lang: Lang): Future[Paginated[A]] = {
     readService.find(BSONDocument(), queryOptions).map { dataWithTotalCount =>
       Paginated(
         dataWithTotalCount.data,
@@ -25,7 +25,7 @@ trait DataReadController[A] extends Controller with WithComposableActions with W
     }
   }
 
-  def index(implicit lang: Lang) = Action { implicit request =>
+  def index(implicit lang: Lang) = action { implicit request =>
     val queryOptions = QueryOptions.getFromRequest
 
     getPaginatedData(queryOptions).flatMap { paginated =>

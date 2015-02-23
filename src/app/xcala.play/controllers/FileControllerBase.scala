@@ -19,23 +19,26 @@ import xcala.play.services.FileService
 import scala.concurrent.Future
 import xcala.play.utils.WithExecutionContext
 
-abstract class FileControllerBase(fileService: FileService) extends Controller with MongoController with WithoutImplicitLang with WithExecutionContext {
+abstract class FileControllerBase(fileService: FileService) 
+  extends Controller
+  with WithComposableActions
+  with MongoController 
+  with WithoutImplicitLang 
+  with WithExecutionContext {
 
-  type RequestType[_] <: Request[_]
+  type RequestType[A] <: Request[A]
 
-  def actionBuilder: ActionBuilder[RequestType]
-
-  def authenticated[A](action: Action[A]): Action[A]
+  def authenticatedAction[A](action: Action[A]): Action[A]
 
   def renameAction[A](action: Action[A]): Action[A]
 
   def deleteAction[A](action: Action[A]): Action[A]
 
-  def selectorView(implicit request: RequestType[AnyContent], lang: Lang): Future[Result]
+  def selectorView(implicit request: RequestType[_], lang: Lang): Future[Result]
 
-  def browserView(ckEditorFuncNum: Int, fileType: Option[String])(implicit request: RequestType[AnyContent], lang: Lang): Future[Result]
+  def browserView(ckEditorFuncNum: Int, fileType: Option[String])(implicit request: RequestType[_], lang: Lang): Future[Result]
 
-  def listView(files: List[FileEntry], folders: List[Folder], folderAndParents: List[Folder])(implicit request: RequestType[AnyContent], lang: Lang): Future[Result]
+  def listView(files: List[FileEntry], folders: List[Folder], folderAndParents: List[Folder])(implicit request: RequestType[_], lang: Lang): Future[Result]
 
   /**
    * Returns the file matching the specified ID.
@@ -50,30 +53,29 @@ abstract class FileControllerBase(fileService: FileService) extends Controller w
    * It's OK to set one of the width or height.
    */
   def getImage(id: BSONObjectID, width: Option[Int], height: Option[Int]) = Cached("image" + id.stringify + width.getOrElse("") + height.getOrElse("")) {
-    actionBuilder.async { implicit request =>
+    Action.async  { implicit request =>
+      checkMaxResize(width, height)
 
-        checkMaxResize(width, height)
+	    fileService.getFile(id) flatMap {
+	      case Some(file) if file.isImage && width.isEmpty && height.isEmpty =>
+	        // Response original image
+	        val oStream = new ByteArrayOutputStream(file.length)
+	        fileService.gridFS.readToOutputStream(file, oStream) map { _ =>
+	          Result(
+	            header = ResponseHeader(200),
+              body = Enumerator(oStream.toByteArray()))
+          }
 
-  	    fileService.getFile(id) flatMap {
-  	      case Some(file) if file.isImage && width.isEmpty && height.isEmpty =>
-  	        // Response original image
-  	        val oStream = new ByteArrayOutputStream(file.length)
-  	        fileService.gridFS.readToOutputStream(file, oStream) map { _ =>
-  	          Result(
-  	            header = ResponseHeader(200),
-	              body = Enumerator(oStream.toByteArray()))
-            }
+	      case Some(file) if file.isImage =>
+	        val oStream = new ByteArrayOutputStream(file.length)
+	        // Read file from GridFS
+	        fileService.gridFS.readToOutputStream(file, oStream) map { _ =>
+	          renderImage(oStream.toByteArray(), width, height, file.contentType)
+	        }
 
-  	      case Some(file) if file.isImage =>
-  	        val oStream = new ByteArrayOutputStream(file.length)
-  	        // Read file from GridFS
-  	        fileService.gridFS.readToOutputStream(file, oStream) map { _ =>
-  	          renderImage(oStream.toByteArray(), width, height, file.contentType)
-  	        }
-
-  	      case _ => Future.successful(NotFound)
-  	    }
-    	}
+	      case _ => Future.successful(NotFound)
+	    }
+  	}
   }
 
   private def checkMaxResize(width: Option[Int], height: Option[Int]) = {
@@ -126,20 +128,20 @@ abstract class FileControllerBase(fileService: FileService) extends Controller w
     case _ => _.writer(Format.JPEG).withCompression(90)
   }
 
-  def selector = authenticated {
-    actionBuilder.async { implicit request =>
+  def selector = authenticatedAction {
+    action { implicit request =>
       selectorView(request, implicitly)
     }
   }
 
-  def browser(ckEditorFuncNum: Int, fileType: Option[String]) = authenticated {
-    actionBuilder.async { implicit request =>
+  def browser(ckEditorFuncNum: Int, fileType: Option[String]) = authenticatedAction {
+    action { implicit request =>
       browserView(ckEditorFuncNum, fileType)(request, Lang("fa"))
     }
   }
 
-  def getList(folderId: Option[BSONObjectID], fileId: Option[BSONObjectID], fileType: Option[String]): Action[AnyContent] = authenticated {
-    actionBuilder.async { implicit request =>
+  def getList(folderId: Option[BSONObjectID], fileId: Option[BSONObjectID], fileType: Option[String]): Action[AnyContent] = authenticatedAction {
+    action { implicit request =>
       val finalFolderId = fileId match {
         case None => Future.successful(folderId)
         case Some(fileId) => fileService.getFile(fileId).map(_.flatMap(_.folderId))
@@ -149,7 +151,7 @@ abstract class FileControllerBase(fileService: FileService) extends Controller w
     }
   }
 
-  private def getList(folderId: Option[BSONObjectID], fileType: Option[String])(implicit request: RequestType[AnyContent], lang: Lang): Future[Result] = {
+  private def getList(folderId: Option[BSONObjectID], fileType: Option[String])(implicit request: RequestType[_], lang: Lang): Future[Result] = {
     for {
       files <- fileService.getFilesUnderFolder(folderId, fileType)
       folders <- fileService.getFoldersUnderFolder(folderId)
@@ -162,8 +164,8 @@ abstract class FileControllerBase(fileService: FileService) extends Controller w
     }
   }
   
-  def upload(folderId: Option[BSONObjectID] = None) = authenticated {
-    Action.async(parse.multipartFormData) { implicit request =>
+  def upload(folderId: Option[BSONObjectID] = None) = authenticatedAction {
+    action(parse.multipartFormData) { implicit request =>
       request.body.files.headOption map { filePart =>
         val gfs = fileService.gridFS
         val file = filePart.ref.file
@@ -186,8 +188,8 @@ abstract class FileControllerBase(fileService: FileService) extends Controller w
     case other => other.toString
   }
   
-  def createFolder = authenticated {
-    Action.async(parse.json) { implicit request =>
+  def createFolder = authenticatedAction {
+    action(parse.json) { implicit request =>
 	    val json = request.body
 	    val folderNameOpt = (json \ "folderName").asOpt[String]
 	    val currentFolderIDOpt = (json \ "currentFolderId").asOpt[String].flatMap(BSONObjectID.parse(_).toOption)
@@ -199,27 +201,29 @@ abstract class FileControllerBase(fileService: FileService) extends Controller w
 	  }
 	}
   
-  def getFileInfo = Action.async(parse.json) { implicit request =>
-    val input = request.body
-    val idOpt = (input \ "id").asOpt[String].map(BSONObjectID.parse(_).toOption).flatten
-    idOpt map { id => 
-	    fileService.getFile(id) map { 
-	      case None => Ok("{}")
-	      case Some(file) =>
-	        Ok(
-            Json.obj(
-		          "filename" -> file.filename,
-		          "contentType" -> file.contentType
-	          )
-          )
-	    }      
-    } getOrElse {
-      Future.successful(Ok("{}"))
+  def getFileInfo = authenticatedAction {
+    action(parse.json) { implicit request =>
+      val input = request.body
+      val idOpt = (input \ "id").asOpt[String].map(BSONObjectID.parse(_).toOption).flatten
+      idOpt map { id => 
+  	    fileService.getFile(id) map { 
+  	      case None => Ok("{}")
+  	      case Some(file) =>
+  	        Ok(
+              Json.obj(
+  		          "filename" -> file.filename,
+  		          "contentType" -> file.contentType
+  	          )
+            )
+  	    }      
+      } getOrElse {
+        Future.successful(Ok("{}"))
+      }
     }
   }
   
   def rename(id: BSONObjectID, itemType: String, newName: String) = renameAction {
-    Action.async { implicit request =>
+    action { implicit request =>
       val future = itemType match {
         case "folder" =>
           fileService.renameFolder(id, newName)
@@ -234,7 +238,7 @@ abstract class FileControllerBase(fileService: FileService) extends Controller w
   }
   
   def remove(id: BSONObjectID, itemType: String) = deleteAction {
-    Action.async { implicit request =>
+    action { implicit request =>
       val future = itemType match {
         case "folder" =>
           fileService.removeFolder(id)

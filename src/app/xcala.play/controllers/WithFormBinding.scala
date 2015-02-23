@@ -6,9 +6,9 @@ import scala.concurrent.Future
 import play.api.data.Form
 
 trait WithFormBinding {
-  type RequestType <: Request[_]
+  type RequestType[A] <: Request[A]
   
-  protected def bindForm[B](form: Form[B])(implicit request: RequestType): Future[Form[B]] = {
+  protected def bindForm[B](form: Form[B])(implicit request: RequestType[_]): Future[Form[B]] = {
     Future.successful(form.bindFromRequest)
   }
 
