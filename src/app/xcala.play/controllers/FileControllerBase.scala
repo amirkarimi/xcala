@@ -24,8 +24,6 @@ abstract class FileControllerBase(fileService: FileService)
   with WithComposableActions
   with MongoController 
   with WithExecutionContext {
-
-  type RequestType[A] <: Request[A]
   
   def renameGuard[A](block: => Future[Result])(implicit request: RequestType[A]): Future[Result]
 
@@ -125,24 +123,24 @@ abstract class FileControllerBase(fileService: FileService)
     case _ => _.writer(Format.JPEG).withCompression(90)
   }
 
-  def selector = action { implicit request =>
+  def selector(lang: Lang) = action(lang) { implicit request =>
     selectorView(request)
   }
 
-  def browser(ckEditorFuncNum: Int, fileType: Option[String]) = action { implicit request =>
+  def browser(lang: Lang, ckEditorFuncNum: Int, fileType: Option[String]) = action(lang) { implicit request =>
     browserView(ckEditorFuncNum, fileType)
   }
 
-  def getList(folderId: Option[BSONObjectID], fileId: Option[BSONObjectID], fileType: Option[String]): Action[AnyContent] = action { implicit request =>
+  def getList(lang: Lang, folderId: Option[BSONObjectID], fileId: Option[BSONObjectID], fileType: Option[String]): Action[AnyContent] = action(lang) { implicit request =>
     val finalFolderId = fileId match {
       case None => Future.successful(folderId)
       case Some(fileId) => fileService.getFile(fileId).map(_.flatMap(_.folderId))
     }
 
-    finalFolderId.flatMap(getList(_, fileType))
+    finalFolderId.flatMap(getList(lang, _, fileType))
   }
 
-  private def getList(folderId: Option[BSONObjectID], fileType: Option[String])(implicit request: RequestType[_]): Future[Result] = {
+  private def getList(lang: Lang, folderId: Option[BSONObjectID], fileType: Option[String])(implicit request: RequestType[_]): Future[Result] = {
     for {
       files <- fileService.getFilesUnderFolder(folderId, fileType)
       folders <- fileService.getFoldersUnderFolder(folderId)
@@ -155,7 +153,7 @@ abstract class FileControllerBase(fileService: FileService)
     }
   }
   
-  def upload(folderId: Option[BSONObjectID] = None) = action(parse.multipartFormData) { implicit request =>
+  def upload(lang: Lang, folderId: Option[BSONObjectID] = None) = action(parse.multipartFormData, lang) { implicit request =>
     request.body.files.headOption map { filePart =>
       val gfs = fileService.gridFS
       val file = filePart.ref.file
@@ -177,7 +175,7 @@ abstract class FileControllerBase(fileService: FileService)
     case other => other.toString
   }
   
-  def createFolder = action(parse.json) { implicit request =>
+  def createFolder(lang: Lang) = action(parse.json, lang) { implicit request =>
     val json = request.body
     val folderNameOpt = (json \ "folderName").asOpt[String]
     val currentFolderIDOpt = (json \ "currentFolderId").asOpt[String].flatMap(BSONObjectID.parse(_).toOption)
@@ -188,7 +186,7 @@ abstract class FileControllerBase(fileService: FileService)
     }
   }
   
-  def getFileInfo = action(parse.json) { implicit request =>
+  def getFileInfo(lang: Lang) = action(parse.json, lang) { implicit request =>
     val input = request.body
     val idOpt = (input \ "id").asOpt[String].map(BSONObjectID.parse(_).toOption).flatten
     idOpt map { id => 
@@ -207,7 +205,7 @@ abstract class FileControllerBase(fileService: FileService)
     }
   }
   
-  def rename(id: BSONObjectID, itemType: String, newName: String) = action { implicit request =>
+  def rename(lang: Lang, id: BSONObjectID, itemType: String, newName: String) = action(lang) { implicit request =>
     renameGuard {
       val future = itemType match {
         case "folder" =>
@@ -222,7 +220,7 @@ abstract class FileControllerBase(fileService: FileService)
     }
   }
   
-  def remove(id: BSONObjectID, itemType: String) = action { implicit request =>
+  def remove(lang: Lang, id: BSONObjectID, itemType: String) = action(lang) { implicit request =>
     deleteGuard {
       val future = itemType match {
         case "folder" =>
