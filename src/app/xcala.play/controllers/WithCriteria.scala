@@ -17,7 +17,7 @@ trait WithCriteria[A, B] extends DataReadController[A] with WithFormBinding with
   
   def criteriaForm: Form[B]
   
-  override def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_], lang: Lang): Future[Paginated[A]] = {
+  override def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_]): Future[Paginated[A]] = {
     bindForm(criteriaForm) flatMap { filledCriteriaForm =>
       val criteriaOpt = filledCriteriaForm.value
       

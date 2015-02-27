@@ -10,20 +10,20 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import xcala.play.utils.WithExecutionContext
 
-trait DataCudController[A] extends Controller with WithMainPageResults with WithFormBinding with WithComposableActions with WithoutImplicitLang with WithExecutionContext {
+trait DataCudController[A] extends Controller with WithMainPageResults with WithFormBinding with WithComposableActions with WithExecutionContext {
   protected def cudService: DataReadService[A] with DataSaveService[A] with DataRemoveService
 
   def defaultForm: Form[A]
 
-  def createView(form: Form[A])(implicit request: RequestType[_], lang: Lang): Future[Result]
+  def createView(form: Form[A])(implicit request: RequestType[_]): Future[Result]
 
-  def editView(form: Form[A], model: A)(implicit request: RequestType[_], lang: Lang): Future[Result]
+  def editView(form: Form[A], model: A)(implicit request: RequestType[_]): Future[Result]
 
-  def create(implicit lang: Lang) = action { implicit request =>
+  def create(lang: Lang) = action(lang) { implicit request =>
     createView(defaultForm.bindFromRequest.discardingErrors)
   }
 
-  def createPost(implicit lang: Lang) = action { implicit request =>
+  def createPost(lang: Lang) = action(lang) { implicit request =>
     val filledFormFuture = bindForm(defaultForm)
 
     filledFormFuture flatMap { filledForm =>
@@ -42,7 +42,7 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
     }
   }
 
-  def edit(lang: Lang, id: BSONObjectID) = action(lang) { implicit request => implicit lang =>
+  def edit(lang: Lang, id: BSONObjectID) = action(lang) { implicit request =>
     cudService.findById(id).flatMap { modelOption =>
       modelOption match {
         case Some(model) => editView(defaultForm.fill(model), model)
@@ -51,7 +51,7 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
     }
   } 
   
-  def editPost(lang: Lang, id: BSONObjectID) = action(lang) { implicit request => implicit lang =>
+  def editPost(lang: Lang, id: BSONObjectID) = action(lang) { implicit request =>
     cudService.findById(id) flatMap {
       case None => Future.successful(NotFound)
       case Some(model) =>
@@ -75,11 +75,11 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
     }
   }
 
-  protected def recoverSaveError(throwable: Throwable, filledForm: Form[A])(implicit request: RequestType[_], lang: Lang): Future[Result] = {
+  protected def recoverSaveError(throwable: Throwable, filledForm: Form[A])(implicit request: RequestType[_]): Future[Result] = {
     createView(filledForm.withGlobalError(throwable.getMessage()))
   }
 
-  def delete(lang: Lang, id: BSONObjectID) = action(lang) { implicit request => implicit lang =>
+  def delete(lang: Lang, id: BSONObjectID) = action(lang) { implicit request =>
     cudService.remove(id).map {
       case error if error.ok => successfulResult(Messages("message.successfulDelete"))
       case _ => NotFound

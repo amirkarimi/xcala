@@ -8,15 +8,15 @@ import xcala.play.services._
 import scala.concurrent.Future
 import xcala.play.utils.WithExecutionContext
 
-trait DataReadController[A] extends Controller with WithComposableActions with WithoutImplicitLang with WithExecutionContext {
+trait DataReadController[A] extends Controller with WithComposableActions with WithExecutionContext {
 
   protected def readService: DataReadService[A]
 
-  def indexView(paginated: Paginated[A])(implicit request: RequestType[_], lang: Lang): Future[Result]
+  def indexView(paginated: Paginated[A])(implicit request: RequestType[_]): Future[Result]
 
-  def indexResultView(paginated: Paginated[A])(implicit request: RequestType[_], lang: Lang): Future[Result]
+  def indexResultView(paginated: Paginated[A])(implicit request: RequestType[_]): Future[Result]
 
-  def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_], lang: Lang): Future[Paginated[A]] = {
+  def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_]): Future[Paginated[A]] = {
     readService.find(BSONDocument(), queryOptions).map { dataWithTotalCount =>
       Paginated(
         dataWithTotalCount.data,
