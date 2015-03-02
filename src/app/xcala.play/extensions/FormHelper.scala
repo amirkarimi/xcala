@@ -2,9 +2,14 @@ package xcala.play.extensions
 
 import play.api.data.Form
 import play.api.data.FormError
+import play.api.data.Mapping
 import play.api.i18n.Lang
 
 object FormHelper {
+  def trimmed(mapping: Mapping[String]): Mapping[String] = {
+    mapping.transform[String]((a: String) => a.trim, (a: String) => a)
+  }
+  
   implicit class AdvancedForm[A](val form: Form[A]) extends AnyVal {
     def withErrorIf(hasError: Boolean, key: String, error: String, args: Any*) = {
       if (hasError) {
