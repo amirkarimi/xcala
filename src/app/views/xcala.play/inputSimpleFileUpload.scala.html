@@ -10,7 +10,7 @@
 		</div>
 		<div class="col-xs-4">
 			@field.value.flatMap(BSONObjectID.parse(_).toOption).map { id =>
-				<a class="btn btn-warning btn-sm" target="_blank" href="@fileCall(id)">
+				<a class="btn btn-warning btn-sm @args.find(_._1 == '_linkClass).map(_._2)" target="_blank" href="@fileCall(id)">
 					<span class="glyphicon glyphicon-download-alt"></span> @Messages("download")
 				</a>	
 			}
