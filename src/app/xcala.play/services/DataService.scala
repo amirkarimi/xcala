@@ -183,7 +183,7 @@ trait DataCrudService[A] extends DataCollectionService
       case false => update
       case true => 
         val updateTime = DateTime.now
-        update ++ BSONDocument("$set" -> BSONDocument("updateTime" -> new BSONDateTime(updateTime.getMillis)))
+        update ++ BSONDocument("$set" -> BSONDocument(DataCrudService.UpdateTimeField -> new BSONDateTime(updateTime.getMillis)))
     }
     
     collection.update(selector, finalUpdateDoc, upsert = upsert, multi = multi)
@@ -199,8 +199,8 @@ trait DataCrudService[A] extends DataCollectionService
   
   private def setCreateAndUpdateTime(doc: BSONDocument) = {
     // Set create time if it wasn't available
-    val createTime = doc.getAs[DateTime]("createTime").getOrElse(DateTime.now)
-    val docWithCreateTime = BSONDocument(doc.elements.filter(_._1 != "createTime") :+ ("createTime" -> new BSONDateTime(createTime.getMillis)))
+    val createTime = doc.getAs[DateTime](DataCrudService.CreateTimeField).getOrElse(DateTime.now)
+    val docWithCreateTime = BSONDocument(doc.elements.filter(_._1 != DataCrudService.CreateTimeField) :+ (DataCrudService.CreateTimeField -> new BSONDateTime(createTime.getMillis)))
     
     // Always set update time
     setUpdateTime(docWithCreateTime)
@@ -208,6 +208,11 @@ trait DataCrudService[A] extends DataCollectionService
   
   private def setUpdateTime(doc: BSONDocument) = {
     val updateTime = DateTime.now
-    BSONDocument(doc.elements.filter(_._1 != "updateTime") :+ ("updateTime" -> new BSONDateTime(updateTime.getMillis)))    
+    BSONDocument(doc.elements.filter(_._1 != DataCrudService.UpdateTimeField) :+ (DataCrudService.UpdateTimeField -> new BSONDateTime(updateTime.getMillis)))    
   }
+}
+
+object DataCrudService {
+  val UpdateTimeField = "updateTime"
+  val CreateTimeField = "createTime"
 }
