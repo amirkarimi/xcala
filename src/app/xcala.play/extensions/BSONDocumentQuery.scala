@@ -9,7 +9,7 @@ object BSONDocumentQuery {
     def filterByDateRange(field: String, range: Range[Option[DateTime]]) = {
       doc ++
         BSONDocument(field -> range.from.map(date => BSONDocument("$gte" -> BSONDateTime(date.getMillis)))) ++
-        BSONDocument(field -> range.to.map(date => BSONDocument("$lte" -> BSONDateTime(date.getMillis))))
+        BSONDocument(field -> range.to.map(date => BSONDocument("$lt" -> BSONDateTime(date.plusDays(1).getMillis))))
     }
 
     def filterByRange[A](field: String, range: Range[Option[A]])(implicit writer: BSONWriter[A, _ <: BSONValue]) = {
