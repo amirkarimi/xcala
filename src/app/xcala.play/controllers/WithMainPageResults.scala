@@ -5,7 +5,7 @@ import play.api.i18n.Lang
 
 trait WithMainPageResults extends Results {
 
-  def mainPageRoute(implicit lang: Lang): Call
+  def mainPageRoute: Call
 
   protected def successfulResult(message: String)(implicit lang: Lang): Result = {
     Redirect(mainPageRoute).flashing("success" -> message)
