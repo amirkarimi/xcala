@@ -25,7 +25,7 @@ trait DataReadController[A] extends Controller with WithComposableActions with W
     }
   }
 
-  def index(lang: Lang) = action(lang) { implicit request =>
+  def index = action.async { implicit request =>
     val queryOptions = QueryOptions.getFromRequest
 
     getPaginatedData(queryOptions).flatMap { paginated =>

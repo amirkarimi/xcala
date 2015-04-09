@@ -19,11 +19,11 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
 
   def editView(form: Form[A], model: A)(implicit request: RequestType[_]): Future[Result]
 
-  def create(lang: Lang) = action(lang) { implicit request =>
+  def create = action.async { implicit request =>
     createView(defaultForm.bindFromRequest.discardingErrors)
   }
 
-  def createPost(lang: Lang) = action(lang) { implicit request =>
+  def createPost = action.async {implicit request =>
     val filledFormFuture = bindForm(defaultForm)
 
     filledFormFuture flatMap { filledForm =>
@@ -42,7 +42,7 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
     }
   }
 
-  def edit(lang: Lang, id: BSONObjectID) = action(lang) { implicit request =>
+  def edit(id: BSONObjectID) = action.async {implicit request =>
     cudService.findById(id).flatMap { modelOption =>
       modelOption match {
         case Some(model) => editView(defaultForm.fill(model), model)
@@ -51,7 +51,7 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
     }
   } 
   
-  def editPost(lang: Lang, id: BSONObjectID) = action(lang) { implicit request =>
+  def editPost(id: BSONObjectID) = action.async {implicit request =>
     cudService.findById(id) flatMap {
       case None => Future.successful(NotFound)
       case Some(model) =>
@@ -79,7 +79,7 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
     createView(filledForm.withGlobalError(throwable.getMessage()))
   }
 
-  def delete(lang: Lang, id: BSONObjectID) = action(lang) { implicit request =>
+  def delete(id: BSONObjectID) = action.async {implicit request =>
     cudService.remove(id).map {
       case error if error.ok => successfulResult(Messages("message.successfulDelete"))
       case _ => NotFound

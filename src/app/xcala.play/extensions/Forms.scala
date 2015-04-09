@@ -11,7 +11,7 @@ object Forms {
     list(
       mapping(
         "lang" -> nonEmptyText, 
-        "value" -> nonEmptyText
+        "value" -> textMapping
       )(MultilangText.apply)(MultilangText.unapply)
     )
   }

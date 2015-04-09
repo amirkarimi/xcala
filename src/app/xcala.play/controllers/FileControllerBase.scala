@@ -25,15 +25,15 @@ abstract class FileControllerBase(fileService: FileService)
   with MongoController 
   with WithExecutionContext {
   
-  def renameGuard[A](block: => Future[Result])(implicit request: RequestType[A]): Future[Result]
+  def renameAction: ActionBuilder[RequestType]
 
-  def deleteGuard[A](block: => Future[Result])(implicit request: RequestType[A]): Future[Result]
+  def removeAction: ActionBuilder[RequestType]
 
-  def selectorView(implicit request: RequestType[_]): Future[Result]
+  def selectorView(implicit request: RequestType[AnyContent]): Future[Result]
 
-  def browserView(ckEditorFuncNum: Int, fileType: Option[String])(implicit request: RequestType[_]): Future[Result]
+  def browserView(ckEditorFuncNum: Int, fileType: Option[String])(implicit request: RequestType[AnyContent]): Future[Result]
 
-  def listView(files: List[FileEntry], folders: List[Folder], folderAndParents: List[Folder])(implicit request: RequestType[_]): Future[Result]
+  def listView(files: List[FileEntry], folders: List[Folder], folderAndParents: List[Folder])(implicit request: RequestType[AnyContent]): Future[Result]
 
   /**
    * Returns the file matching the specified ID.
@@ -123,24 +123,24 @@ abstract class FileControllerBase(fileService: FileService)
     case _ => _.writer(Format.JPEG).withCompression(90)
   }
 
-  def selector(lang: Lang) = action(lang) { implicit request =>
+  def selector = action.async { implicit request =>
     selectorView(request)
   }
 
-  def browser(lang: Lang, ckEditorFuncNum: Int, fileType: Option[String]) = action(lang) { implicit request =>
+  def browser(ckEditorFuncNum: Int, fileType: Option[String]) = action.async { implicit request =>
     browserView(ckEditorFuncNum, fileType)
   }
 
-  def getList(lang: Lang, folderId: Option[BSONObjectID], fileId: Option[BSONObjectID], fileType: Option[String]): Action[AnyContent] = action(lang) { implicit request =>
+  def getList(folderId: Option[BSONObjectID], fileId: Option[BSONObjectID], fileType: Option[String]): Action[AnyContent] = action.async { implicit request =>
     val finalFolderId = fileId match {
       case None => Future.successful(folderId)
       case Some(fileId) => fileService.getFile(fileId).map(_.flatMap(_.folderId))
     }
 
-    finalFolderId.flatMap(getList(lang, _, fileType))
+    finalFolderId.flatMap(getList(request2lang, _, fileType))
   }
 
-  private def getList(lang: Lang, folderId: Option[BSONObjectID], fileType: Option[String])(implicit request: RequestType[_]): Future[Result] = {
+  private def getList(lang: Lang, folderId: Option[BSONObjectID], fileType: Option[String])(implicit request: RequestType[AnyContent]): Future[Result] = {
     for {
       files <- fileService.getFilesUnderFolder(folderId, fileType)
       folders <- fileService.getFoldersUnderFolder(folderId)
@@ -153,7 +153,7 @@ abstract class FileControllerBase(fileService: FileService)
     }
   }
   
-  def upload(lang: Lang, folderId: Option[BSONObjectID] = None) = action(parse.multipartFormData, lang) { implicit request =>
+  def upload(folderId: Option[BSONObjectID] = None) = action.async(parse.multipartFormData) { implicit request =>
     request.body.files.headOption map { filePart =>
       val gfs = fileService.gridFS
       val file = filePart.ref.file
@@ -175,7 +175,7 @@ abstract class FileControllerBase(fileService: FileService)
     case other => other.toString
   }
   
-  def createFolder(lang: Lang) = action(parse.json, lang) { implicit request =>
+  def createFolder = action.async(parse.json) { implicit request =>
     val json = request.body
     val folderNameOpt = (json \ "folderName").asOpt[String]
     val currentFolderIDOpt = (json \ "currentFolderId").asOpt[String].flatMap(BSONObjectID.parse(_).toOption)
@@ -186,7 +186,7 @@ abstract class FileControllerBase(fileService: FileService)
     }
   }
   
-  def getFileInfo(lang: Lang) = action(parse.json, lang) { implicit request =>
+  def getFileInfo = action.async(parse.json) { implicit request =>
     val input = request.body
     val idOpt = (input \ "id").asOpt[String].map(BSONObjectID.parse(_).toOption).flatten
     idOpt map { id => 
@@ -205,33 +205,29 @@ abstract class FileControllerBase(fileService: FileService)
     }
   }
   
-  def rename(lang: Lang, id: BSONObjectID, itemType: String, newName: String) = action(lang) { implicit request =>
-    renameGuard {
-      val future = itemType match {
-        case "folder" =>
-          fileService.renameFolder(id, newName)
-        case "file" =>
-          fileService.renameFile(id, newName)
-      }
-      
-      future map { _ =>
-        Ok("Ok")
-      }
+  def rename(id: BSONObjectID, itemType: String, newName: String) = renameAction.async { implicit request =>
+    val future = itemType match {
+      case "folder" =>
+        fileService.renameFolder(id, newName)
+      case "file" =>
+        fileService.renameFile(id, newName)
+    }
+
+    future map { _ =>
+      Ok("Ok")
     }
   }
   
-  def remove(lang: Lang, id: BSONObjectID, itemType: String) = action(lang) { implicit request =>
-    deleteGuard {
-      val future = itemType match {
-        case "folder" =>
-          fileService.removeFolder(id)
-        case "file" =>
-          fileService.removeFile(id)
-      }
-      
-      future map { _ =>
-        Ok("Ok")
-      }
+  def remove(id: BSONObjectID, itemType: String) = removeAction.async { implicit request =>
+    val future = itemType match {
+      case "folder" =>
+        fileService.removeFolder(id)
+      case "file" =>
+        fileService.removeFile(id)
+    }
+
+    future map { _ =>
+      Ok("Ok")
     }
   }
 }

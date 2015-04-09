@@ -2,6 +2,7 @@ package xcala.play.controllers
 
 import play.api.i18n.Lang
 import play.api.mvc._
+import play.api.Play.current
 import reactivemongo.bson._
 import xcala.play.models._
 import xcala.play.services._
@@ -15,15 +16,11 @@ trait MultilangDataSingleViewController[A <: WithLang] extends Results with With
   
   def singleView(model: A)(implicit request: RequestType[_]): Future[Result]
   
-  def view(id: BSONObjectID): EssentialAction = play.api.mvc.Action.async { implicit request =>
+  def view(id: BSONObjectID): EssentialAction = action.async { implicit request =>
     readService.findById(id) flatMap {
       case None => Future.successful(NotFound)
       case Some(model) =>
-        val actionWithLang = action(Lang(model.lang)) { implicit request =>
-          singleView(model)
-        }
-      
-        actionWithLang(request)
+        singleView(model).map(_.withLang(Lang(model.lang)))
     }
   }
 }
