@@ -37,7 +37,7 @@ object FormHelper {
           (key,PersianUtils.convertToPersianChars(value))
         }
 
-        form.bind(fixedData)
+        form.discardingErrors.bind(fixedData)
       } else {
         form
       }
