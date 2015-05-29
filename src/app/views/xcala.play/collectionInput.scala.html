@@ -11,12 +11,13 @@
 
 @helper.input(collectionField, Seq('_ignoreFormControlClass -> true, '_inputDivCol -> 10) ++ args:_*) { (id, name, value, args) =>
     <div id="@id" class="collection-input" data-collection-scope="@name">
-        <div>
-            <a class="btn btn-success collection-new-btn">@Messages("new")</a>
-        </div>
         @helper.repeat(collectionField, 0) { field =>
             @collectionFieldBuilder(field)
         }    
+
+        <div class="collection-new-btn-container">
+            <a class="btn btn-success collection-new-btn">@Messages("new")</a>
+        </div>
         
         <div style="display: none" class="collection-template">
             @collectionFieldBuilder(collectionField("[x]"))
