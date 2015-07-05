@@ -7,14 +7,13 @@ import play.api.test._
 import play.api.test.Helpers._
 import org.joda.time.DateTime
 
-import xcala.play.models.Range
+import xcala.play.models.{MultilangModel, Range}
 import reactivemongo.bson._
 
 @RunWith(classOf[JUnitRunner])
 class BSONHandlersSpec extends Specification {
 
   "Optional range handler" should {
-    import BSONHandlers._
     val handler = BSONHandlers.optionalRangeHandler[Int]
 
     "write Option types with Some value" in {
@@ -43,7 +42,6 @@ class BSONHandlersSpec extends Specification {
   }
 
   "Range handler" should {
-    import BSONHandlers._
     val handler = BSONHandlers.rangeHandler[Int]
 
     "write correctly" in {
@@ -56,6 +54,84 @@ class BSONHandlersSpec extends Specification {
       val bson = BSONDocument("from" -> 1, "to" -> 2)
       val model = handler.read(bson)
       model === Range[Int](1, 2)
+    }
+  }
+
+  "Multilang handler with String" should {
+    val handler = BSONHandlers.multilangHandler[String]
+
+    "write correctly" in {
+      val model = MultilangModel[String]("en", "Test")
+      val bson = handler.write(model)
+      bson === BSONDocument("lang" -> "en", "value" -> "Test")
+    }
+
+    "read correctly" in {
+      val bson = BSONDocument("lang" -> "en", "value" -> "Test")
+      val model = handler.read(bson)
+      model === MultilangModel[String]("en", "Test")
+    }
+  }
+
+  "Multilang handler with BSONObjecID" should {
+    val handler = BSONHandlers.multilangDocumentHandler[BSONObjectID]
+    val bsonObjectId = BSONObjectID.generate
+
+    "write correctly" in {
+      val model = MultilangModel[BSONObjectID]("en", bsonObjectId)
+      val bson = handler.write(model)
+      bson === BSONDocument(Seq("lang" -> BSONString("en"), "value" -> bsonObjectId))
+    }
+
+    "read correctly" in {
+      val bson = BSONDocument(Seq("lang" -> BSONString("en"), "value" -> bsonObjectId))
+      val model = handler.read(bson)
+      model === MultilangModel[BSONObjectID]("en", bsonObjectId)
+    }
+  }
+
+  "Multilang handler with Option[BSONObjecID]" should {
+    val handler = BSONHandlers.optionalMultilangDocumentHandler[BSONObjectID]
+    val bsonObjectId = BSONObjectID.generate
+
+    "write correctly" in {
+      val model = MultilangModel[Option[BSONObjectID]]("en", Some(bsonObjectId))
+      val bson = handler.write(model)
+      bson === BSONDocument(Seq("lang" -> BSONString("en"), "value" -> bsonObjectId))
+    }
+
+    "read correctly" in {
+      val bson = BSONDocument(Seq("lang" -> BSONString("en"), "value" -> bsonObjectId))
+      val model = handler.read(bson)
+      model === MultilangModel[Option[BSONObjectID]]("en", Some(bsonObjectId))
+    }
+  }
+
+  "Multilang handler with Option[String]" should {
+    val handler = BSONHandlers.optionalMultilangHandler[String]
+
+    "write correctly with Some[String] type" in {
+      val model = MultilangModel[Option[String]]("en", Some("Test"))
+      val bson = handler.write(model)
+      bson === BSONDocument("lang" -> "en", "value" -> "Test")
+    }
+
+    "read correctly with Some[String] type" in {
+      val bson = BSONDocument("lang" -> "en", "value" -> "Test")
+      val model = handler.read(bson)
+      model === MultilangModel[Option[String]]("en", Some("Test"))
+    }
+
+    "write correctly with None type" in {
+      val model = MultilangModel[Option[String]]("en", None)
+      val bson = handler.write(model)
+      bson === BSONDocument("lang" -> "en")
+    }
+
+    "read correctly with None type" in {
+      val bson = BSONDocument("lang" -> "en")
+      val model = handler.read(bson)
+      model === MultilangModel[Option[String]]("en", None)
     }
   }
 }

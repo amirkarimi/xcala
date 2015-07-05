@@ -2,7 +2,9 @@ package xcala.play.extensions
 
 import reactivemongo.bson._
 import org.joda.time.DateTime
-import xcala.play.models.Range
+import xcala.play.models.{MultilangModel, Range}
+
+import scala.util.Try
 
 object BSONHandlers {
   implicit object BSONDateTimeHandler extends BSONHandler[BSONDateTime, DateTime] {
@@ -50,5 +52,61 @@ object BSONHandlers {
   implicit def optionHandler[A <: BSONValue, B](implicit handler: BSONHandler[A, B]) = new BSONHandler[A, Option[B]] {
     def read(value: A): Option[B] = handler.readOpt(value)
     def write(value: Option[B]): A = handler.write(value.get)
+  }
+
+  implicit def multilangDocumentHandler[A <: BSONValue] = new BSONDocumentReader[MultilangModel[A]] with BSONDocumentWriter[MultilangModel[A]] {
+    def read(doc: BSONDocument): MultilangModel[A] = {
+      MultilangModel(lang = doc.getAs[String]("lang").get, value = doc.get("value").get.asInstanceOf[A])
+    }
+    def write(multilangModel: MultilangModel[A]): BSONDocument = {
+      BSONDocument(
+        Seq(
+          "lang" -> BSONString(multilangModel.lang),
+          "value" -> multilangModel.value
+        )
+      )
+    }
+  }
+
+  implicit def optionalMultilangDocumentHandler[A <: BSONValue] = new BSONDocumentReader[MultilangModel[Option[A]]] with BSONDocumentWriter[MultilangModel[Option[A]]] {
+    def read(doc: BSONDocument): MultilangModel[Option[A]] = {
+      MultilangModel(lang = doc.getAs[String]("lang").get, value = doc.get("value").collect({case v: A => v}))
+    }
+    def write(multilangModel: MultilangModel[Option[A]]): BSONDocument = {
+      BSONDocument(
+        Seq(
+          Some("lang" -> BSONString(multilangModel.lang)),
+          multilangModel.value.map("value" -> _)
+        ).flatten
+      )
+    }
+  }
+
+  implicit def multilangHandler[A](implicit handler: BSONHandler[_ <: BSONValue, A]) = new BSONDocumentReader[MultilangModel[A]] with BSONDocumentWriter[MultilangModel[A]] {
+    def read(doc: BSONDocument): MultilangModel[A] = {
+      MultilangModel(lang = doc.getAs[String]("lang").get, value = doc.getAs[A]("value").get)
+    }
+    def write(multilangModel: MultilangModel[A]): BSONDocument = {
+      BSONDocument(
+        Seq(
+          Some(("lang" -> BSONString(multilangModel.lang))),
+          handler.writeOpt(multilangModel.value).map("value" -> _)
+        ).flatten
+      )
+    }
+  }
+
+  implicit def optionalMultilangHandler[A](implicit handler: BSONHandler[_ <: BSONValue, A]) = new BSONDocumentReader[MultilangModel[Option[A]]] with BSONDocumentWriter[MultilangModel[Option[A]]] {
+    def read(doc: BSONDocument) = {
+      MultilangModel(lang = doc.getAs[String]("lang").get, value = doc.getAs[A]("value"))
+    }
+    def write(multilangModel: MultilangModel[Option[A]]): BSONDocument = {
+      BSONDocument(
+        Seq(
+          Some(("lang" -> BSONString(multilangModel.lang))),
+          multilangModel.value.flatMap(handler.writeOpt(_)).map("value" -> _)
+        ).flatten
+      )
+    }
   }
 }

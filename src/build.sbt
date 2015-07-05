@@ -4,7 +4,7 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.2"
+version := "0.3"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -34,18 +34,16 @@ excludeFilter in (Assets, LessKeys.less) := "_*.less"
 
 pipelineStages := Seq(gzip)
 
-routesImport += "reactivemongo.bson.BSONObjectID"
+routesImport ++= Seq(
+  "reactivemongo.bson.BSONObjectID",
+  "xcala.play.extensions.Bindables._",
+  "play.api.i18n.Lang"
+)
 
-routesImport += "xcala.play.extensions.Bindables._"
-
-routesImport += "play.api.i18n.Lang"
-
-TwirlKeys.templateImports += "reactivemongo.bson.{BSONObjectID, BSONDocument}"
-
-TwirlKeys.templateImports += "_root_.xcala.play.models._"
-
-TwirlKeys.templateImports += "reactivemongo.api.gridfs.ReadFile"
-
-TwirlKeys.templateImports += "_root_.xcala.play.extensions.PersianUtils._"
-
-TwirlKeys.templateImports += "_root_.xcala.play.extensions.MultilangTextHelper._"
+TwirlKeys.templateImports ++= Seq(
+  "reactivemongo.bson.{BSONObjectID, BSONDocument}",
+  "_root_.xcala.play.models._",
+  "reactivemongo.api.gridfs.ReadFile",
+  "_root_.xcala.play.extensions.PersianUtils._",
+  "_root_.xcala.play.extensions.MultilangHelper._"
+)

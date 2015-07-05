@@ -1,6 +1,6 @@
 package xcala.play.models
 
-import play.api.i18n.Messages
+import play.api.i18n.{Lang, Messages}
 
 case class Permission(id: String) {
   override def equals(o: Any) = o match {
@@ -8,6 +8,6 @@ case class Permission(id: String) {
     case _ => false
   }
   
-  def title = Messages(id)
+  def title(implicit lang: Lang) = Messages(id)
 }
 
