@@ -1,4 +1,4 @@
-This is your new Play application
+Xcala
 =================================
 
-This file will be packaged with your application, when using `activator dist`.
+This is a web application library based on Scala, Play and ReactiveMongo.
