@@ -27,7 +27,7 @@ Extending existing classes and objects:
 * Other helpers
 
 ###Models (xcala.play.models)###
-Models used in other part of the Xcala.
+Models used in other part of Xcala.
 
 ###Utils###
 Other useful utilities.
