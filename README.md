@@ -13,7 +13,7 @@ Provides base components for rendering HTML pages, like:
 
 * Bootstrap input renderes
 * Master-detail input structures
-* MVC-freindly grid view with sort and pagination
+* MVC-friendly grid view with sort and pagination
 * etc.
 
 ###Services (xcala.play.services)###
