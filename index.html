@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Xcala by AmirKarimi</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Xcala</h1>
+        <p>A web application library based on Scala, Play and ReactiveMongo</p>
+
+        <p class="view"><a href="https://github.com/AmirKarimi/xcala">View the Project on GitHub <small>AmirKarimi/xcala</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/AmirKarimi/xcala/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/AmirKarimi/xcala/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/AmirKarimi/xcala">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="xcala" class="anchor" href="#xcala" aria-hidden="true"><span class="octicon octicon-link"></span></a>Xcala</h1>
+
+<p>This is a web application library based on Scala, Play and ReactiveMongo.</p>
+
+<h2>
+<a id="parts" class="anchor" href="#parts" aria-hidden="true"><span class="octicon octicon-link"></span></a>Parts</h2>
+
+<p>Xcala provides helpers for various parts of web development.</p>
+
+<h3>
+<a id="controllers-xcalaplaycontrollers" class="anchor" href="#controllers-xcalaplaycontrollers" aria-hidden="true"><span class="octicon octicon-link"></span></a>Controllers (xcala.play.controllers)</h3>
+
+<p>Provides base functionality for CRUD operations, support server side pagination, data criterias, localization, etc.</p>
+
+<h3>
+<a id="views-viewshtmlxcalaplay" class="anchor" href="#views-viewshtmlxcalaplay" aria-hidden="true"><span class="octicon octicon-link"></span></a>Views (views.html.xcala.play)</h3>
+
+<p>Provides base components for rendering HTML pages, like:</p>
+
+<ul>
+<li>Bootstrap input renderes</li>
+<li>Master-detail input structures</li>
+<li>MVC-friendly grid view with sort and pagination</li>
+<li>etc.</li>
+</ul>
+
+<h3>
+<a id="services-xcalaplayservices" class="anchor" href="#services-xcalaplayservices" aria-hidden="true"><span class="octicon octicon-link"></span></a>Services (xcala.play.services)</h3>
+
+<p>Provides base functionality for building CRUD data services, server side pagination, data criterias, GridFS, tree structures, decorators, etc.</p>
+
+<h3>
+<a id="extensions-xcalaplayextensions" class="anchor" href="#extensions-xcalaplayextensions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Extensions (xcala.play.extensions)</h3>
+
+<p>Extending existing classes and objects:</p>
+
+<ul>
+<li>BSON helpers like <code>DateTime</code>, <code>BigDecimal</code>, <code>Range</code>, etc BSON handlers</li>
+<li>Play <code>Form</code> helpers for <code>BSONObjectID</code> and other things</li>
+<li>Other helpers</li>
+</ul>
+
+<h3>
+<a id="models-xcalaplaymodels" class="anchor" href="#models-xcalaplaymodels" aria-hidden="true"><span class="octicon octicon-link"></span></a>Models (xcala.play.models)</h3>
+
+<p>Models used in other part of Xcala.</p>
+
+<h3>
+<a id="utils" class="anchor" href="#utils" aria-hidden="true"><span class="octicon octicon-link"></span></a>Utils</h3>
+
+<p>Other useful utilities.</p>
+
+<h1>
+<a id="build-and-use" class="anchor" href="#build-and-use" aria-hidden="true"><span class="octicon octicon-link"></span></a>Build and Use</h1>
+
+<h2>
+<a id="build" class="anchor" href="#build" aria-hidden="true"><span class="octicon octicon-link"></span></a>Build</h2>
+
+<pre><code>activator compile
+</code></pre>
+
+<h2>
+<a id="use" class="anchor" href="#use" aria-hidden="true"><span class="octicon octicon-link"></span></a>Use</h2>
+
+<h4>
+<a id="publish-locally" class="anchor" href="#publish-locally" aria-hidden="true"><span class="octicon octicon-link"></span></a>Publish locally:</h4>
+
+<pre><code>activator publish-local
+</code></pre>
+
+<h4>
+<a id="use-in-other-projects" class="anchor" href="#use-in-other-projects" aria-hidden="true"><span class="octicon octicon-link"></span></a>Use in other projects:</h4>
+
+<pre><code>libraryDependencies += "com.xcala" %% "xcala-play" % "0.3"
+</code></pre>
+
+<blockquote>
+<p>I haven't published Xcala into maven repositories yet. Because it's still under development and it's easier for me to use <code>publish-local</code>. Please let me know if there are simpler ways ;)</p>
+</blockquote>
+
+<h1>
+<a id="known-issues" class="anchor" href="#known-issues" aria-hidden="true"><span class="octicon octicon-link"></span></a>Known Issues</h1>
+
+<ul>
+<li>Project structure is like a Play application while it's a library and should be improved</li>
+<li>Data services are <a href="https://github.com/AmirKarimi/xcala/blob/22de6022ca21612ff065ce58a6fa1e39debb24b4/src/app/xcala.play/services/DatabaseConfig.scala#L36">hardly-coupled to Play config</a> which should be decoupled</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/AmirKarimi">AmirKarimi</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
