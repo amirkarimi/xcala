@@ -9,7 +9,7 @@ import reactivemongo.api.collections.GenericQueryBuilder
 import xcala.play.utils.WithExecutionContext
 
 trait DataReadServiceDecorator[A, B] extends DataReadService[B] with WithExecutionContext {
-  val service: DataDocumentHandler[A] 
+  protected val service: DataDocumentHandler[A] 
     with DataReadService[A] 
     with DataRemoveService 
     with DataSaveService[A]
