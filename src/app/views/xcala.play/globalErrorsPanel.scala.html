@@ -1,9 +1,9 @@
-@(form: Form[_])
+@(form: Form[_])(implicit lang: Lang)
 @if(form.globalErrors.nonEmpty) {
 	@alert("danger") {
 		<ul>
 		@form.globalErrors.map { error =>
-			<li>@error.message</li>
+			<li>@Messages(error.message)</li>
 		}
 		</ul>
 	}
