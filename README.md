@@ -5,10 +5,10 @@ This is a web application library based on Scala, Play and ReactiveMongo.
 ##Parts##
 Xcala provides helpers for various parts of web development.
 
-###Controllers (xcala.play.controllers)###
+###Controllers (`xcala.play.controllers`)###
 Provides base functionality for CRUD operations, support server side pagination, data criterias, localization, etc.
 
-###Views (views.html.xcala.play)###
+###Views (`views.html.xcala.play`)###
 Provides base components for rendering HTML pages, like:
 
 * Bootstrap input renderes
@@ -16,17 +16,17 @@ Provides base components for rendering HTML pages, like:
 * MVC-friendly grid view with sort and pagination
 * etc.
 
-###Services (xcala.play.services)###
+###Services (`xcala.play.services`)###
 Provides base functionality for building CRUD data services, server side pagination, data criterias, GridFS, tree structures, decorators, etc.
 
-###Extensions (xcala.play.extensions)###
+###Extensions (`xcala.play.extensions`)###
 Extending existing classes and objects:
 
 * BSON helpers like `DateTime`, `BigDecimal`, `Range`, etc BSON handlers
 * Play `Form` helpers for `BSONObjectID` and other things
 * Other helpers
 
-###Models (xcala.play.models)###
+###Models (`xcala.play.models`)###
 Models used in other part of Xcala.
 
 ###Utils###
