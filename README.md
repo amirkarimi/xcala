@@ -29,7 +29,7 @@ Extending existing classes and objects:
 ###Models (`xcala.play.models`)###
 Models used in other part of Xcala.
 
-###Utils###
+###Utils (`xcala.play.utils`)###
 Other useful utilities.
 
 #Build and Use#
