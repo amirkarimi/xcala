@@ -25,13 +25,13 @@ trait DatabaseConfig {
 }
 
 trait DefaultDatabaseConfig extends DatabaseConfig {
-  lazy val parsedUri: MongoConnection.ParsedURI = MongoConnection.parseURI(mongoUri).get
+  def parsedUri: MongoConnection.ParsedURI = MongoConnection.parseURI(mongoUri).get
 
-  lazy val driver: MongoDriver = new MongoDriver
-  lazy val connection: MongoConnection = driver.connection(parsedUri)
+  def driver: MongoDriver = new MongoDriver
+  def connection: MongoConnection = driver.connection(parsedUri)
   def db(implicit ex: ExecutionContext): DefaultDB = connection.db(parsedUri.db.get)
 }
 
 object DefaultDatabaseConfig extends DefaultDatabaseConfig {
-  lazy val mongoUri = Play.current.configuration.getString("mongodb.uri").get
+  def mongoUri = Play.current.configuration.getString("mongodb.uri").get
 }
