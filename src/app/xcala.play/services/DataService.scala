@@ -21,7 +21,7 @@ import xcala.play.utils.WithExecutionContext
 trait DataService extends WithExecutionContext {
   def dbConfig: DBConfig
   
-  private[services] lazy val db: DefaultDB = databaseConfig.db
+  private[services] lazy val db: DefaultDB = dbConfig.db
 }
 
 /**

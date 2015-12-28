@@ -9,7 +9,7 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.core.commands.LastError
 import scala.concurrent.Future
 
-class FolderService(implicit val ec: ExecutionContext) extends DataCrudService[Folder] {
+class FolderService(val dbConfig: DBConfig)(implicit val ec: ExecutionContext) extends DataCrudService[Folder] {
   val collectionName = "folders"
   val documentHandler = Macros.handler[Folder]  
 }

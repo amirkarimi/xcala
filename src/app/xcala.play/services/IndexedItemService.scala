@@ -12,7 +12,7 @@ import xcala.play.extensions.BSONHandlers._
 import org.joda.time.DateTime
 import reactivemongo.api.collections.default.BSONCollection
 
-class IndexedItemService(implicit val ec: ExecutionContext) extends DataCrudService[IndexedItem] {
+class IndexedItemService(val dbConfig: DBConfig)(implicit val ec: ExecutionContext) extends DataCrudService[IndexedItem] {
   val collectionName = "indexedItems"
   val documentHandler = Macros.handler[IndexedItem]
 

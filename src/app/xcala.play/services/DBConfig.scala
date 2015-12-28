@@ -24,9 +24,9 @@ trait DBConfig {
 }
 
 trait DefaultDBConfig extends DBConfig {
-  def parsedUri: MongoConnection.ParsedURI = MongoConnection.parseURI(mongoUri).get
+  lazy val parsedUri: MongoConnection.ParsedURI = MongoConnection.parseURI(mongoUri).get
 
-  def driver: MongoDriver = new MongoDriver
-  def connection: MongoConnection = driver.connection(parsedUri)
+  lazy val driver: MongoDriver = new MongoDriver
+  lazy val connection: MongoConnection = driver.connection(parsedUri)
   def db(implicit ex: ExecutionContext): DefaultDB = connection.db(parsedUri.db.get)
 }

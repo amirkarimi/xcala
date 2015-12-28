@@ -9,7 +9,7 @@ import reactivemongo.core.commands.LastError
 import xcala.play.models._
 import xcala.play.models.FileEntry.BSONDocumentReader
 
-class FileService(folderService: FolderService)(implicit val ec: ExecutionContext) extends GridFSDataService {
+class FileService(folderService: FolderService, val dbConfig: DBConfig)(implicit val ec: ExecutionContext) extends GridFSDataService {
   implicit val folderDocumentHandler = Macros.handler[Folder]
   
   def setFileFolder(file: ReadFile[BSONValue], folderId: Option[BSONObjectID]): Future[Option[LastError]] = folderId match {
