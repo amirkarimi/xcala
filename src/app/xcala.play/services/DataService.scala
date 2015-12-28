@@ -19,7 +19,7 @@ import xcala.play.utils.WithExecutionContext
  * Represents the data service foundation.
  */
 trait DataService extends WithExecutionContext {
-  protected def databaseConfig: DatabaseConfig = DefaultDatabaseConfig
+  def dbConfig: DBConfig
   
   private[services] lazy val db: DefaultDB = databaseConfig.db
 }
