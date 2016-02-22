@@ -1,6 +1,6 @@
-@(field: Field, fileCall: BSONObjectID => Call, args: (Symbol, Any)*)(implicit fieldConstructor: views.html.helper.FieldConstructor, lang: Lang)
+@(field: Field, fileCall: BSONObjectID => Call, originalArgs: (Symbol, Any)*)(implicit fieldConstructor: views.html.helper.FieldConstructor, lang: Lang)
 
-@helper.input(field, (args :+ ('_ignoreFormControlClass -> true)):_*) { (id, name, value, args) =>
+@helper.input(field, (originalArgs :+ ('_ignoreFormControlClass -> true)):_*) { (id, name, value, args) =>
 	<div class="row">
 		<div class="col-xs-8">
 			@defining(field(_root_.xcala.play.controllers.WithFileUploader.AutoUploadSuffix)) { fileUploadField =>
@@ -10,7 +10,7 @@
 		</div>
 		<div class="col-xs-4">
 			@field.value.flatMap(BSONObjectID.parse(_).toOption).map { id =>
-				<a class="btn btn-warning btn-sm @args.find(_._1 == '_linkClass).map(_._2)" target="_blank" href="@fileCall(id)">
+				<a class="btn btn-warning btn-sm @originalArgs.find(_._1 == '_linkClass).map(_._2)" target="_blank" href="@fileCall(id)">
 					<span class="glyphicon glyphicon-download-alt"></span> @Messages("download")
 				</a>	
 			}
