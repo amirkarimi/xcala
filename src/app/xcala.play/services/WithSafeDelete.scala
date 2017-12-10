@@ -40,4 +40,4 @@ trait WithSafeDelete extends DataCollectionService with DataRemoveService {
   }
 }
 
-class DeleteConstraintException(collectionName: String, query: BSONDocument, id: BSONObjectID) extends Throwable
+class DeleteConstraintException(val collectionName: String, val query: BSONDocument, val id: BSONObjectID) extends Throwable
