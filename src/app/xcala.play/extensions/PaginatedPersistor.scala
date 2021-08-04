@@ -2,8 +2,7 @@ package xcala.play.extensions
 
 import play.api.mvc._
 import xcala.play.models._
-import com.netaporter.uri.dsl._
-import com.netaporter.uri.QueryString
+import io.lemonlabs.uri.dsl._
 
 object PaginatedPersistor {
   implicit class PaginatedPersistorCall(val call: Call) extends AnyVal {

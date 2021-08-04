@@ -9,7 +9,7 @@ object HttpHelper {
 
   implicit class XcalaRequest[A](val request: Request[A]) extends AnyVal {
     def withLang(lang: Lang): Request[A] = {
-      val requestHeaderWithLang = request.copy(headers = WrappedHeaders(request.headers, (HeaderNames.ACCEPT_LANGUAGE -> Seq(lang.toString))))
+      val requestHeaderWithLang = request.withHeaders(newHeaders = WrappedHeaders(request.headers, Seq(HeaderNames.ACCEPT_LANGUAGE -> lang.toString)))
       Request(requestHeaderWithLang, request.body)    
     }
   }

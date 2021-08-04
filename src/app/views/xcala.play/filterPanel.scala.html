@@ -1,4 +1,4 @@
-@(updateTarget: String = "#result", collapsed: Boolean = true, action: Option[Call] = None, title: Option[String] = None, commandBar: Option[Html] = None)(body: Html)(implicit lang: Lang)
+@(updateTarget: String = "#result", collapsed: Boolean = true, action: Option[Call] = None, title: Option[String] = None, commandBar: Option[Html] = None)(body: Html)(implicit messages: Messages)
 
 <div class="panel panel-default filter-panel-container">
   <div class="panel-heading filter-panel-expander" data-filter-panel=".filter-panel">

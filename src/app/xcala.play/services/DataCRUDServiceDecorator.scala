@@ -2,20 +2,20 @@ package xcala.play.services
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import reactivemongo.bson._
-import reactivemongo.core.commands.LastError
-import xcala.play.models.{ QueryOptions, DataWithTotalCount }
+import reactivemongo.api.bson._
+import xcala.play.models.{DataWithTotalCount, QueryOptions}
 import reactivemongo.api.collections.GenericQueryBuilder
+import reactivemongo.api.commands.WriteResult
 import xcala.play.utils.WithExecutionContext
 
-trait DataCrudServiceDecorator[A, B] 
+trait DataCRUDServiceDecorator[A, B]
 	extends DataReadServiceDecorator[A, B] 
   with DataRemoveService 
   with DataSaveService[B]
   with WithExecutionContext {
   
   val service: DataDocumentHandler[A] 
-		with DataReadService[A] 
+		with DataReadService[A]
 		with DataRemoveService 
 		with DataSaveService[A]
 
@@ -23,7 +23,7 @@ trait DataCrudServiceDecorator[A, B]
   
   def copyBackModel(source: B, destination: A): Future[A]
   
-	def remove(query: BSONDocument): Future[LastError] = service.remove(query)
+	def remove(query: BSONDocument): Future[WriteResult] = service.remove(query)
   
   def insert(model: B) = mapBackModel(model).flatMap(service.insert)
 	

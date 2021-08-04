@@ -1,9 +1,7 @@
 package xcala.play.services
 
-import xcala.play.services._
-import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import reactivemongo.bson._
+import reactivemongo.api.bson._
 import play.api.i18n.Lang
 import xcala.play.models._
 import xcala.play.utils.WithExecutionContext
@@ -30,13 +28,15 @@ trait TreeService[A, B <: TreeModelBase[B]] extends DataReadService[A] with Data
   }
   
   protected def findItemsUnder(query: BSONDocument): Future[List[B]] = {
-    val items = findQuery(query).sort(BSONDocument("order" -> 1)).cursor[BSONDocument].collect[List]()
-    
-    items flatMap { items =>
+    val itemsFuture = findQuery(query) flatMap { query =>
+      query.sort(BSONDocument("order" -> 1)).cursor[BSONDocument]().collect[List]()
+    }
+
+    itemsFuture flatMap { items =>
       val itemModels = items map { doc =>
-        val id = doc.getAs[BSONObjectID]("_id") 
+        val id = doc.getAsOpt[BSONObjectID]("_id")
         findItemsUnder(id) map { childMenus =>
-          getModel(documentHandler.read(doc), childMenus)
+          getModel(documentHandler.readOpt(doc).get, childMenus)
         }
       }
       

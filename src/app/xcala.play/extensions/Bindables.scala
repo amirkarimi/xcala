@@ -1,11 +1,11 @@
 package xcala.play.extensions
 
 import play.api.mvc.PathBindable
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.api.bson.BSONObjectID
 import play.api.mvc.QueryStringBindable
 import play.api.data.format.Formatter
 import play.api.i18n.Lang
-import play.api.mvc.JavascriptLitteral
+import play.api.mvc.JavascriptLiteral
 
 object Bindables {
 
@@ -24,7 +24,7 @@ object Bindables {
 
   }
 
-  implicit def optionJavascriptLitteral[T: PathBindable] = new JavascriptLitteral[Option[T]] {
+  implicit def optionJavascriptLitteral[T: PathBindable] = new JavascriptLiteral[Option[T]] {
     override def to(value: Option[T]): String = value.map(_.toString).getOrElse("")
   }
 

@@ -1,7 +1,7 @@
 package xcala.play.extensions
 
 import org.joda.time.DateTime
-import reactivemongo.bson._
+import reactivemongo.api.bson._
 import xcala.play.models._
 
 object BSONDocumentQuery {
@@ -12,7 +12,7 @@ object BSONDocumentQuery {
         BSONDocument(field -> range.to.map(date => BSONDocument("$lt" -> BSONDateTime(date.plusDays(1).getMillis))))
     }
 
-    def filterByRange[A](field: String, range: Range[Option[A]])(implicit writer: BSONWriter[A, _ <: BSONValue]) = {
+    def filterByRange[A](field: String, range: Range[Option[A]])(implicit writer: BSONWriter[A]) = {
       doc ++
         BSONDocument(field -> range.from.map(value => BSONDocument("$gte" -> value))) ++
         BSONDocument(field -> range.to.map(value => BSONDocument("$lte" -> value)))

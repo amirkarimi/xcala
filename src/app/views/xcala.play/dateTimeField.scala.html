@@ -1,4 +1,4 @@
-@(field: Field, hasTimePicker: Boolean, args: (Symbol,Any)*)(implicit lang: Lang)
+@(field: Field, hasTimePicker: Boolean, args: (Symbol,Any)*)(implicit messages: Messages)
 
 @htmlArgs = @{args.filter(arg => !arg._1.name.startsWith("_") && arg._1 != 'id).toMap}
 
@@ -6,7 +6,7 @@
 	class="datetimepicker"
 	id="@field.id"
 	name="@field.name"
-	data-datepickerculture="@if(lang.code=="fa"){fa}else{en}"
+	data-datepickerculture="@if(messages.lang.code=="fa"){fa}else{en}"
 	data-datepicker="@(field.id)DatePicker"
 	@if(hasTimePicker){data-timepicker="@(field.id)TimePicker"}
 	@field.value.map{value=>value="@value"}>

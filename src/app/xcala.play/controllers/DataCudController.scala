@@ -2,15 +2,22 @@ package xcala.play.controllers
 
 import play.api.Logger
 import play.api.data.Form
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.{I18nSupport, Lang, Messages}
 import play.api.mvc._
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.api.bson.BSONObjectID
+import reactivemongo.api.commands.WriteResult
 import xcala.play.services._
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import xcala.play.utils.WithExecutionContext
 
-trait DataCudController[A] extends Controller with WithMainPageResults with WithFormBinding with WithComposableActions with WithExecutionContext {
+trait DataCudController[A] extends InjectedController
+  with WithMainPageResults
+  with WithFormBinding
+  with WithComposableActions
+  with WithExecutionContext
+  with I18nSupport {
   protected def cudService: DataReadService[A] with DataSaveService[A] with DataRemoveService
 
   def defaultForm: Form[A]
@@ -23,7 +30,7 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
     createView(defaultForm.bindFromRequest.discardingErrors)
   }
 
-  def createPost = action.async {implicit request =>
+  def createPost = action.async { implicit request =>
     val filledFormFuture = bindForm(defaultForm)
 
     filledFormFuture flatMap { filledForm =>
@@ -42,16 +49,14 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
     }
   }
 
-  def edit(id: BSONObjectID) = action.async {implicit request =>
-    cudService.findById(id).flatMap { modelOption =>
-      modelOption match {
-        case Some(model) => editView(defaultForm.fill(model), model)
-        case None => Future.successful(NotFound)
-      }
+  def edit(id: BSONObjectID) = action.async { implicit request =>
+    cudService.findById(id) flatMap {
+      case Some(model) => editView(defaultForm.fill(model), model)
+      case None => Future.successful(NotFound)
     }
-  } 
-  
-  def editPost(id: BSONObjectID) = action.async {implicit request =>
+  }
+
+  def editPost(id: BSONObjectID) = action.async { implicit request =>
     cudService.findById(id) flatMap {
       case None => Future.successful(NotFound)
       case Some(model) =>
@@ -76,13 +81,14 @@ trait DataCudController[A] extends Controller with WithMainPageResults with With
   }
 
   protected def recoverSaveError(throwable: Throwable, filledForm: Form[A])(implicit request: RequestType[_]): Future[Result] = {
-    createView(filledForm.withGlobalError(throwable.getMessage()))
+    createView(filledForm.withGlobalError(throwable.getMessage))
   }
 
-  def delete(id: BSONObjectID) = action.async {implicit request =>
-    cudService.remove(id).map {
-      case error if error.ok => successfulResult(Messages("message.successfulDelete"))
-      case _ => NotFound
+  def delete(id: BSONObjectID) = action.async { implicit request =>
+    cudService.remove(id) map { _ =>
+      successfulResult(Messages("message.successfulDelete"))
+    } recover {
+      case WriteResult.Exception(error) => failedResult(error.message)
     }
   }
 }

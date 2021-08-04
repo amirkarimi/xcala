@@ -2,7 +2,7 @@ package xcala.play.models
 
 import play.api.data.Form
 
-case class Paginated[A](data: Seq[A], totalCount: Int, queryOptions: QueryOptions, args: Map[String, String] = Map()) {
+case class Paginated[A](data: Seq[A], totalCount: Long, queryOptions: QueryOptions, args: Map[String, String] = Map()) {
   def pageCount = math.ceil(totalCount.toDouble / queryOptions.pageSize.toDouble).toInt
   def hasNextPage = queryOptions.page < pageCount
   def hasPrevPage = queryOptions.page > 1
@@ -39,7 +39,7 @@ object Paginated {
     apply(dataWithTotalCount.data, dataWithTotalCount.totalCount, queryOptions)
   }
 
-  def apply[A, B](data: Seq[A], totalCount: Int, queryOptions: QueryOptions, criteria: Option[B], criteriaForm: Form[B]): Paginated[A] = {
+  def apply[A, B](data: Seq[A], totalCount: Long, queryOptions: QueryOptions, criteria: Option[B], criteriaForm: Form[B]): Paginated[A] = {
     // Form data contains all request data but we just need criteria data
     val criteriaArgs = criteria.map(c => criteriaForm.fill(c).data).getOrElse(Map())
     

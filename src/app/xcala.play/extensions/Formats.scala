@@ -7,7 +7,7 @@ import play.api.data.format.Formats._
 import play.api.data.format.Formatter
 import play.api.data.validation._
 import play.api.libs.json._
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.api.bson.BSONObjectID
 
 object Formats {
 
@@ -34,9 +34,9 @@ object Formats {
     def reads(json: JsValue): JsResult[BSONObjectID] = json match {
       case JsString(s) => BSONObjectID.parse(s) match {
         case Success(d) => JsSuccess(d)
-        case Failure(e) => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.objectId.format"))))
+        case Failure(e) => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId.format"))))
       }
-      case _ => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.objectId"))))
+      case _ => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId"))))
     }
 
     def writes(o: BSONObjectID): JsValue = JsString(o.stringify)

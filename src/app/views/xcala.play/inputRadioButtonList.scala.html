@@ -1,6 +1,6 @@
-@(field: Field, items: Seq[(String, String)], args: (Symbol,Any)*)(implicit lang: Lang)
+@(field: Field, items: Seq[(String, String)], args: (Symbol,Any)*)(implicit messages: Messages)
 
-@elements = @{helper.FieldElements(field.id, field, Html(""), args.toMap, lang)}
+@elements = @{helper.FieldElements(field.id, field, Html(""), args.toMap, messages)}
 
 @bootstrap3.field(elements) {
 	<div class="@elements.args.getOrElse('class, "")">

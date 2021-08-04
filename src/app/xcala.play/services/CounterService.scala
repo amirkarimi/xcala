@@ -1,16 +1,18 @@
 package xcala.play.services
 
-import concurrent.ExecutionContext.Implicits._
-import reactivemongo.bson._
+import reactivemongo.api.bson._
+import xcala.play.utils.WithExecutionContext
 
-trait CounterService extends DataService {
+trait CounterService extends DataService with WithExecutionContext {
+
   protected def counterCollectionName: String
-  protected lazy val collection = db.collection(counterCollectionName)
+  protected lazy val collectionFuture = dbFuture.map(_.collection(counterCollectionName))
   
   def increment(key: String) = {
-    collection.update(
+    collectionFuture.flatMap(_.update.one(
       BSONDocument("key" -> key),
       BSONDocument("$inc" -> BSONDocument("count" -> 1)),
       upsert = true)
+    )
   }
 }

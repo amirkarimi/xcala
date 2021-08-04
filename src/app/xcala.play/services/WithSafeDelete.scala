@@ -1,9 +1,7 @@
 package xcala.play.services
 
-import reactivemongo.api.collections.default.BSONCollection
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
-import reactivemongo.core.commands.LastError
-
+import reactivemongo.api.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.api.commands.WriteResult
 import scala.concurrent.Future
 
 trait WithSafeDelete extends DataCollectionService with DataRemoveService {
@@ -14,20 +12,24 @@ trait WithSafeDelete extends DataCollectionService with DataRemoveService {
     */
   def checkOnDelete: Seq[(String, BSONObjectID => BSONDocument)]
 
-  abstract override def remove(query: BSONDocument): Future[LastError] = {
-    val deletingIdsFuture = collection
-      .find(query, BSONDocument("_id" -> 1))
-      .cursor[BSONDocument]
-      .collect[List]()
-      .map(_.map(_.getAs[BSONObjectID]("_id")).flatten)
+  abstract override def remove(query: BSONDocument): Future[WriteResult] = {
+    val deletingIdsFuture = collectionFuture flatMap { collection =>
+      collection.find(query, Some(BSONDocument("_id" -> 1)))
+        .cursor[BSONDocument]()
+        .collect[List]()
+        .map(_.flatMap(_.getAsOpt[BSONObjectID]("_id")))
+    }
 
     deletingIdsFuture flatMap { deletingIds =>
       val checkFuture = Future.sequence(
         deletingIds flatMap { deletingId =>
           checkOnDelete map { case (collectionName, queryBuilder) =>
             val query = queryBuilder(deletingId)
-            db.command(reactivemongo.core.commands.Count(collectionName, Some(query))).map {
-              count => if (count > 0) throw new DeleteConstraintException(collectionName, query, deletingId)
+            dbFuture flatMap { db =>
+              val collection = db.collection(collectionName)
+              collection.count(Some(query)) map { count =>
+                if (count > 0) throw new DeleteConstraintException(collectionName, query, deletingId)
+              }
             }
           }
         }

@@ -1,4 +1,4 @@
-@(field: Field, args: (Symbol, Any)*)(implicit lang: Lang)
+@(field: Field, args: (Symbol, Any)*)(implicit messages: Messages)
 
 @inputRange(field, args:_*) { (field, args) =>
     <input type="text" class="form-control" name="@field.name" id="@field.id" value="@field.value" @toHtmlArgs(args.toMap) />

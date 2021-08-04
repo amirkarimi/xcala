@@ -1,4 +1,4 @@
-@(field: Field, args: (Symbol, Any)*)(implicit lang: Lang)
+@(field: Field, args: (Symbol, Any)*)(implicit messages: Messages)
 <div class="file-selector">
     <div class="input-group">
         <input type="text" id="@field("text").id" class="form-control file-selector-text" disabled>

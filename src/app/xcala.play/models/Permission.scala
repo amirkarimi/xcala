@@ -8,6 +8,6 @@ case class Permission(id: String) {
     case _ => false
   }
   
-  def title(implicit lang: Lang) = Messages(id)
+  def title(implicit messages: Messages) = Messages(id)
 }
 

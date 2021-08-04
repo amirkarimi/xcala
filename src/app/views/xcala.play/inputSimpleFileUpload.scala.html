@@ -1,4 +1,4 @@
-@(field: Field, fileCall: BSONObjectID => Call, args: (Symbol, Any)*)(implicit fieldConstructor: views.html.helper.FieldConstructor, lang: Lang)
+@(field: Field, fileCall: BSONObjectID => Call, args: (Symbol, Any)*)(implicit fieldConstructor: views.html.helper.FieldConstructor, messages: Messages)
 
 @helper.input(field, (args :+ ('_ignoreFormControlClass -> true)):_*) { (id, name, value, args) =>
 	<div class="row">

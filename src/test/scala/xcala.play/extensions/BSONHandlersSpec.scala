@@ -8,7 +8,7 @@ import play.api.test.Helpers._
 import org.joda.time.DateTime
 
 import xcala.play.models.{MultilangModel, Range}
-import reactivemongo.bson._
+import reactivemongo.api.bson._
 
 @RunWith(classOf[JUnitRunner])
 class BSONHandlersSpec extends Specification {

@@ -1,13 +1,11 @@
 package xcala.play.models
 
-import play.twirl.api.Html
-import play.api.mvc.Call
 import play.api.i18n.Messages
 
 case class Col[A](name: String, fieldMapper: A => String, sortExpression: String = "", cssClass: A => Option[String] = ((a: A) => None), headerCssClass: Option[String] = None)
 
 object Col {
-  def command[A](commands: (A => RowCommand)*) = {
+  def command[A](commands: (A => RowCommand)*)(implicit messages: Messages) = {
     Col[A]("",
       (field: A) =>
 	      "<div class='btn-group'>" +
@@ -23,7 +21,7 @@ object Col {
       _ => Some("command-column"))
   }
   
-  def getConfirmationAttribute(rowCommand: RowCommand): String = {
+  def getConfirmationAttribute(rowCommand: RowCommand)(implicit messages: Messages): String = {
     if (rowCommand.confirmationMessage != "") {
       val message = Messages(rowCommand.confirmationMessage)
       s"""onclick="return confirm('$message')""""

@@ -1,6 +1,6 @@
-@(field: Field, args: (Symbol, Any)*)(inputGenerator: (Field, Seq[(Symbol, Any)]) => Html)(implicit lang: Lang)
+@(field: Field, args: (Symbol, Any)*)(inputGenerator: (Field, Seq[(Symbol, Any)]) => Html)(implicit messages: Messages)
 
-@defining(helper.FieldElements(field.id, field, Html(""), args.toMap, lang)) { elements =>
+@defining(helper.FieldElements(field.id, field, Html(""), args.toMap, messages)) { elements =>
     @bootstrap3.field(elements) {
         <div class="row">
             <div class="col-sm-6">

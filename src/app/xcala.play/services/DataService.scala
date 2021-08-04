@@ -1,35 +1,30 @@
 package xcala.play.services
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import reactivemongo.bson._
+import reactivemongo.api.bson._
 import reactivemongo.api._
-import reactivemongo.core.commands._
-import reactivemongo.api.collections.default._
-import reactivemongo.api.collections._
-import play.api.Play
-import play.api.libs.iteratee.Enumerator
+import reactivemongo.api.bson.collection._
 import xcala.play.models._
-import xcala.play.extensions.BSONHandlers._
-import reactivemongo.api.gridfs.GridFS
+import xcala.play.extensions.BSONHandlers.BSONDateTimeHandler
 import org.joda.time.DateTime
+import reactivemongo.api.collections._
+import reactivemongo.api.commands._
 import xcala.play.utils.WithExecutionContext
 
 /**
  * Represents the data service foundation.
  */
-trait DataService extends WithExecutionContext {
-  protected def databaseConfig: DatabaseConfig = DefaultDatabaseConfig
-  
-  private[services] lazy val db: DefaultDB = databaseConfig.db
+trait DataService extends WithExecutionContext with DefaultDatabaseConfig {
+  private[services] lazy val dbFuture: Future[DB] = dbFuture
 }
 
 /**
  * Represents grid FS data service.
  */
-trait GridFSDataService extends DataService {
-  lazy val gridFS = GridFS(db)
-}
+// TODO: Fix Soheil
+//trait GridFSDataService extends DataService {
+//  lazy val gridFS = GridFS(dbFuture)
+//}
 
 /**
  * Represents the service which works with a collection
@@ -37,39 +32,41 @@ trait GridFSDataService extends DataService {
 trait DataCollectionService extends DataService {
   private[services] val collectionName: String
 
-  private[services] lazy val collection: BSONCollection = getCollection
+  private[services] lazy val collectionFuture: Future[BSONCollection] = getCollection
 
   private[services] def getCollection = {
-    val coll = db.collection(collectionName)
+    val coll = dbFuture.map(_.collection(collectionName))
     onCollectionInitialized(coll)
     coll
   }
 
-  protected def onCollectionInitialized(collection: BSONCollection) = {}
+  protected def onCollectionInitialized(collection: Future[BSONCollection]) = {}
 }
 
 trait WithDbCommand extends DataService {
-  def dbCommand[A](command: Command[A], readPreference: ReadPreference = ReadPreference.primary)(implicit ec: ExecutionContext) = db.command(command) 
+//  TODO: Fix Soheil
+//  def dbCommand[A](command: Command[A], readPreference: ReadPreference = ReadPreference.primary)(implicit ec: ExecutionContext) = db.command(command)
 }
 
 trait WithExternalCollectionAccess extends DataService {
-  protected def collection(collectionName: String) = db.collection(collectionName)
+  protected def collection(collectionName: String) = dbFuture.map(_.collection(collectionName))
 }
 
 /**
  * Represents the document handler.
  */
 trait DataDocumentHandler[A] {
-  implicit val documentHandler: BSONDocumentReader[A] with BSONDocumentWriter[A] with BSONHandler[BSONDocument, A]
+  implicit val documentHandler: BSONDocumentReader[A] with BSONDocumentWriter[A] with BSONHandler[A]
 }
 
 /**
  * Represents the read functionality of Crud service.
  */
 trait DataReadService[A] {
-  def findQuery(query: BSONDocument): GenericQueryBuilder[BSONDocument, BSONDocumentReader, BSONDocumentWriter]
+  //TODO: Fix Soheil
+  def findQuery(query: BSONDocument): Future[QueryBuilderFactory[SerializationPack]]
 
-  def findAll() = find(BSONDocument())
+  def findAll: Future[List[A]] = find(BSONDocument())
 
   def findOne(query: BSONDocument): Future[Option[A]]
 
@@ -79,10 +76,10 @@ trait DataReadService[A] {
 
   def find(query: BSONDocument, sort: BSONDocument): Future[List[A]]
 
-  def count(query: BSONDocument): Future[Int]
+  def count(query: BSONDocument): Future[Long]
 
   def find(query: BSONDocument, queryOptions: QueryOptions): Future[DataWithTotalCount[A]]
-  
+
   def find(query: BSONDocument, sortOptions: SortOptions): Future[Seq[A]]
 }
 
@@ -90,8 +87,8 @@ trait DataReadService[A] {
  * Represents the remove functionality of the Crud service.
  */
 trait DataRemoveService {
-  def remove(id: BSONObjectID): Future[LastError] = remove(BSONDocument("_id" -> id))
-  def remove(query: BSONDocument): Future[LastError]
+  def remove(id: BSONObjectID): Future[WriteResult] = remove(BSONDocument("_id" -> id))
+  def remove(query: BSONDocument): Future[WriteResult]
 }
 
 /**
@@ -109,42 +106,46 @@ trait DataReadServiceImpl[A] extends DataCollectionService
   with DataDocumentHandler[A]
   with DataReadService[A] {
 
-  def findQuery(query: BSONDocument): GenericQueryBuilder[BSONDocument, BSONDocumentReader, BSONDocumentWriter] = collection.find(query)
+  def findQuery(query: BSONDocument) = collectionFuture.map(_.find(query))
 
-  def findById(id: BSONObjectID): Future[Option[A]] = collection.find(BSONDocument("_id" -> id)).cursor[A].headOption
+  def findById(id: BSONObjectID): Future[Option[A]] = collectionFuture.flatMap(_.find(BSONDocument("_id" -> id)).cursor[A]().headOption)
 
-  def find(query: BSONDocument): Future[List[A]] = collection.find(query).cursor[A].collect[List]()
+  def find(query: BSONDocument): Future[List[A]] = collectionFuture.flatMap(_.find(query).cursor[A]().collect[List]())
 
-  def find(query: BSONDocument, sort: BSONDocument): Future[List[A]] = collection.find(query).sort(sort).cursor[A].collect[List]()
+  def find(query: BSONDocument, sort: BSONDocument): Future[List[A]] = collectionFuture.flatMap(_.find(query).sort(sort).cursor[A]().collect[List]())
 
-  def findOne(query: BSONDocument): Future[Option[A]] = collection.find(query).one[A]
+  def findOne(query: BSONDocument): Future[Option[A]] = collectionFuture.flatMap(_.find(query).one[A])
 
-  def count(query: BSONDocument): Future[Int] = db.command(Count(collectionName, Some(query)))
-  
+  def count(query: BSONDocument): Future[Long] = dbFuture.flatMap(_.collection(collectionName).count(Some(query)))
+
   def find(query: BSONDocument, queryOptions: QueryOptions): Future[DataWithTotalCount[A]] = {
     val sortDocs = applyDefaultSort(queryOptions.sortInfos) map { sortInfo =>
-      (sortInfo.field -> BSONInteger(sortInfo.direction))
+      sortInfo.field -> BSONInteger(sortInfo.direction)
     }
 
-    val queryBuilder = collection.find(query)
-      .options(QueryOpts(queryOptions.startRowIndex, queryOptions.pageSize))
+    val queryBuilderFuture = collectionFuture.map(_.find(query)
+      .skip(queryOptions.startRowIndex)
+      .batchSize(queryOptions.pageSize)
       .sort(BSONDocument(sortDocs))
+    )
 
     for {
-      data <- queryBuilder.cursor[A].collect[List](queryOptions.pageSize)
+      queryBuilder <- queryBuilderFuture
+      data <- queryBuilder.cursor[A]().collect[List](queryOptions.pageSize)
       totalCount <- count(query)
     } yield DataWithTotalCount(data, totalCount)
   }
 
   def find(query: BSONDocument, sortOptions: SortOptions): Future[List[A]] = {
     val sortDocs = applyDefaultSort(sortOptions.sortInfos) map { sortInfo =>
-      (sortInfo.field -> BSONInteger(sortInfo.direction))
+      sortInfo.field -> BSONInteger(sortInfo.direction)
     }
 
-    collection.find(query)
+    collectionFuture.flatMap(_.find(query)
       .sort(BSONDocument(sortDocs))
-      .cursor[A]
+      .cursor[A]()
       .collect[List]()
+    )
   }
 
   protected def applyDefaultSort(sortInfos: List[SortInfo]): List[SortInfo] = sortInfos match {
@@ -164,43 +165,47 @@ trait DataCrudService[A] extends DataCollectionService
   with DataRemoveService
   with DataSaveService[A] {
 
-  def remove(query: BSONDocument): Future[LastError] = collection.remove(query)
+  def remove(query: BSONDocument): Future[WriteResult] = collectionFuture.flatMap(_.delete.one(query))
 
   def insert(model: A): Future[BSONObjectID] = {
     val (newDoc, objectId) = getDocWithId(model)
 
-    collection.insert(setCreateAndUpdateTime(newDoc)).map(_ => objectId)
+    collectionFuture.flatMap(_.insert.one(setCreateAndUpdateTime(newDoc)).map(_ => objectId))
   }
 
   def save(model: A): Future[BSONObjectID] = {
     val (newDoc, objectId) = getDocWithId(model)
+    val updateDoc = setCreateAndUpdateTime(newDoc)
 
-    collection.save(setCreateAndUpdateTime(newDoc)).map(_ => objectId)
+    collectionFuture.flatMap(_.update.one(BSONDocument("_id" -> objectId), updateDoc, upsert = true)).map(_ => objectId)
   }
-  
-  def update(selector: BSONDocument, update: BSONDocument, upsert: Boolean = false, multi: Boolean = false, setUpdateTime: Boolean = true): Future[LastError] = {
+
+  def update(selector: BSONDocument, update: BSONDocument, upsert: Boolean = false, multi: Boolean = false, setUpdateTime: Boolean = true): Future[WriteResult] = {
     val finalUpdateDoc = setUpdateTime match {
       case false => update
-      case true => 
+      case true =>
         val updateTime = DateTime.now
-        update ++ BSONDocument("$set" -> BSONDocument(DataCrudService.UpdateTimeField -> new BSONDateTime(updateTime.getMillis)))
+        update ++ BSONDocument("$set" -> BSONDocument(DataCrudService.UpdateTimeField -> BSONDateTime(updateTime.getMillis)))
     }
-    
-    collection.update(selector, finalUpdateDoc, upsert = upsert, multi = multi)
+
+    collectionFuture.flatMap(_.update.one(selector, finalUpdateDoc, upsert = upsert, multi = multi))
   }
   
   private def getDocWithId(model: A) = {
     val fieldName = "_id"
-    val doc = documentHandler.write(model)
-    val objectId = doc.getAs[BSONObjectID](fieldName).getOrElse(BSONObjectID.generate)
-    val newDoc = BSONDocument(doc.elements.filter(_._1 != fieldName) :+ (fieldName -> objectId))
+    val doc = documentHandler.writeOpt(model).get
+    val objectId = doc.getAsOpt[BSONObjectID](fieldName).getOrElse(BSONObjectID.generate)
+    val newDoc = BSONDocument(doc.elements.filter(_.name != fieldName).map(e => (e.name, e.value)) :+ (fieldName -> objectId))
     (newDoc, objectId)
   }
   
   private def setCreateAndUpdateTime(doc: BSONDocument) = {
     // Set create time if it wasn't available
-    val createTime = doc.getAs[DateTime](DataCrudService.CreateTimeField).getOrElse(DateTime.now)
-    val docWithCreateTime = BSONDocument(doc.elements.filter(_._1 != DataCrudService.CreateTimeField) :+ (DataCrudService.CreateTimeField -> new BSONDateTime(createTime.getMillis)))
+    val createTime = doc.getAsOpt[DateTime](DataCrudService.CreateTimeField).getOrElse(DateTime.now)
+    val docWithCreateTime = BSONDocument(
+      doc.elements.filter(_.name != DataCrudService.CreateTimeField).map(e => (e.name, e.value)) :+
+        (DataCrudService.CreateTimeField -> BSONDateTime(createTime.getMillis))
+    )
     
     // Always set update time
     setUpdateTime(docWithCreateTime)
@@ -208,7 +213,7 @@ trait DataCrudService[A] extends DataCollectionService
   
   private def setUpdateTime(doc: BSONDocument) = {
     val updateTime = DateTime.now
-    BSONDocument(doc.elements.filter(_._1 != DataCrudService.UpdateTimeField) :+ (DataCrudService.UpdateTimeField -> new BSONDateTime(updateTime.getMillis)))    
+    BSONDocument(doc.elements.filter(_.name != DataCrudService.UpdateTimeField).map(e => (e.name, e.value)) :+ (DataCrudService.UpdateTimeField -> BSONDateTime(updateTime.getMillis)))
   }
 }
 

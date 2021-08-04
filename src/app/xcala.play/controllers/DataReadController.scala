@@ -1,14 +1,13 @@
 package xcala.play.controllers
 
 import xcala.play.models.{Paginated, QueryOptions}
-import play.api.i18n.Lang
 import play.api.mvc._
-import reactivemongo.bson._
+import reactivemongo.api.bson._
 import xcala.play.services._
 import scala.concurrent.Future
 import xcala.play.utils.WithExecutionContext
 
-trait DataReadController[A] extends Controller with WithComposableActions with WithExecutionContext {
+trait DataReadController[A] extends InjectedController with WithComposableActions with WithExecutionContext {
 
   protected def readService: DataReadService[A]
 
@@ -21,7 +20,8 @@ trait DataReadController[A] extends Controller with WithComposableActions with W
       Paginated(
         dataWithTotalCount.data,
         dataWithTotalCount.totalCount,
-        queryOptions)
+        queryOptions
+      )
     }
   }
 

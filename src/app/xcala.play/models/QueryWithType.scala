@@ -11,7 +11,7 @@ object SearchType {
   val Contains = "contains"
   val Exact = "exact"  
     
-  def all(implicit lang: Lang) = Seq(
+  def all(implicit messages: Messages) = Seq(
     Contains,
     Exact
   ).map(a => (a, Messages("searchType." + a)))

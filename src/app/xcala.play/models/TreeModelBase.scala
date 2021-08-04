@@ -1,6 +1,6 @@
 package xcala.play.models
 
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.api.bson.BSONObjectID
 
 trait TreeModelBase[A <: TreeModelBase[_]] {
   def id: Option[BSONObjectID]

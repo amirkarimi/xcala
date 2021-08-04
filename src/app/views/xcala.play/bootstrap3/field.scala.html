@@ -16,7 +16,7 @@
 }
 
 <div class="form-group @elements.args.get('_formGroupClass) @if(elements.hasErrors) {has-error}">
-    <label for="@elements.id" class="col-sm-@labelDivCol control-label">@elements.label(elements.lang)</label>
+    <label for="@elements.id" class="col-sm-@labelDivCol control-label">@elements.label</label>
     <div class="@elements.args.toMap.get('inputDivClass).getOrElse("col-sm-" + inputDivCol)">
         @content
     </div>

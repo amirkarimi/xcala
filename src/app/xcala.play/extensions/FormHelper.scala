@@ -3,7 +3,7 @@ package xcala.play.extensions
 import play.api.data.Form
 import play.api.data.FormError
 import play.api.data.Mapping
-import play.api.i18n.Lang
+import play.api.i18n.{Lang, Messages}
 
 object FormHelper {
   def trimmed(mapping: Mapping[String]): Mapping[String] = {
@@ -31,8 +31,8 @@ object FormHelper {
     /**
      *  When the language is Persian, converts incorrect used Arabic characters like "ي" and "ك" to correct Persian ones. 
      */
-    def fixLanguageChars(implicit lang: Lang) = {
-      if (lang.language == "fa") {
+    def fixLanguageChars(implicit messages: Messages) = {
+      if (messages.lang.code == "fa") {
         val fixedData = form.data.map { case (key, value) =>
           (key,PersianUtils.convertToPersianChars(value))
         }

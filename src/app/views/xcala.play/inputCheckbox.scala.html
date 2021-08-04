@@ -1,8 +1,8 @@
-@(field: Field, args: (Symbol,Any)*)(implicit lang: Lang)
+@(field: Field, args: (Symbol,Any)*)(implicit messages: Messages)
 
 @import bootstrap3.DefaultHelpers.horizontalField
 
-@elements = @{ helper.FieldElements(field.id, field, Html(""), args.toMap, lang) }
+@elements = @{ helper.FieldElements(field.id, field, Html(""), args.toMap, messages) }
 @boxValue = @{ args.toMap.get('value).getOrElse("true") }
 
 <div class="form-group @if(elements.hasErrors) {has-error}">
