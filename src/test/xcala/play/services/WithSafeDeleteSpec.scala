@@ -7,11 +7,10 @@ import reactivemongo.api.bson.Macros.Annotations.Key
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits._
-import scala.xcala.play.services.WithTestDb
 
 class WithSafeDeleteSpec extends Specification {
   import WithSafeDeleteSpecHelpers._
-  import scala.xcala.play.helpers.FutureHelpers._
+  import xcala.play.helpers.FutureHelpers._
 
   "Service with WithSafeDelete" should {
     "allow delete when no related data found for remove by id" >> new WithTestDb {

@@ -1,4 +1,4 @@
-package scala.xcala.play.helpers
+package xcala.play.helpers
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
