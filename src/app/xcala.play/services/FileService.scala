@@ -1,13 +1,13 @@
-package xcala.play.services
+//package xcala.play.services
 
-import xcala.play.services._
-
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
-import reactivemongo.api.bson._
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.gridfs._
-import xcala.play.models._
+//import xcala.play.services._
+//
+//import scala.concurrent.Future
+//import scala.concurrent.ExecutionContext
+//import reactivemongo.api.bson._
+//import reactivemongo.api.commands.WriteResult
+//import reactivemongo.api.gridfs._
+//import xcala.play.models._
 //import xcala.play.models.FileEntry.BSONDocumentReader
 
 //TODO: Fix Soheil

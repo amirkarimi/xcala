@@ -15,6 +15,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+  guice,
   ws,
   ehcache,
   filters,
@@ -22,14 +23,10 @@ libraryDependencies ++= Seq(
   "org.reactivemongo" %% "play2-reactivemongo" % "1.0.5-play27",
   "com.typesafe.play" %% "play-iteratees" % "2.6.1",
   "com.typesafe.play" %% "play-iteratees-reactive-streams" % "2.6.1",
-  "com.softwaremill.macwire" %% "macros" % "2.4.0",
-  "org.mindrot" % "jbcrypt" % "0.3m",
-  "net.sf.jsignature.io-tools" % "easystream" % "1.2.12",
   "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.8",
   "com.bahmanm" %% "persianutils" % "3.0",
-  "net.tanesha.recaptcha4j" % "recaptcha4j" % "0.0.7",
-  "com.typesafe.play" %% "play-mailer" % "7.0.1",
-  "io.lemonlabs" %% "scala-uri" % "1.5.1"
+  "io.lemonlabs" %% "scala-uri" % "1.5.1",
+  specs2 % Test
 )
 
 includeFilter in (Assets, LessKeys.less) := "*.less"

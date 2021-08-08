@@ -1,8 +1,8 @@
-package xcala.play.models
-
-import reactivemongo.api.bson._
-import reactivemongo.api.bson.DefaultBSONHandlers
-import reactivemongo.api.gridfs._
+//package xcala.play.models
+//
+//import reactivemongo.api.bson._
+//import reactivemongo.api.bson.DefaultBSONHandlers
+//import reactivemongo.api.gridfs._
 
 // TODO: Fix Soheil
 //case class FileEntry(

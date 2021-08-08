@@ -7,6 +7,7 @@ import reactivemongo.api.bson.collection._
 import xcala.play.models._
 import xcala.play.extensions.BSONHandlers.BSONDateTimeHandler
 import org.joda.time.DateTime
+import play.api.Configuration
 import reactivemongo.api.collections._
 import reactivemongo.api.commands._
 import xcala.play.utils.WithExecutionContext
@@ -15,7 +16,7 @@ import xcala.play.utils.WithExecutionContext
  * Represents the data service foundation.
  */
 trait DataService extends WithExecutionContext with DefaultDatabaseConfig {
-  private[services] lazy val dbFuture: Future[DB] = dbFuture
+  private[services] lazy val dbFuture: Future[DB] = databaseFuture
 }
 
 /**
@@ -63,9 +64,6 @@ trait DataDocumentHandler[A] {
  * Represents the read functionality of Crud service.
  */
 trait DataReadService[A] {
-  //TODO: Fix Soheil
-  def findQuery(query: BSONDocument): Future[QueryBuilderFactory[SerializationPack]]
-
   def findAll: Future[List[A]] = find(BSONDocument())
 
   def findOne(query: BSONDocument): Future[Option[A]]

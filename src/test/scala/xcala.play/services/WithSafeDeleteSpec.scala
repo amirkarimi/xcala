@@ -1,14 +1,12 @@
 package xcala.play.services
 
 import org.specs2.mutable.Specification
-import reactivemongo.api.MongoConnection.ParsedURI
-import reactivemongo.api.{MongoDriver, DefaultDB, MongoConnection}
-import reactivemongo.bson.{BSONObjectID, BSONDocument, Macros}
-import reactivemongo.bson.Macros.Annotations.Key
+import play.api.Configuration
+import reactivemongo.api.bson.{BSONDocument, BSONObjectID, Macros}
+import reactivemongo.api.bson.Macros.Annotations.Key
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits._
-import scala.concurrent.duration.Duration
 import scala.xcala.play.services.WithTestDb
 
 class WithSafeDeleteSpec extends Specification {
@@ -78,7 +76,7 @@ object WithSafeDeleteSpecHelpers {
   case class Person(@Key("_id") id: BSONObjectID = BSONObjectID.generate, name: String, age: Int)
   case class Card(@Key("_id") id: BSONObjectID = BSONObjectID.generate, title: String, personId: BSONObjectID)
 
-  class PersonService(implicit val ec: ExecutionContext, override val databaseConfig: DatabaseConfig) extends DataCrudService[Person] with WithSafeDelete {
+  class PersonService(implicit val ec: ExecutionContext, val databaseConfig: DatabaseConfig, val configuration: Configuration) extends DataCrudService[Person] with WithSafeDelete {
     val documentHandler = Macros.handler[Person]
     val collectionName = "persons"
 
@@ -87,7 +85,7 @@ object WithSafeDeleteSpecHelpers {
     )
   }
 
-  class CardService(implicit val ec: ExecutionContext, override val databaseConfig: DatabaseConfig) extends DataCrudService[Card] {
+  class CardService(implicit val ec: ExecutionContext, val databaseConfig: DatabaseConfig, val configuration: Configuration) extends DataCrudService[Card] {
     val documentHandler = Macros.handler[Card]
     val collectionName = "cards"
   }
