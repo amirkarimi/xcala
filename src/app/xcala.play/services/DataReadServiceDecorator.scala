@@ -22,9 +22,6 @@ trait DataReadServiceDecorator[A, B] extends DataReadService[B] with WithExecuti
   
   private def mapSeq(seq: Seq[A]): Future[List[B]] = Future.sequence(seq.map(mapModel).toList)
 
-  //TODO: Fix Soheil
-  //def findQuery(query: BSONDocument): GenericQueryBuilder[BSONDocument, BSONDocumentReader, BSONDocumentWriter] = service.findQuery(query)
-
   def findById(id: BSONObjectID): Future[Option[B]] = service.findById(id).flatMap(mapOptional)
 
   def find(query: BSONDocument): Future[List[B]] = service.find(query).flatMap(mapSeq)
