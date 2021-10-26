@@ -14,7 +14,8 @@ case class FileEntry(
 	md5: Option[String], 
 	metadata: BSONDocument,
 	folderId: Option[BSONObjectID],
-	original: BSONDocument	
+	original: BSONDocument,
+	isHidden: Option[Boolean]
 ) extends ReadFile[BSONObjectID] {
   
   def isImage = contentType.map(_.startsWith("image/")).getOrElse(false) 
@@ -34,7 +35,9 @@ object FileEntry {
 	      doc.getAs[BSONString]("md5").map(_.value),
 	      doc.getAs[BSONDocument]("metadata").getOrElse(BSONDocument()),
 	      doc.getAs[BSONObjectID]("folderId"),
-	      doc)
+				doc,
+				doc.getAs[BSONBoolean]("isHidden").map(_.value)
+			)
 	  }
 	}
 }
