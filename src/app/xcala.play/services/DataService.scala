@@ -36,12 +36,13 @@ trait DataCollectionService extends DataService {
   private[services] lazy val collectionFuture: Future[BSONCollection] = getCollection
 
   private[services] def getCollection = {
-    val coll = dbFuture.map(_.collection(collectionName))
-    onCollectionInitialized(coll)
-    coll
+    dbFuture.map(_.collection(collectionName)) map { coll =>
+      onCollectionInitialized(coll)
+      coll  
+    }
   }
 
-  protected def onCollectionInitialized(collection: Future[BSONCollection]) = {}
+  protected def onCollectionInitialized(collection: BSONCollection) = {}
 }
 
 trait WithDbCommand extends DataService {
