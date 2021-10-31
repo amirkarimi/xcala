@@ -1,12 +1,20 @@
 package xcala.play.extensions
 
 import reactivemongo.api.bson._
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import xcala.play.models.{MultilangModel, Range}
 
 import scala.util.{Failure, Success, Try}
 
 object BSONHandlers {
+  implicit object BSONLocalDateHandler extends BSONHandler[LocalDate] {
+    def readTry(v: BSONValue) = v match {
+      case BSONDateTime(dateTime) => Success(new LocalDate(dateTime))
+      case _ => Failure(new IllegalArgumentException())
+    }
+    def writeTry(localDate: LocalDate) = Success(BSONDateTime(localDate.toDateTimeAtStartOfDay().getMillis))
+  }
+
   implicit object BSONDateTimeHandler extends BSONHandler[DateTime] {
   	def readTry(v: BSONValue) = v match {
       case BSONDateTime(dateTime) => Success(new DateTime(dateTime))
