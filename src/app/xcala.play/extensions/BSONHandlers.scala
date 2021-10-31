@@ -12,7 +12,7 @@ object BSONHandlers {
       case BSONDateTime(dateTime) => Success(new LocalDate(dateTime))
       case _ => Failure(new IllegalArgumentException())
     }
-    def writeTry(localDate: LocalDate) = Success(BSONDateTime(localDate.toDateTimeAtStartOfDay().getMillis))
+    def writeTry(localDate: LocalDate) = Try(BSONDateTime(localDate.toDateTimeAtStartOfDay().getMillis))
   }
 
   implicit object BSONDateTimeHandler extends BSONHandler[DateTime] {
@@ -21,7 +21,7 @@ object BSONHandlers {
       case _ => Failure(new IllegalArgumentException())
     }
 
-  	def writeTry(dateTime: DateTime) = Success(BSONDateTime(dateTime.getMillis))
+  	def writeTry(dateTime: DateTime) = Try(BSONDateTime(dateTime.getMillis))
   }
 
   implicit def optionalRangeHandler[A](implicit handler: BSONHandler[A]) = new BSONDocumentReader[Range[Option[A]]] with BSONDocumentWriter[Range[Option[A]]] {
@@ -29,7 +29,7 @@ object BSONHandlers {
       Range(from = doc.getAsOpt[A]("from"), to = doc.getAsOpt[A]("to"))
     }
 
-    def writeTry(range: Range[Option[A]]) = Success {
+    def writeTry(range: Range[Option[A]]) = Try {
       BSONDocument(
         Seq(
           range.from.flatMap(handler.writeOpt).map("from" -> _),
@@ -47,7 +47,7 @@ object BSONHandlers {
       }
     }
 
-    def writeTry(range: Range[A]) = Success {
+    def writeTry(range: Range[A]) = Try {
       BSONDocument(
         Seq(
           handler.writeOpt(range.from).map("from" -> _), 
@@ -72,7 +72,7 @@ object BSONHandlers {
       }
     }
 
-    def writeTry(multilangModel: MultilangModel[A]): Try[BSONDocument] = Success {
+    def writeTry(multilangModel: MultilangModel[A]): Try[BSONDocument] = Try {
       BSONDocument(
         Seq(
           "lang" -> BSONString(multilangModel.lang),
@@ -92,7 +92,7 @@ object BSONHandlers {
       }
     }
 
-    def writeTry(multilangModel: MultilangModel[Option[A]]): Try[BSONDocument] = Success {
+    def writeTry(multilangModel: MultilangModel[Option[A]]): Try[BSONDocument] = Try {
       BSONDocument(
         Seq(
           Some("lang" -> BSONString(multilangModel.lang)),
@@ -112,7 +112,7 @@ object BSONHandlers {
       }
     }
 
-    def writeTry(multilangModel: MultilangModel[A]): Try[BSONDocument] = Success {
+    def writeTry(multilangModel: MultilangModel[A]): Try[BSONDocument] = Try {
       BSONDocument(
         Seq(
           Some("lang" -> BSONString(multilangModel.lang)),
@@ -132,7 +132,7 @@ object BSONHandlers {
       }
     }
 
-    def writeTry(multilangModel: MultilangModel[Option[A]]): Try[BSONDocument] = Success {
+    def writeTry(multilangModel: MultilangModel[Option[A]]): Try[BSONDocument] = Try {
       BSONDocument(
         Seq(
           Some("lang" -> BSONString(multilangModel.lang)),
