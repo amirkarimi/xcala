@@ -5,10 +5,8 @@ import reactivemongo.api.bson._
 import reactivemongo.api._
 import reactivemongo.api.bson.collection._
 import xcala.play.models._
-import xcala.play.extensions.BSONHandlers.BSONDateTimeHandler
+import xcala.play.extensions.BSONHandlers._
 import org.joda.time.DateTime
-import play.api.Configuration
-import reactivemongo.api.collections._
 import reactivemongo.api.commands._
 import xcala.play.utils.WithExecutionContext
 
@@ -115,7 +113,7 @@ trait DataReadServiceImpl[A] extends DataCollectionService
 
   def findOne(query: BSONDocument): Future[Option[A]] = collectionFuture.flatMap(_.find(query).one[A])
 
-  def count(query: BSONDocument): Future[Long] = dbFuture.flatMap(_.collection(collectionName).count(Some(query)))
+  def count(query: BSONDocument): Future[Long] = collectionFuture.flatMap(_.count(Some(query)))
 
   def find(query: BSONDocument, queryOptions: QueryOptions): Future[DataWithTotalCount[A]] = {
     val sortDocs = applyDefaultSort(queryOptions.sortInfos) map { sortInfo =>
