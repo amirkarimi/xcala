@@ -16,17 +16,6 @@ object BSONHandlers {
   	def writeTry(dateTime: DateTime) = Success(BSONDateTime(dateTime.getMillis))
   }
 
-  implicit object BigDecimalHandler extends BSONHandler[BigDecimal] {
-    def readTry(v: BSONValue) = v match {
-      case BSONDouble(double) => Success(BigDecimal(double))
-      case BSONInteger(integer) => Success(BigDecimal(integer))
-      case BSONLong(long) => Success(BigDecimal(long))
-      case _ => Failure(new IllegalArgumentException())
-    }
-
-    def writeTry(bigDecimal: BigDecimal) = Success(BSONDouble(bigDecimal.toDouble))
-  }
-
   implicit def optionalRangeHandler[A](implicit handler: BSONHandler[A]) = new BSONDocumentReader[Range[Option[A]]] with BSONDocumentWriter[Range[Option[A]]] {
     def readDocument(doc: BSONDocument): Try[Range[Option[A]]] = Success {
       Range(from = doc.getAsOpt[A]("from"), to = doc.getAsOpt[A]("to"))
