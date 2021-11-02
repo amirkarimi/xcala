@@ -6,7 +6,6 @@ import reactivemongo.api.bson.{BSONDocument, BSONObjectID, Macros}
 import reactivemongo.api.bson.Macros.Annotations.Key
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits._
 
 class WithSafeDeleteSpec extends Specification {
   import WithSafeDeleteSpecHelpers._
