@@ -1,8 +1,8 @@
 package xcala.play.services
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.api.bson._
-import reactivemongo.api._
+import reactivemongo.api.{FailoverStrategy, _}
 import reactivemongo.api.bson.collection._
 import xcala.play.models._
 import xcala.play.extensions.BSONHandlers._
@@ -16,14 +16,6 @@ import xcala.play.utils.WithExecutionContext
 trait DataService extends WithExecutionContext with DefaultDatabaseConfig {
   private[services] lazy val dbFuture: Future[DB] = databaseFuture
 }
-
-/**
- * Represents grid FS data service.
- */
-// TODO: Fix Soheil
-//trait GridFSDataService extends DataService {
-//  lazy val gridFS = GridFS(dbFuture)
-//}
 
 /**
  * Represents the service which works with a collection
@@ -44,8 +36,9 @@ trait DataCollectionService extends DataService {
 }
 
 trait WithDbCommand extends DataService {
-//  TODO: Fix Soheil
-//  def dbCommand[A](command: Command[A], readPreference: ReadPreference = ReadPreference.primary)(implicit ec: ExecutionContext) = db.command(command)
+  def dbCommand(command: BSONDocument, failoverStrategy: FailoverStrategy = FailoverStrategy.default) = dbFuture map { db =>
+    db.runCommand(command, failoverStrategy)
+  }
 }
 
 trait WithExternalCollectionAccess extends DataService {
