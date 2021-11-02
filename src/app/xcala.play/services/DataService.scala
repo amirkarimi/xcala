@@ -4,6 +4,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.api.bson._
 import reactivemongo.api.{FailoverStrategy, _}
 import reactivemongo.api.bson.collection._
+import reactivemongo.api.commands.CollectionCommand
 import xcala.play.models._
 import xcala.play.extensions.BSONHandlers._
 import org.joda.time.DateTime
@@ -36,9 +37,8 @@ trait DataCollectionService extends DataService {
 }
 
 trait WithDbCommand extends DataService {
-  def dbCommand(command: BSONDocument, failoverStrategy: FailoverStrategy = FailoverStrategy.default) = dbFuture map { db =>
-    db.runCommand(command, failoverStrategy)
-  }
+  def dbCommand(commandDoc: BSONDocument)(implicit ec: ExecutionContext) =
+    dbFuture.flatMap(_.runCommand(commandDoc, FailoverStrategy.default).cursor[BSONDocument](ReadPreference.primaryPreferred).head)
 }
 
 trait WithExternalCollectionAccess extends DataService {
