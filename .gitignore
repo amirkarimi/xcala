@@ -83,3 +83,5 @@ local.properties
 .ensime
 .ensime_cache
 .history
+
+.bsp
