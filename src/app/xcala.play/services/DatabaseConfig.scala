@@ -1,26 +1,25 @@
 package xcala.play.services
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import reactivemongo.api._
 import play.api._
+import xcala.play.utils.WithExecutionContext
 
 trait DatabaseConfig {
   def mongoUri: String
-  def parsedUriFuture(implicit ec: ExecutionContext): Future[MongoConnection.ParsedURI]
-  
+  def parsedUriFuture: Future[MongoConnection.ParsedURI]
   def driver: AsyncDriver
-  def connectionFuture(implicit ec: ExecutionContext): Future[MongoConnection]
-  def databaseFuture(implicit ec: ExecutionContext): Future[DB]
+  def connectionFuture: Future[MongoConnection]
+  def databaseFuture: Future[DB]
 }
 
-trait DefaultDatabaseConfig extends DatabaseConfig {
+trait DefaultDatabaseConfig extends DatabaseConfig with WithExecutionContext {
   val configuration: Configuration
   lazy val mongoUri = configuration.get[String]("mongodb.uri")
-  def parsedUriFuture(implicit ec: ExecutionContext): Future[MongoConnection.ParsedURI] = MongoConnection.fromString(mongoUri)
+  lazy val parsedUriFuture: Future[MongoConnection.ParsedURI] = MongoConnection.fromString(mongoUri)
   lazy val driver: AsyncDriver = AsyncDriver()
-  def connectionFuture(implicit ec: ExecutionContext) = parsedUriFuture.flatMap(p => driver.connect(p))
-  def databaseFuture(implicit ec: ExecutionContext): Future[DB] = {
+  lazy val connectionFuture = parsedUriFuture.flatMap(p => driver.connect(p))
+  lazy val databaseFuture: Future[DB] = {
     parsedUriFuture flatMap { parsedUri =>
       connectionFuture.flatMap(_.database(parsedUri.db.get))
     }
