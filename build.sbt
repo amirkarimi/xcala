@@ -60,3 +60,7 @@ TwirlKeys.templateImports ++= Seq(
   "_root_.xcala.play.extensions.PersianUtils._",
   "_root_.xcala.play.extensions.MultilangHelper._"
 )
+
+publishConfiguration := publishConfiguration.value.withOverwrite(true)
+publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
+
