@@ -2,14 +2,13 @@ package xcala.play.controllers
 
 import play.api.Logger
 import play.api.data.Form
-import play.api.i18n.{I18nSupport, Lang, Messages}
+import play.api.i18n.{I18nSupport, Messages}
 import play.api.mvc._
 import reactivemongo.api.bson.BSONObjectID
 import reactivemongo.api.commands.WriteResult
 import xcala.play.services._
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
 import xcala.play.utils.WithExecutionContext
 
 trait DataCudController[A] extends InjectedController

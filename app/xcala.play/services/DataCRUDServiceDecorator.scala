@@ -1,10 +1,7 @@
 package xcala.play.services
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import reactivemongo.api.bson._
-import xcala.play.models.{DataWithTotalCount, QueryOptions}
-import reactivemongo.api.collections.GenericQueryBuilder
 import reactivemongo.api.commands.WriteResult
 import xcala.play.utils.WithExecutionContext
 

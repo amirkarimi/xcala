@@ -1,6 +1,6 @@
 package xcala.play.controllers
 
-import play.api.i18n.{I18nSupport, Lang}
+import play.api.i18n.I18nSupport
 import reactivemongo.api.bson._
 import xcala.play.models._
 import xcala.play.services._
