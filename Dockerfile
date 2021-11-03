@@ -13,7 +13,9 @@ ADD build.sbt /opt/
 RUN sbt clean update updateClassifiers
 
 # Prepare build
-ADD src /opt/src
+ADD app /opt/app
+ADD conf /opt/conf
+ADD public /opt/public
 
 # Actual building
 RUN sbt publish
