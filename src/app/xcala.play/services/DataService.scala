@@ -4,7 +4,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import reactivemongo.api.bson._
 import reactivemongo.api.{FailoverStrategy, _}
 import reactivemongo.api.bson.collection._
-import reactivemongo.api.commands.CollectionCommand
 import xcala.play.models._
 import xcala.play.extensions.BSONHandlers._
 import org.joda.time.DateTime
@@ -14,8 +13,9 @@ import xcala.play.utils.WithExecutionContext
 /**
  * Represents the data service foundation.
  */
-trait DataService extends WithExecutionContext with DefaultDatabaseConfig {
-  private[services] lazy val dbFuture: Future[DB] = databaseFuture
+trait DataService extends WithExecutionContext {
+  private[services] def databaseConfig: DatabaseConfig
+  private[services] lazy val dbFuture: Future[DB] = databaseConfig.databaseFuture
 }
 
 /**
