@@ -4,7 +4,7 @@ stages:
 variables:
   IMAGE_USER: ketab
 
-common_build:
+xcala_play_build:
   image: docker:19.03
   script:
     - docker build . --build-arg NEXUS_KEY
