@@ -1,5 +1,0 @@
-@(field: Field, args: (Symbol, Any)*)(implicit lang: Lang)
-
-@inputRange(field, args:_*) { (field, args) =>
-    <input type="text" class="form-control" name="@field.name" id="@field.id" value="@field.value" @toHtmlArgs(args.toMap) />
-}

@@ -1,0 +1,16 @@
+@(field: Field, items: Seq[(String, String)], args: (Symbol,Any)*)(implicit messages: Messages)
+
+@elements = @{helper.FieldElements(field.id, field, Html(""), args.toMap + ('_inputDivCol -> 8), messages)}
+
+@bootstrap3.field(elements) {
+	<div class="@elements.args.getOrElse('class, "")">
+	@items.map { item =>
+		<label class="checkbox">
+			@defining(field.indexes.map(i => field("[" + i + "]").value.getOrElse(""))) { fieldValues =>
+			<input type="checkbox" name="@(field.name)[]" value="@item._1" @if(fieldValues.exists(_ == item._1)){checked}>
+			}
+			@item._2
+		</label> 
+	}
+	</div>
+}

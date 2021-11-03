@@ -1,0 +1,18 @@
+@(field: Field, args: (Symbol, Any)*)(inputGenerator: (Field, Seq[(Symbol, Any)]) => Html)(implicit messages: Messages)
+
+@defining(helper.FieldElements(field.id, field, Html(""), args.toMap, messages)) { elements =>
+    @bootstrap3.field(elements) {
+        <div class="row">
+            <div class="col-sm-6">
+                @defining(field("from")) { field =>
+                    @inputGenerator(field, ('placeholder -> Messages("from")) +: args)
+                }
+            </div>
+            <div class="col-sm-6">
+                @defining(field("to")) { field =>
+                    @inputGenerator(field, ('placeholder -> Messages("to")) +: args)
+                }
+            </div>
+        </div>
+    }
+}

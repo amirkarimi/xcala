@@ -1,0 +1,18 @@
+@(field: Field, args: (Symbol,Any)*)(implicit messages: Messages)
+
+@import bootstrap3.DefaultHelpers.horizontalField
+
+@elements = @{ helper.FieldElements(field.id, field, Html(""), args.toMap, messages) }
+@boxValue = @{ args.toMap.get('value).getOrElse("true") }
+
+<div class="form-group @if(elements.hasErrors) {has-error}">
+	<div class="col-sm-offset-2 col-sm-6">
+		<input type="checkbox" id="@field.id" name="@field.name" value="@boxValue" @(if(field.value == Some(boxValue)) "checked" else "") @toHtmlArgs(elements.args.filterKeys(_ != 'value))>
+		<label for="@field.id" class="control-label">@elements.label</label>
+	</div>
+    <div class="col-sm-4">
+	@if(elements.hasErrors) {
+		<p class="help-block">@elements.errors.mkString(", ")</p>
+	}	
+    </div>
+</div>

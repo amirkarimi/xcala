@@ -1,0 +1,9 @@
+@(elements: views.html.helper.FieldElements)
+@defining(elements.p) { implicit p =>
+    @* this template displays help text and error messages, it is reused amongst the forms types *@
+    @if(elements.hasErrors) {
+    	<p class="help-block">@Html(elements.errors.mkString(", "))</p>
+    } else {
+    	<p class="help-block">@Html(elements.infos.mkString(", "))</p>
+    }
+}

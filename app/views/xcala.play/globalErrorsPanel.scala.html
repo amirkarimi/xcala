@@ -1,0 +1,10 @@
+@(form: Form[_])(implicit messages: Messages)
+@if(form.globalErrors.nonEmpty) {
+	@alert("danger") {
+		<ul>
+		@form.globalErrors.map { error =>
+			<li>@Messages(error.message)</li>
+		}
+		</ul>
+	}
+}

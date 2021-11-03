@@ -1,9 +1,0 @@
-@(field: Field, args: (Symbol,Any)*)(implicit lang: Lang)
-
-@elements = @{helper.FieldElements(field.id, field, Html(""), args.toMap + ('_inputDivCol -> 8), lang)}
-
-@bootstrap3.field(elements) {
-	<textarea name="@field.name" id="@field.id" rows="10" cols="80" class="rich form-control" >
-	@field.value
-	</textarea>
-}

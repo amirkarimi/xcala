@@ -1,0 +1,7 @@
+@(field: Field, hasTimePicker: Boolean, args: (Symbol,Any)*)(implicit messages: Messages)
+
+@defining(helper.FieldElements(field.id, field, Html(""), args.toMap, messages)) { elements =>
+	@bootstrap3.field(elements) {
+		@dateTimeField(field, hasTimePicker, args:_*)
+	}
+}
