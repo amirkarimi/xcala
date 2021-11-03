@@ -14,13 +14,22 @@ resolvers ++= Seq(
   "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 )
 
+publishTo := Some(
+  "Sonatype Nexus Repository Manager" at "https://nexus.darkube.app/repository/ajor-maven/"
+)
+credentials += Credentials(
+  "Sonatype Nexus Repository Manager",
+  "nexus.darkube.app",
+  "ci",
+  System.getenv.get("NEXUS_KEY")
+)
+
 libraryDependencies ++= Seq(
   guice,
   ws,
   ehcache,
   filters,
   "org.reactivemongo" %% "reactivemongo" % "1.0.7",
-  //"org.reactivemongo" %% "play2-reactivemongo" % "1.0.5-play27",
   "com.typesafe.play" %% "play-iteratees" % "2.6.1",
   "com.typesafe.play" %% "play-iteratees-reactive-streams" % "2.6.1",
   "com.typesafe.akka" %% "akka-testkit" % "2.5.26" % "test",

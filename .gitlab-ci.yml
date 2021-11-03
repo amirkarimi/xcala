@@ -1,0 +1,12 @@
+stages:
+  - build
+
+variables:
+  IMAGE_USER: ketab
+
+common_build:
+  image: docker:19.03
+  script:
+    - docker build . --build-arg NEXUS_KEY
+  stage: build
+
