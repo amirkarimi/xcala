@@ -36,7 +36,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % "2.5.26",
   "com.typesafe.akka" %% "akka-slf4j" % "2.5.26",
   "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.8",
-  "com.bahmanm" %% "persianutils" % "3.0",
+  "com.bahmanm" %% "persianutils" % "4.0",
   "io.lemonlabs" %% "scala-uri" % "1.5.1",
   specs2 % Test
 )

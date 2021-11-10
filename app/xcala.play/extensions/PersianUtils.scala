@@ -13,7 +13,7 @@ object PersianUtils {
 				val gDate = SimpleDate(dateTime.year.get, dateTime.monthOfYear.get, dateTime.dayOfMonth.get)
 				val pDate = gregorianToPersian(gDate)
 				s"${pDate.year}/${pDate.month.toString.reverse.padTo(2, "0").reverse.mkString}/${pDate.day.toString.reverse.padTo(2, "0").reverse.mkString}" +
-					(if (addTime) { "-" + dateTime.toString("HH:mm") } else { "" })
+					(if (addTime) { " " + dateTime.toString("HH:mm") } else { "" })
 			} else {
 				dateTime.toString("yyyy-MM-dd" + (if (addTime) { " HH:mm" } else { "" }))
 			}
