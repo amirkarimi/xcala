@@ -5,7 +5,7 @@ import reactivemongo.api.bson._
 import reactivemongo.api.commands.WriteResult
 import xcala.play.utils.WithExecutionContext
 
-trait DataCRUDServiceDecorator[A, B]
+trait DataCrudServiceDecorator[A, B]
 	extends DataReadServiceDecorator[A, B] 
   with DataRemoveService 
   with DataSaveService[B]
