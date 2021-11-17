@@ -138,6 +138,13 @@ trait DataReadServiceImpl[A] extends DataCollectionService
     )
   }
 
+  def distinct(fieldName: String, query: Option[BSONDocument] = None): Future[Seq[BSONValue]] = {
+    val command = BSONDocument("distinct" -> collectionName, "key" -> fieldName, "query" -> query)
+    dbFuture.flatMap(_.runCommand(command, FailoverStrategy.default).cursor[BSONDocument](ReadPreference.primaryPreferred).head) map { doc =>
+      doc.getAsOpt[BSONArray]("values").toSeq.flatMap(_.values)
+    }
+  }
+
   protected def applyDefaultSort(sortInfos: List[SortInfo]): List[SortInfo] = sortInfos match {
     case Nil => defaultSort
     case _ => sortInfos
