@@ -35,7 +35,7 @@ object gridHeader {
 
     sortExpression match {
       case "" => Html(s"$colLabel")
-      case sort => {
+      case sort =>
         val url = paginated.sort(Some(sort)).toQueryString
 
         val link = s"<a href='?$url' data-ajax='true' data-ajax-update-target='$updateTarget'>$colLabel</a>"
@@ -48,7 +48,6 @@ object gridHeader {
         }
 
         Html(link + icon)
-      }
     }
   }
 }
