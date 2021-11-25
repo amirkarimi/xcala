@@ -2,7 +2,12 @@
 
 <div class="panel panel-default filter-panel-container">
   <div class="panel-heading filter-panel-expander" data-filter-panel=".filter-panel">
-	<div class="expander-icon glyphicon glyphicon-plus"></div> <strong>@title.getOrElse(Messages("search"))</strong>
+	  @if(collapsed){
+	  	<div class="expander-icon glyphicon glyphicon-plus"></div>
+	  } else {
+	  	<div class="expander-icon glyphicon glyphicon-minus"></div>
+	  }
+	  <strong>@title.getOrElse(Messages("search"))</strong>
   </div>
   <div class="panel-body filter-panel @if(collapsed){filter-panel-collapsed}">
 	<div class="">
