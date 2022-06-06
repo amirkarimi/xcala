@@ -85,3 +85,9 @@ local.properties
 .history
 
 .bsp
+/bloop
+.bloop
+/metals
+.metals
+.vscode
+metals.sbt
