@@ -9,8 +9,9 @@ import xcala.play.models.{Indexable, IndexedItem}
 import xcala.play.extensions.BSONHandlers._
 
 import scala.concurrent.Future
+import play.api.Logging
 
-trait IndexableService[A <: Indexable] extends DataService with DataCollectionService with DataRemoveService with DataSaveService[A] with DataDocumentHandler[A]
+trait IndexableService[A <: Indexable] extends DataService with DataCollectionService with DataRemoveService with DataSaveService[A] with DataDocumentHandler[A] with Logging
 {
   implicit val indexedItemHandler = Macros.handler[IndexedItem]
 
@@ -38,7 +39,7 @@ trait IndexableService[A <: Indexable] extends DataService with DataCollectionSe
     
     result.map { objectId =>
       saveItem(objectId, model).recover {
-        case err => Logger.logger.error("Saving indexed item error: " + err.toString)
+        case err => logger.error("Saving indexed item error: " + err.toString)
       }      
     }
     

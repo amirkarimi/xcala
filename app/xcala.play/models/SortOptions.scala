@@ -52,7 +52,7 @@ object SortOptions {
     )(SortOptions.apply)(SortOptions.unapply)
   )  
   
-  def getFromRequest()(implicit request: Request[_]): SortOptions = {
+  def getFromRequest()(implicit request: Request[_], formBinding: FormBinding): SortOptions = {
     form.bindFromRequest.value.getOrElse(SortOptions())
   }
 }

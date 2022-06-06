@@ -45,7 +45,7 @@
         </a>
     </li>        
     }
-    @if(paginated.pageCount > 8){
+    @if(paginated.pageCount >= 8){
 	    <li @if(paginated.queryOptions.page==paginated.pageCount){class="active"}>
 	        <a data-ajax="true" data-ajax-update-target="@updateTarget" href="?@paginated.gotoPage(paginated.pageCount).toQueryString">
 	            @paginated.pageCount

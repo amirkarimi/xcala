@@ -5,6 +5,7 @@ import org.joda.time.{DateTime, LocalDate}
 import xcala.play.models.{MultilangModel, Range}
 
 import scala.util.{Failure, Success, Try}
+import scala.reflect.ClassTag
 
 object BSONHandlers {
   implicit object BSONLocalDateHandler extends BSONHandler[LocalDate] {
@@ -89,12 +90,13 @@ object BSONHandlers {
     }
   }
 
-  implicit def optionalMultilangDocumentHandler[A <: BSONValue] = new BSONDocumentReader[MultilangModel[Option[A]]] with BSONDocumentWriter[MultilangModel[Option[A]]] {
+  implicit def optionalMultilangDocumentHandler[A <: BSONValue](implicit classTag: ClassTag[A]) = new BSONDocumentReader[MultilangModel[Option[A]]] with BSONDocumentWriter[MultilangModel[Option[A]]] {
     def readDocument(doc: BSONDocument): Try[MultilangModel[Option[A]]] = {
       (doc.getAsOpt[String]("lang"), doc.get("value")) match {
-        case (Some(lang), value) => Success(
-          MultilangModel(lang = lang, value = value.collect({ case v: A => v }))
-        )
+        case (Some(lang: String), value: Option[BSONValue]) => 
+          Success(
+            MultilangModel(lang = lang, value = value.collect{ case x: A => x}) // implicit classTag defined above helps with erasure bug here
+          )
         case _ => Failure(new NoSuchFieldException())
       }
     }
