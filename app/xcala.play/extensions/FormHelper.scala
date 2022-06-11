@@ -4,11 +4,17 @@ import play.api.data.Form
 import play.api.data.FormError
 import play.api.data.Mapping
 import play.api.i18n.{Lang, Messages}
+import xcala.play.utils.KeywordExtractor
 
 object FormHelper {
   def trimmed(mapping: Mapping[String]): Mapping[String] = {
     mapping.transform[String]((a: String) => a.trim, (a: String) => a)
   }
+
+  def removeSpecialCharacters(mapping: Mapping[String]): Mapping[String]= {
+    mapping.transform[String](a => KeywordExtractor.removeSpecialCharacters(a.trim), a => a)
+  }
+
   
   implicit class AdvancedForm[A](val form: Form[A]) extends AnyVal {
     def withErrorIf(hasError: Boolean, key: String, error: String, args: Any*) = {
