@@ -38,6 +38,7 @@ libraryDependencies ++= Seq(
   "com.sksamuel.scrimage" %% "scrimage-core" % "2.1.8",
   "com.bahmanm" %% "persianutils" % "4.0",
   "io.lemonlabs" %% "scala-uri" % "4.0.2",
+  "org.apache.tika" % "tika-core" % "2.4.1",
   specs2 % Test
 )
 
