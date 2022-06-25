@@ -30,8 +30,6 @@ libraryDependencies ++= Seq(
   ehcache,
   filters,
   "org.reactivemongo" %% "reactivemongo" % "1.0.10",
-  "com.typesafe.play" %% "play-iteratees" % "2.6.1",
-  "com.typesafe.play" %% "play-iteratees-reactive-streams" % "2.6.1",
   "com.typesafe.akka" %% "akka-testkit" % "2.6.19" % "test",
   "com.typesafe.akka" %% "akka-stream" % "2.6.19",
   "com.typesafe.akka" %% "akka-slf4j" % "2.6.19",
