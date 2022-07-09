@@ -1,6 +1,7 @@
 package xcala.play.controllers
 
-import play.api.mvc.{ Result, Results }
+import play.api.mvc.Result
+import play.api.mvc.Results
 import reactivemongo.api.bson.BSONObjectID
 import xcala.play.services.DataReadService
 import scala.concurrent.Future
@@ -13,9 +14,10 @@ trait DataSingleViewController[A] extends Results with WithComposableActions wit
   def singleView(model: A)(implicit request: RequestType[_]): Future[Result]
 
   def view(id: BSONObjectID) = action.async { implicit request =>
-    readService.findById(id) flatMap {
-      case None => Future.successful(NotFound)
+    readService.findById(id).flatMap {
+      case None        => Future.successful(NotFound)
       case Some(model) => singleView(model)
     }
   }
+
 }

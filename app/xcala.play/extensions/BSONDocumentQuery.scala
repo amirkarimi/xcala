@@ -5,7 +5,9 @@ import reactivemongo.api.bson._
 import xcala.play.models._
 
 object BSONDocumentQuery {
+
   implicit class BSONDocumentQueryExtender(val doc: BSONDocument) extends AnyVal {
+
     def filterByDateRange(field: String, range: Range[Option[DateTime]]) = {
       doc ++
         BSONDocument(field -> range.from.map(date => BSONDocument("$gte" -> BSONDateTime(date.getMillis)))) ++
@@ -30,7 +32,12 @@ object BSONDocumentQuery {
     }
 
     private def getQueryParts(query: String) = {
-      query.toLowerCase.split(Array(' ', 0x200B.toChar, 0x200C.toChar, 0x200D.toChar, 0xFEFF.toChar)).toList.filter(_.length != 0)
+      query.toLowerCase
+        .split(Array(' ', 0x200b.toChar, 0x200c.toChar, 0x200d.toChar, 0xfeff.toChar))
+        .toList
+        .filter(_.length != 0)
     }
+
   }
+
 }

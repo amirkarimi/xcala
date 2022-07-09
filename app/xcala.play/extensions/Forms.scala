@@ -10,9 +10,10 @@ object Forms {
   def multilangMapping[A](valueMapping: Mapping[A]): Mapping[List[MultilangModel[A]]] = {
     list(
       mapping(
-        "lang" -> nonEmptyText,
+        "lang"  -> nonEmptyText,
         "value" -> valueMapping
       )(MultilangModel.apply[A])(MultilangModel.unapply[A])
     )
   }
+
 }

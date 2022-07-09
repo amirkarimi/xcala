@@ -1,6 +1,7 @@
 package xcala.play.controllers
 
-import xcala.play.models.{Paginated, QueryOptions}
+import xcala.play.models.Paginated
+import xcala.play.models.QueryOptions
 import play.api.mvc._
 import reactivemongo.api.bson._
 import xcala.play.services._
@@ -31,8 +32,9 @@ trait DataReadController[A] extends InjectedController with WithComposableAction
     getPaginatedData(queryOptions).flatMap { paginated =>
       request.headers.get("X-Requested-With") match {
         case Some(_) => indexResultView(paginated)
-        case None => indexView(paginated)
+        case None    => indexView(paginated)
       }
     }
   }
+
 }
