@@ -7,12 +7,13 @@ case class QueryWithType(query: Option[String], searchType: SearchType.Type)
 
 object SearchType {
   type Type = String
-  
+
   val Contains = "contains"
-  val Exact = "exact"  
-    
+  val Exact    = "exact"
+
   def all(implicit messages: Messages) = Seq(
     Contains,
     Exact
   ).map(a => (a, Messages("searchType." + a)))
+
 }

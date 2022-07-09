@@ -8,8 +8,10 @@ import play.api.data.FormBinding
 
 trait WithFormBinding {
   type RequestType[A] <: Request[A]
-  
-  protected def bindForm[B](form: Form[B])(implicit request: RequestType[_], formBinding: FormBinding): Future[Form[B]] = {
+
+  protected def bindForm[B](
+      form: Form[B]
+  )(implicit request: RequestType[_], formBinding: FormBinding): Future[Form[B]] = {
     Future.successful(form.bindFromRequest)
   }
 

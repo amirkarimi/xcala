@@ -19,9 +19,10 @@ class IranianNationalCodeHelperSpec extends Specification {
     }
 
     "return false if national code is invalid" in {
-      IranianNationalCodeHelper.isValid("007988426")  must beFalse
+      IranianNationalCodeHelper.isValid("007988426") must beFalse
       IranianNationalCodeHelper.isValid("0000100000") must beFalse
       IranianNationalCodeHelper.isValid("1111121111") must beFalse
     }
   }
+
 }

@@ -14,4 +14,5 @@ trait WithMainPageResults extends Results {
   protected def failedResult(message: String)(implicit messages: Messages, requestHeader: RequestHeader): Result = {
     Redirect(mainPageRoute).flashing("error" -> message)
   }
+
 }

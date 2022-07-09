@@ -11,5 +11,5 @@ trait DataCrudController[A] extends DataReadController[A] with DataCudController
   protected def permissions: List[Permission] = List()
 
   protected def readService = defaultService
-  protected def cudService = defaultService
+  protected def cudService  = defaultService
 }

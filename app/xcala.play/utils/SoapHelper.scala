@@ -1,9 +1,12 @@
 package xcala.play
 
-import scala.xml.{Elem,XML,Node}
+import scala.xml.Elem
+import scala.xml.XML
+import scala.xml.Node
 
 object SoapHelper {
-  def wrap(xml: String) : String = {
+
+  def wrap(xml: String): String = {
     s"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
       <SOAP-ENV:Body>
@@ -11,8 +14,9 @@ object SoapHelper {
       </SOAP-ENV:Body>
     </SOAP-ENV:Envelope>"""
   }
-  
+
   def unwrap(elem: Elem): Node = {
     (elem \\ "Envelope" \\ "Body").flatMap(_.child).head
   }
+
 }
