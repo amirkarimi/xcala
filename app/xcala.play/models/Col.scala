@@ -17,17 +17,17 @@ object Col {
       "",
       (field: A) =>
         "<div class='btn-group'>" +
-          commands
-            .map(_(field))
-            .map { rowCommand =>
-              if (rowCommand.show) {
-                s"<a href='${rowCommand.route}' class='btn btn-default' ${getConfirmationAttribute(rowCommand)} ${getTargetAttribute(rowCommand)}>${rowCommand.title}</a>"
-              } else {
-                ""
-              }
+        commands
+          .map(_(field))
+          .map { rowCommand =>
+            if (rowCommand.show) {
+              s"<a href='${rowCommand.route}' class='btn btn-default' ${getConfirmationAttribute(rowCommand)} ${getTargetAttribute(rowCommand)}>${rowCommand.title}</a>"
+            } else {
+              ""
             }
-            .mkString +
-          "</div>",
+          }
+          .mkString +
+        "</div>",
       "",
       _ => Some("command-column")
     )
