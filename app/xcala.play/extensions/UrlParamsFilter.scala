@@ -1,6 +1,5 @@
 package xcala.play.extensions
 
-
 import play.api.mvc.Filter
 import akka.stream.Materializer
 import play.api.mvc.RequestHeader
