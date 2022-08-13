@@ -46,7 +46,7 @@ object gridHeader {
 
   def apply(name: String, sortExpression: String, paginated: Paginated[_], updateTarget: String = "")(implicit
       messages: Messages
-  ) = {
+  ): Html = {
     val colLabel = messages(name)
 
     sortExpression match {

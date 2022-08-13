@@ -10,6 +10,7 @@ trait DataCrudController[A] extends DataReadController[A] with DataCudController
   protected def defaultService: DataReadService[A] with DataRemoveService with DataSaveService[A]
   protected def permissions: List[Permission] = List()
 
-  protected def readService = defaultService
-  protected def cudService  = defaultService
+  protected def readService: DataReadService[A] with DataRemoveService with DataSaveService[A] = defaultService
+
+  protected def cudService: DataReadService[A] with DataRemoveService with DataSaveService[A] = defaultService
 }

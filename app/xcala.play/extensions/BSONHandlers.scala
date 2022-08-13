@@ -15,12 +15,14 @@ object BSONHandlers {
 
   implicit object BSONLocalDateHandler extends BSONHandler[LocalDate] {
 
-    def readTry(v: BSONValue) = v match {
+    def readTry(v: BSONValue): Try[LocalDate] = v match {
       case BSONDateTime(dateTime) => Success(new LocalDate(dateTime))
       case _                      => Failure(new IllegalArgumentException())
     }
 
-    def writeTry(localDate: LocalDate) = Try(BSONDateTime(localDate.toDateTimeAtStartOfDay().getMillis))
+    def writeTry(localDate: LocalDate): Try[BSONDateTime] = Try(
+      BSONDateTime(localDate.toDateTimeAtStartOfDay().getMillis)
+    )
   }
 
   implicit object DateTimeReader extends BSONReader[DateTime] {
@@ -40,25 +42,29 @@ object BSONHandlers {
 
   }
 
-  implicit def optionalRangeHandler[A](implicit handler: BSONHandler[A]) = new BSONDocumentReader[Range[Option[A]]]
-    with BSONDocumentWriter[Range[Option[A]]] {
+  implicit def optionalRangeHandler[A](implicit
+      handler: BSONHandler[A]
+  ): BSONDocumentReader[Range[Option[A]]] with BSONDocumentWriter[Range[Option[A]]] =
+    new BSONDocumentReader[Range[Option[A]]] with BSONDocumentWriter[Range[Option[A]]] {
 
-    def readDocument(doc: BSONDocument): Try[Range[Option[A]]] = Success {
-      Range(from = doc.getAsOpt[A]("from"), to = doc.getAsOpt[A]("to"))
+      def readDocument(doc: BSONDocument): Try[Range[Option[A]]] = Success {
+        Range(from = doc.getAsOpt[A]("from"), to = doc.getAsOpt[A]("to"))
+      }
+
+      def writeTry(range: Range[Option[A]]) = Try {
+        BSONDocument(
+          Seq(
+            range.from.flatMap(handler.writeOpt).map("from" -> _),
+            range.to.flatMap(handler.writeOpt).map("to" -> _)
+          ).flatten
+        )
+      }
+
     }
 
-    def writeTry(range: Range[Option[A]]) = Try {
-      BSONDocument(
-        Seq(
-          range.from.flatMap(handler.writeOpt).map("from" -> _),
-          range.to.flatMap(handler.writeOpt).map("to" -> _)
-        ).flatten
-      )
-    }
-
-  }
-
-  implicit def rangeHandler[A](implicit handler: BSONHandler[A]) = new BSONDocumentReader[Range[A]]
+  implicit def rangeHandler[A](implicit
+      handler: BSONHandler[A]
+  ): BSONDocumentReader[Range[A]] with BSONDocumentWriter[Range[A]] = new BSONDocumentReader[Range[A]]
     with BSONDocumentWriter[Range[A]] {
 
     def readDocument(doc: BSONDocument): Try[Range[A]] = {
@@ -68,7 +74,7 @@ object BSONHandlers {
       }
     }
 
-    def writeTry(range: Range[A]) = Try {
+    def writeTry(range: Range[A]): Try[BSONDocument] = Try {
       BSONDocument(
         Seq(
           handler.writeOpt(range.from).map("from" -> _),
@@ -79,37 +85,34 @@ object BSONHandlers {
 
   }
 
-//  implicit def optionHandler[A <: BSONValue, B](implicit handler: BSONHandler[B]) = new BSONHandler[Option[B]] {
-//    def readTry(value: BSONValue): Try[Option[B]] = Success(handler.readOpt(value))
-//
-//    def writeTry(value: Option[B]): Try[BSONValue] = handler.writeTry(value.get)
-//  }
+  implicit def multilangDocumentHandler[A <: BSONValue]
+      : BSONDocumentReader[MultilangModel[A]] with BSONDocumentWriter[MultilangModel[A]] =
+    new BSONDocumentReader[MultilangModel[A]] with BSONDocumentWriter[MultilangModel[A]] {
 
-  implicit def multilangDocumentHandler[A <: BSONValue] = new BSONDocumentReader[MultilangModel[A]]
-    with BSONDocumentWriter[MultilangModel[A]] {
-
-    def readDocument(doc: BSONDocument): Try[MultilangModel[A]] = {
-      (doc.getAsOpt[String]("lang"), doc.get("value")) match {
-        case (Some(lang), Some(value)) =>
-          Success(
-            MultilangModel(lang = lang, value = value.asInstanceOf[A])
-          )
-        case _ => Failure(new NoSuchFieldException())
+      def readDocument(doc: BSONDocument): Try[MultilangModel[A]] = {
+        (doc.getAsOpt[String]("lang"), doc.get("value")) match {
+          case (Some(lang), Some(value)) =>
+            Success(
+              MultilangModel(lang = lang, value = value.asInstanceOf[A])
+            )
+          case _ => Failure(new NoSuchFieldException())
+        }
       }
-    }
 
-    def writeTry(multilangModel: MultilangModel[A]): Try[BSONDocument] = Try {
-      BSONDocument(
-        Seq(
-          "lang"  -> BSONString(multilangModel.lang),
-          "value" -> multilangModel.value
+      def writeTry(multilangModel: MultilangModel[A]): Try[BSONDocument] = Try {
+        BSONDocument(
+          Seq(
+            "lang"  -> BSONString(multilangModel.lang),
+            "value" -> multilangModel.value
+          )
         )
-      )
+      }
+
     }
 
-  }
-
-  implicit def optionalMultilangDocumentHandler[A <: BSONValue](implicit classTag: ClassTag[A]) =
+  implicit def optionalMultilangDocumentHandler[A <: BSONValue](implicit
+      classTag: ClassTag[A]
+  ): BSONDocumentReader[MultilangModel[Option[A]]] with BSONDocumentWriter[MultilangModel[Option[A]]] =
     new BSONDocumentReader[MultilangModel[Option[A]]] with BSONDocumentWriter[MultilangModel[Option[A]]] {
 
       def readDocument(doc: BSONDocument): Try[MultilangModel[Option[A]]] = {
@@ -136,34 +139,38 @@ object BSONHandlers {
 
     }
 
-  implicit def multilangHandler[A](implicit handler: BSONHandler[A]) = new BSONDocumentReader[MultilangModel[A]]
-    with BSONDocumentWriter[MultilangModel[A]] {
+  implicit def multilangHandler[A](implicit
+      handler: BSONHandler[A]
+  ): BSONDocumentReader[MultilangModel[A]] with BSONDocumentWriter[MultilangModel[A]] =
+    new BSONDocumentReader[MultilangModel[A]] with BSONDocumentWriter[MultilangModel[A]] {
 
-    def readDocument(doc: BSONDocument): Try[MultilangModel[A]] = {
-      (doc.getAsOpt[String]("lang"), doc.getAsOpt[A]("value")) match {
-        case (Some(lang), Some(value)) =>
-          Success(
-            MultilangModel(lang = lang, value = value)
-          )
-        case _ => Failure(new NoSuchFieldException())
+      def readDocument(doc: BSONDocument): Try[MultilangModel[A]] = {
+        (doc.getAsOpt[String]("lang"), doc.getAsOpt[A]("value")) match {
+          case (Some(lang), Some(value)) =>
+            Success(
+              MultilangModel(lang = lang, value = value)
+            )
+          case _ => Failure(new NoSuchFieldException())
+        }
       }
+
+      def writeTry(multilangModel: MultilangModel[A]): Try[BSONDocument] = Try {
+        BSONDocument(
+          Seq(
+            Some("lang" -> BSONString(multilangModel.lang)),
+            handler.writeOpt(multilangModel.value).map("value" -> _)
+          ).flatten
+        )
+      }
+
     }
 
-    def writeTry(multilangModel: MultilangModel[A]): Try[BSONDocument] = Try {
-      BSONDocument(
-        Seq(
-          Some("lang" -> BSONString(multilangModel.lang)),
-          handler.writeOpt(multilangModel.value).map("value" -> _)
-        ).flatten
-      )
-    }
-
-  }
-
-  implicit def optionalMultilangHandler[A](implicit handler: BSONHandler[A]) =
+  implicit def optionalMultilangHandler[A](implicit
+      handler: BSONHandler[A]
+  ): BSONDocumentReader[MultilangModel[Option[A]]] with BSONDocumentWriter[MultilangModel[Option[A]]] =
     new BSONDocumentReader[MultilangModel[Option[A]]] with BSONDocumentWriter[MultilangModel[Option[A]]] {
 
-      def readDocument(doc: BSONDocument) = {
+      def readDocument(doc: BSONDocument): Try[MultilangModel[Option[A]]] = {
         (doc.getAsOpt[String]("lang"), doc.getAsOpt[A]("value")) match {
           case (Some(lang), value) =>
             Success(

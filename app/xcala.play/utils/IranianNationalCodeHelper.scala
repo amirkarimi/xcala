@@ -2,7 +2,7 @@ package xcala.play.utils
 
 object IranianNationalCodeHelper {
 
-  def isValid(input: String) = {
+  def isValid(input: String): Boolean = {
     val pattern = """^(\d{10})$""".r
     input match {
       case pattern(_) =>

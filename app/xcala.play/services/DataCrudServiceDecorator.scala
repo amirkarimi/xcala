@@ -19,9 +19,9 @@ trait DataCrudServiceDecorator[A, B]
 
   def remove(query: BSONDocument): Future[WriteResult] = service.remove(query)
 
-  def insert(model: B) = mapBackModel(model).flatMap(service.insert)
+  def insert(model: B): Future[BSONObjectID] = mapBackModel(model).flatMap(service.insert)
 
-  def save(model: B) = {
+  def save(model: B): Future[BSONObjectID] = {
     getIdFromModel(model) match {
       case Some(id) =>
         service.findById(id).flatMap {

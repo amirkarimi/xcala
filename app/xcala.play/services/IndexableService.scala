@@ -1,7 +1,6 @@
 package xcala.play.services
 
 import org.joda.time.DateTime
-import play.api.Logger
 import reactivemongo.api.bson.Macros
 import reactivemongo.api.bson._
 import reactivemongo.api.commands.WriteResult
@@ -12,6 +11,7 @@ import xcala.play.extensions.BSONHandlers._
 
 import scala.concurrent.Future
 import play.api.Logging
+import reactivemongo.api.bson.collection.BSONCollection
 
 trait IndexableService[A <: Indexable]
     extends DataService
@@ -20,9 +20,9 @@ trait IndexableService[A <: Indexable]
     with DataSaveService[A]
     with DataDocumentHandler[A]
     with Logging {
-  implicit val indexedItemHandler = Macros.handler[IndexedItem]
+  implicit val indexedItemHandler: BSONDocumentHandler[IndexedItem] = Macros.handler[IndexedItem]
 
-  lazy val indexedItemCollection = {
+  lazy val indexedItemCollection: Future[BSONCollection] = {
     val coll = dbFuture.map(_.collection("indexedItems"))
     collectionFuture.map(
       _.indexesManager.ensure(

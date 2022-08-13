@@ -11,7 +11,7 @@ object PersianUtils {
 
   implicit class PersianDateConverter(val dateTime: DateTime) extends AnyVal {
 
-    def toGlobalDateTimeString(implicit messages: Messages, addTime: Boolean = true) = {
+    def toGlobalDateTimeString(implicit messages: Messages, addTime: Boolean = true): String = {
       if (messages.lang.code == "fa") {
         val gDate = SimpleDate(dateTime.year.get, dateTime.monthOfYear.get, dateTime.dayOfMonth.get)
         val pDate = gregorianToPersian(gDate)
@@ -25,10 +25,10 @@ object PersianUtils {
     }
 
     /** Format => yyyy-MM-dd HH:mm
-      * @param addTime
+      * @param addTime if true return with time
       * @return
       */
-    def toJalaliDateTimeString(addTime: Boolean = true) = {
+    def toJalaliDateTimeString(addTime: Boolean = true): String = {
       val gDate = SimpleDate(dateTime.year.get, dateTime.monthOfYear.get, dateTime.dayOfMonth.get)
       val pDate = gregorianToPersian(gDate)
       s"${pDate.year}-${pDate.month.toString.reverse.padTo(2, "0").reverse.mkString}-${pDate.day.toString.reverse.padTo(2, "0").reverse.mkString}" +
@@ -36,7 +36,7 @@ object PersianUtils {
        else { "" })
     }
 
-    def toGlobalLongDateTimeString(implicit messages: Messages, addTime: Boolean = true) = {
+    def toGlobalLongDateTimeString(implicit messages: Messages, addTime: Boolean = true): String = {
       if (messages.lang.code == "fa") {
         val gDate = SimpleDate(dateTime.year.get, dateTime.monthOfYear.get, dateTime.dayOfMonth.get)
         val pDate = gregorianToPersian(gDate)
@@ -49,9 +49,9 @@ object PersianUtils {
       }
     }
 
-    def toGlobalDateString(implicit messages: Messages) = toGlobalDateTimeString(messages, false)
+    def toGlobalDateString(implicit messages: Messages): String = toGlobalDateTimeString(messages, addTime = false)
 
-    def toGlobalLongDateString(implicit messages: Messages) = toGlobalLongDateTimeString(messages, false)
+    def toGlobalLongDateString(implicit messages: Messages): String = toGlobalLongDateTimeString(messages, addTime = false)
 
     def toGlobalYear(implicit messages: Messages): Int = {
       if (messages.lang.code == "fa") {
@@ -75,7 +75,7 @@ object PersianUtils {
 
   }
 
-  def convertToPersianChars(text: String) = {
+  def convertToPersianChars(text: String): String = {
     text
       .replace("ي", "ی")
       .replace("ك", "ک")

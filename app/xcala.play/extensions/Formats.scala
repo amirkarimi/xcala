@@ -2,11 +2,9 @@ package xcala.play.extensions
 
 import scala.util.Success
 import scala.util.Failure
-import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formats._
 import play.api.data.format.Formatter
-import play.api.data.validation._
 import play.api.libs.json._
 import reactivemongo.api.bson.BSONObjectID
 
@@ -24,26 +22,26 @@ object Formats {
         .allCatch[T]
         .either(parse(s))
         .left
-        .map(e => Seq(FormError(key, errMsg, errArgs)))
+        .map(_ => Seq(FormError(key, errMsg, errArgs)))
     }
   }
 
-  implicit val bsonObjectIDFormatter = new Formatter[BSONObjectID] {
+  implicit val bsonObjectIDFormatter: Formatter[BSONObjectID] = new Formatter[BSONObjectID] {
 
-    def bind(key: String, data: Map[String, String]) = {
+    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], BSONObjectID] = {
       parsing(BSONObjectID.parse(_).get, "error.objectId", Nil)(key, data)
     }
 
-    def unbind(key: String, value: BSONObjectID) = Map(key -> value.stringify)
+    def unbind(key: String, value: BSONObjectID): Map[String, String] = Map(key -> value.stringify)
   }
 
-  implicit val bsonObjectIDFormat = new Format[BSONObjectID] {
+  implicit val bsonObjectIDFormat: Format[BSONObjectID] = new Format[BSONObjectID] {
 
     def reads(json: JsValue): JsResult[BSONObjectID] = json match {
       case JsString(s) =>
         BSONObjectID.parse(s) match {
           case Success(d) => JsSuccess(d)
-          case Failure(e) => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId.format"))))
+          case Failure(_) => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId.format"))))
         }
       case _ => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId"))))
     }

@@ -13,12 +13,12 @@ object TikaMimeDetector {
 
   def guessMimeBasedOnFileContentAndName(file: File, fileName: String): String = {
     // It is important to mix both fileName and content to guess the mime type
-    // otherwise Tika might mixup some types like xml based files with each other
+    // otherwise Tika might mix up some types like xml based files with each other
     val helpingMeta = new Metadata()
     helpingMeta.set(TikaCoreProperties.RESOURCE_NAME_KEY, fileName)
 
     tika
-      .getDetector()
+      .getDetector
       .detect(TikaInputStream.get(new FileInputStream(file)), helpingMeta)
       .toString
 

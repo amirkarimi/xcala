@@ -9,9 +9,12 @@ trait Options {
 
   def all: Seq[Type]
 
-  def getTitle(item: Type)(implicit messages: Messages) = messages(MessagePrefix + all.find(_ == item).getOrElse(""))
+  def getTitle(item: Type)(implicit messages: Messages): String = messages(
+    MessagePrefix + all.find(_ == item).getOrElse("")
+  )
 
-  def allWithTitle(implicit messages: Messages) = all.map(toOption)
+  def allWithTitle(implicit messages: Messages): Seq[(Type, String)] = all.map(toOption)
 
-  protected def toOption(item: Type)(implicit messages: Messages) = (item, messages(MessagePrefix + item))
+  protected def toOption(item: Type)(implicit messages: Messages): (Type, String) =
+    (item, messages(MessagePrefix + item))
 }

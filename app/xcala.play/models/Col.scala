@@ -6,13 +6,13 @@ case class Col[A](
     name: String,
     fieldMapper: A => String,
     sortExpression: String = "",
-    cssClass: A => Option[String] = (a: A) => None,
+    cssClass: A => Option[String] = (_: A) => None,
     headerCssClass: Option[String] = None
 )
 
 object Col {
 
-  def command[A](commands: (A => RowCommand)*)(implicit messages: Messages) = {
+  def command[A](commands: (A => RowCommand)*)(implicit messages: Messages): Col[A] = {
     Col[A](
       "",
       (field: A) =>

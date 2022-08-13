@@ -27,11 +27,11 @@ trait DataCudController[A]
 
   def editView(form: Form[A], model: A)(implicit request: RequestType[_]): Future[Result]
 
-  def create = action.async { implicit request =>
+  def create: Action[AnyContent] = action.async { implicit request =>
     createView(defaultForm.bindFromRequest.discardingErrors)
   }
 
-  def createPost = action.async { implicit request =>
+  def createPost: Action[AnyContent] = action.async { implicit request =>
     val filledFormFuture = bindForm(defaultForm)
 
     filledFormFuture.flatMap { filledForm =>
@@ -54,14 +54,14 @@ trait DataCudController[A]
     }
   }
 
-  def edit(id: BSONObjectID) = action.async { implicit request =>
+  def edit(id: BSONObjectID): Action[AnyContent] = action.async { implicit request =>
     cudService.findById(id).flatMap {
       case Some(model) => editView(defaultForm.fill(model), model)
       case None        => Future.successful(NotFound)
     }
   }
 
-  def editPost(id: BSONObjectID) = action.async { implicit request =>
+  def editPost(id: BSONObjectID): Action[AnyContent] = action.async { implicit request =>
     cudService.findById(id).flatMap {
       case None => Future.successful(NotFound)
       case Some(model) =>
@@ -77,7 +77,7 @@ trait DataCudController[A]
             model =>
               cudService
                 .save(model)
-                .map { objectId =>
+                .map { _ =>
                   successfulResult(Messages("message.successfulSave"))
                 }
                 .recoverWith { case throwable: Throwable =>
@@ -94,7 +94,7 @@ trait DataCudController[A]
     createView(filledForm.withGlobalError(throwable.getMessage))
   }
 
-  def delete(id: BSONObjectID) = action.async { implicit request =>
+  def delete(id: BSONObjectID): Action[AnyContent] = action.async { implicit request =>
     cudService
       .remove(id)
       .map { _ =>

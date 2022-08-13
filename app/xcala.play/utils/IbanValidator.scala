@@ -1,10 +1,12 @@
 package xcala.play.utils
 
+import scala.util.matching.Regex
+
 object IbanValidator {
   val IranianIbanLength = 26
-  val IbanPattern       = """([A-Z]{2})(\d{2})([A-Z0-9]{12,27})""".r
+  val IbanPattern: Regex = """([A-Z]{2})(\d{2})([A-Z0-9]{12,27})""".r
 
-  def isValidIranianIban(iban: String) = {
+  def isValidIranianIban(iban: String): Boolean = {
     iban match {
       case IbanPattern(country, check, account) if country == "IR" && iban.length == 26 =>
         isValid(country, check, account)
@@ -13,7 +15,7 @@ object IbanValidator {
     }
   }
 
-  def isValid(country: String, check: String, account: String) = {
+  def isValid(country: String, check: String, account: String): Boolean = {
     val arranged        = account + country + check
     val arrangedInt     = convertToDigits(arranged)
     val arrangedDecimal = BigDecimal(arrangedInt)

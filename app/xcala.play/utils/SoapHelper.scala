@@ -1,7 +1,6 @@
 package xcala.play
 
 import scala.xml.Elem
-import scala.xml.XML
 import scala.xml.Node
 
 object SoapHelper {
@@ -10,7 +9,7 @@ object SoapHelper {
     s"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
     <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
       <SOAP-ENV:Body>
-        ${xml}
+        $xml
       </SOAP-ENV:Body>
     </SOAP-ENV:Envelope>"""
   }

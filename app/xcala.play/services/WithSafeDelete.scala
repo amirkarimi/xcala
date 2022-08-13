@@ -2,7 +2,9 @@ package xcala.play.services
 
 import reactivemongo.api.bson.BSONDocument
 import reactivemongo.api.bson.BSONObjectID
+import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.commands.WriteResult
+
 import scala.concurrent.Future
 
 trait WithSafeDelete extends DataCollectionService with DataRemoveService {
@@ -28,7 +30,7 @@ trait WithSafeDelete extends DataCollectionService with DataRemoveService {
           checkOnDelete.map { case (collectionName, queryBuilder) =>
             val query = queryBuilder(deletingId)
             dbFuture.flatMap { db =>
-              val collection = db.collection(collectionName)
+              val collection: BSONCollection = db.collection(collectionName)
               collection.count(Some(query)).map { count =>
                 if (count > 0) throw new DeleteConstraintException(collectionName, query, deletingId)
               }

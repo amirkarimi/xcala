@@ -2,7 +2,7 @@ package views.html.xcala.play.bootstrap3
 
 object InputParser {
 
-  def addClass(input: String, className: String) = {
+  def addClass(input: String, className: String): String = {
     val maybeInfo = getInputInfo(input)
     maybeInfo
       .map { info =>

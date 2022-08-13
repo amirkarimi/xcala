@@ -26,7 +26,7 @@ trait DataReadController[A] extends InjectedController with WithComposableAction
     }
   }
 
-  def index = action.async { implicit request =>
+  def index: Action[AnyContent] = action.async { implicit request =>
     val queryOptions = QueryOptions.getFromRequest
 
     getPaginatedData(queryOptions).flatMap { paginated =>

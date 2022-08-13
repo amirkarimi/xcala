@@ -3,27 +3,27 @@ package xcala.play.models
 import play.api.data.Form
 
 case class Paginated[A](data: Seq[A], totalCount: Long, queryOptions: QueryOptions, args: Map[String, String] = Map()) {
-  def pageCount   = math.ceil(totalCount.toDouble / queryOptions.pageSize.toDouble).toInt
-  def hasNextPage = queryOptions.page < pageCount
-  def hasPrevPage = queryOptions.page > 1
+  def pageCount: Int = math.ceil(totalCount.toDouble / queryOptions.pageSize.toDouble).toInt
+  def hasNextPage: Boolean = queryOptions.page < pageCount
+  def hasPrevPage: Boolean = queryOptions.page > 1
 
-  def nextPage = if (hasNextPage) {
+  def nextPage: Paginated[A] = if (hasNextPage) {
     copy(queryOptions = queryOptions.nextPage)
   } else {
     this
   }
 
-  def prevPage = if (hasPrevPage) {
+  def prevPage: Paginated[A] = if (hasPrevPage) {
     copy(queryOptions = queryOptions.prevPage)
   } else {
     this
   }
 
-  def gotoPage(page: Int) = copy(queryOptions = queryOptions.copy(page = page))
+  def gotoPage(page: Int): Paginated[A] = copy(queryOptions = queryOptions.copy(page = page))
 
-  def sort(sortExpression: Option[String]) = copy(queryOptions = queryOptions.sort(sortExpression))
+  def sort(sortExpression: Option[String]): Paginated[A] = copy(queryOptions = queryOptions.sort(sortExpression))
 
-  def toQueryString = {
+  def toQueryString: String = {
     val encodedArgs = args.mapValues(java.net.URLEncoder.encode(_, "UTF-8"))
 
     val queryStringData = QueryOptions.form.fill(queryOptions).data ++ encodedArgs

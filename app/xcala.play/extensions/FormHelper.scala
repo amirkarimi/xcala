@@ -3,7 +3,6 @@ package xcala.play.extensions
 import play.api.data.Form
 import play.api.data.FormError
 import play.api.data.Mapping
-import play.api.i18n.Lang
 import play.api.i18n.Messages
 import xcala.play.utils.KeywordExtractor
 
@@ -19,7 +18,7 @@ object FormHelper {
 
   implicit class AdvancedForm[A](val form: Form[A]) extends AnyVal {
 
-    def withErrorIf(hasError: Boolean, key: String, error: String, args: Any*) = {
+    def withErrorIf(hasError: Boolean, key: String, error: String, args: Any*): Form[A] = {
       if (hasError) {
         form.withError(key, error, args)
       } else {
@@ -41,7 +40,7 @@ object FormHelper {
     /** When the language is Persian, converts incorrect used Arabic characters like "ي" and "ك" to correct Persian
       * ones.
       */
-    def fixLanguageChars(implicit messages: Messages) = {
+    def fixLanguageChars(implicit messages: Messages): Form[A] = {
       if (messages.lang.code == "fa") {
         val fixedData = form.data.map { case (key, value) =>
           (key, PersianUtils.convertToPersianChars(value))

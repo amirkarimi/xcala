@@ -26,19 +26,19 @@ trait DataCollectionService extends DataService {
 
   private[services] lazy val collectionFuture: Future[BSONCollection] = getCollection
 
-  private[services] def getCollection = {
+  private[services] def getCollection: Future[BSONCollection] = {
     dbFuture.map(_.collection(collectionName)).map { coll =>
       onCollectionInitialized(coll)
       coll
     }
   }
 
-  protected def onCollectionInitialized(collection: BSONCollection) = {}
+  protected def onCollectionInitialized(collection: BSONCollection): Unit = {}
 }
 
 trait WithDbCommand extends DataService {
 
-  def dbCommand(commandDoc: BSONDocument)(implicit ec: ExecutionContext) =
+  def dbCommand(commandDoc: BSONDocument)(implicit ec: ExecutionContext): Future[BSONDocument] =
     dbFuture.flatMap(
       _.runCommand(commandDoc, FailoverStrategy.default).cursor[BSONDocument](ReadPreference.primaryPreferred).head
     )
@@ -46,7 +46,7 @@ trait WithDbCommand extends DataService {
 }
 
 trait WithExternalCollectionAccess extends DataService {
-  protected def collection(collectionName: String) = dbFuture.map(_.collection(collectionName))
+  protected def collection(collectionName: String): Future[BSONCollection] = dbFuture.map(_.collection(collectionName))
 }
 
 /** Represents the document handler.

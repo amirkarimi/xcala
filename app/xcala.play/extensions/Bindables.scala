@@ -9,7 +9,7 @@ import play.api.mvc.JavascriptLiteral
 
 object Bindables {
 
-  implicit def optionBindable[T: PathBindable] = new PathBindable[Option[T]] {
+  implicit def optionBindable[T: PathBindable]: PathBindable[Option[T]] = new PathBindable[Option[T]] {
 
     def bind(key: String, value: String): Either[String, Option[T]] =
       implicitly[PathBindable[T]]
@@ -23,26 +23,28 @@ object Bindables {
 
   }
 
-  implicit def optionJavascriptLitteral[T: PathBindable] = new JavascriptLiteral[Option[T]] {
-    override def to(value: Option[T]): String = value.map(_.toString).getOrElse("")
-  }
+  implicit def optionJavascriptLiteral[T: PathBindable]: JavascriptLiteral[Option[T]] =
+    (value: Option[T]) => value.map(_.toString).getOrElse("")
 
-  implicit def bsonObjectIDPathBinder(implicit stringBinder: PathBindable[String]) = new PathBindable[BSONObjectID] {
+  implicit def bsonObjectIDPathBinder(implicit stringBinder: PathBindable[String]): PathBindable[BSONObjectID] =
+    new PathBindable[BSONObjectID] {
 
-    override def bind(key: String, value: String): Either[String, BSONObjectID] = {
-      for {
-        id       <- stringBinder.bind(key, value).right
-        objectId <- BSONObjectID.parse(id).toOption.toRight("Invalid BSON object ID").right
-      } yield objectId
+      override def bind(key: String, value: String): Either[String, BSONObjectID] = {
+        for {
+          id       <- stringBinder.bind(key, value).right
+          objectId <- BSONObjectID.parse(id).toOption.toRight("Invalid BSON object ID").right
+        } yield objectId
+      }
+
+      override def unbind(key: String, objectId: BSONObjectID): String = {
+        stringBinder.unbind(key, objectId.stringify)
+      }
+
     }
 
-    override def unbind(key: String, objectId: BSONObjectID): String = {
-      stringBinder.unbind(key, objectId.stringify)
-    }
-
-  }
-
-  implicit def bsonObjectIdQueryStringBinder(implicit stringBinder: QueryStringBindable[String]) =
+  implicit def bsonObjectIdQueryStringBinder(implicit
+      stringBinder: QueryStringBindable[String]
+  ): QueryStringBindable[BSONObjectID] =
     new QueryStringBindable[BSONObjectID] {
 
       override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, BSONObjectID]] = {
@@ -59,7 +61,7 @@ object Bindables {
 
     }
 
-  implicit def langQueryStringBinder(implicit stringBinder: QueryStringBindable[String]) =
+  implicit def langQueryStringBinder(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[Lang] =
     new QueryStringBindable[Lang] {
 
       override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Lang]] = {
@@ -78,10 +80,10 @@ object Bindables {
 
   implicit object LangPathBindable extends PathBindable[Lang] {
 
-    def bind(key: String, value: String) = try {
+    def bind(key: String, value: String): Either[String, Lang] = try {
       Right(Lang(value))
     } catch {
-      case e: Exception => Left("Cannot parse parameter '" + key + "' as Lang")
+      case _: Exception => Left("Cannot parse parameter '" + key + "' as Lang")
     }
 
     def unbind(key: String, value: Lang): String = value.code

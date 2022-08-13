@@ -1,7 +1,5 @@
 package views.html.xcala.play
 
-import play.twirl.api.Html
-
 object briefHtml {
 
   def apply(content: String, wordCount: Int = 0, addEllipsis: Boolean = true) = {

@@ -1,20 +1,20 @@
 package xcala.play.models
 
-import play.api.mvc.QueryStringBindable
 import play.api.data._
 import play.api.data.Forms._
 import play.api.mvc.Request
 
 abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Option[String] = None) {
-  lazy val sortInfos = sortExpression.toList.flatMap(expr => expr.split(",").map(s => SortInfo.fromExpression(s)))
+
+  lazy val sortInfos: List[SortInfo] =
+    sortExpression.toList.flatMap(expr => expr.split(",").map(s => SortInfo.fromExpression(s)))
 
   def resetSort(sortExpression: Option[String]): A
 
-  def sort(sortExpression: Option[String]) = {
+  def sort(sortExpression: Option[String]): A = {
     sortExpression match {
       case None => resetSort(sortExpression = None)
-      case Some(sort) => {
-
+      case Some(sort) =>
         val existingSortInfo = sortInfos.find(s => s.field == sort)
 
         val newSortInfos = existingSortInfo match {
@@ -36,7 +36,6 @@ abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Opti
         }
 
         resetSort(sortExpression = Some(newSortInfos.mkString(",")))
-      }
     }
   }
 
@@ -44,12 +43,12 @@ abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Opti
 
 case class SortOptions(override val sortExpression: Option[String] = None)
     extends SortOptionsBase[SortOptions](sortExpression) {
-  def resetSort(sortExpression: Option[String]) = copy(sortExpression = sortExpression)
+  def resetSort(sortExpression: Option[String]): SortOptions = copy(sortExpression = sortExpression)
 }
 
 object SortOptions {
 
-  val form = Form(
+  val form: Form[SortOptions] = Form(
     mapping(
       "sort" -> optional(text)
     )(SortOptions.apply)(SortOptions.unapply)
