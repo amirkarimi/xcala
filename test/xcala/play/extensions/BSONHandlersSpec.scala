@@ -3,10 +3,6 @@ package xcala.play.extensions
 import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._
-import play.api.test._
-import play.api.test.Helpers._
-import org.joda.time.DateTime
-
 import xcala.play.models.MultilangModel
 import xcala.play.models.Range
 import reactivemongo.api.bson._
@@ -74,7 +70,7 @@ class BSONHandlersSpec extends Specification {
     }
   }
 
-  "Multilang handler with BSONObjecID" should {
+  "Multilang handler with BSONObjectID" should {
     val handler      = BSONHandlers.multilangDocumentHandler[BSONObjectID]
     val bsonObjectId = BSONObjectID.generate
 
@@ -91,7 +87,7 @@ class BSONHandlersSpec extends Specification {
     }
   }
 
-  "Multilang handler with Option[BSONObjecID]" should {
+  "Multilang handler with Option[BSONObjectID]" should {
     val handler      = BSONHandlers.optionalMultilangDocumentHandler[BSONObjectID]
     val bsonObjectId = BSONObjectID.generate
 

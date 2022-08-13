@@ -3,13 +3,10 @@ package xcala.play.views
 import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._
-import play.api.test._
-import play.api.test.Helpers._
-import org.joda.time.DateTime
 import views.html.xcala.play.bootstrap3._
 
 @RunWith(classOf[JUnitRunner])
-class InputParserSepc extends Specification {
+class InputParserSpec extends Specification {
 
   "InputParser" should {
     val className = "form-control"
@@ -17,14 +14,14 @@ class InputParserSepc extends Specification {
     "adds class to text input without class" in {
       val rawInput       = """<input type="text" name="test" id="test">"""
       val result         = InputParser.addClass(rawInput, className)
-      val inputWithClass = s"""<input type="text" name="test" id="test" class="${className}">"""
+      val inputWithClass = s"""<input type="text" name="test" id="test" class="$className">"""
       result mustEqual inputWithClass
     }
 
     "adds class to text input with class" in {
       val rawInput       = """<input type="text" name="test" id="test" class="test">"""
       val result         = InputParser.addClass(rawInput, className)
-      val inputWithClass = s"""<input type="text" name="test" id="test" class="${className} test">"""
+      val inputWithClass = s"""<input type="text" name="test" id="test" class="$className test">"""
       result mustEqual inputWithClass
     }
 
@@ -40,7 +37,7 @@ class InputParserSepc extends Specification {
           </select>
         """
       val result   = InputParser.addClass(rawInput, className)
-      val inputWithClass = s"""<select name="test" id="test" class="${className}">
+      val inputWithClass = s"""<select name="test" id="test" class="$className">
             <option value="1">1</option>
           </select>
         """

@@ -1,5 +1,6 @@
 package xcala.play.services
 
+import akka.actor.ActorSystem
 import org.specs2.execute.AsResult
 import org.specs2.execute.Result
 import org.specs2.mutable.Around
@@ -19,25 +20,21 @@ import scala.reflect.ClassTag
 
 trait WithTestDb extends Around with LangImplicits {
 
-  val dbConfiguration = Map(
-    "mongodb.uri" -> s"mongodb://localhost/xcala-test-${Math.abs(Random.nextInt())}"
-  )
-
-  val application: Application                         = GuiceApplicationBuilder().configure(dbConfiguration).build()
+  val application: Application                         = GuiceApplicationBuilder().build()
   implicit lazy val implicitInjector: Injector         = instanceOf[Injector]
   implicit lazy val executionContext: ExecutionContext = instanceOf[ExecutionContext]
   implicit val configuration: Configuration            = application.configuration
-  implicit lazy val system                             = application.actorSystem
+  implicit lazy val system: ActorSystem                = application.actorSystem
 
-  implicit val databaseConfig = new DefaultDatabaseConfig {
-    implicit val configuration: Configuration = application.configuration
-    implicit val ec                           = executionContext
+  implicit val databaseConfig: DatabaseConfig = new DatabaseConfig {
+    implicit val ec: ExecutionContext = executionContext
+    override def mongoUri: String     = s"mongodb://localhost/xcala-test-${Math.abs(Random.nextInt())}"
   }
 
-  def instanceOf[T: ClassTag] = application.injector.instanceOf[T]
+  def instanceOf[T: ClassTag]: T = application.injector.instanceOf[T]
 
   override def messagesApi: MessagesApi = instanceOf[MessagesApi]
-  implicit val lang                     = Lang("fa")
+  implicit val lang: Lang               = Lang("fa")
   lazy val messages: Messages           = lang2Messages
 
   def around[T](t: => T)(implicit ev: AsResult[T]): Result = {
