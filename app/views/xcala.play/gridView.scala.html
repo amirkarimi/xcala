@@ -1,5 +1,10 @@
 @(columns: Seq[Col[_]], rows: Seq[Seq[(Col[_], String, Option[String])]], paginated: Paginated[_], updateTarget: String)(implicit messages: Messages)
 
+<div class="pull-right">
+	<label>@Messages("foundResult"):</label>
+	<span>@paginated.totalCount.formatted("%,d")</span>
+</div>
+
 <table class="table table-striped">
 	<tr>
 		@columns.map { column => 
