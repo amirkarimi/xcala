@@ -11,7 +11,7 @@ import javax.inject.Inject
 import scala.util.matching.Regex
 
 object UrlParamsFilter {
-  val harmfulPattern: Regex = ".*[\\(\\)]+.*".r
+  val harmfulPattern: Regex                     = ".*[\\(\\)]+.*".r
   def isUrlParamSafe(urlParam: String): Boolean = harmfulPattern.findFirstMatchIn(urlParam).isEmpty
 }
 

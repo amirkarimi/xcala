@@ -17,9 +17,9 @@ class WithSafeDeleteSpec extends Specification {
 
   "Service with WithSafeDelete" should {
     "allow delete when no related data found for remove by id" >> new WithTestDb {
-      val personService = new PersonService()
-      val cardService     = new CardService()
-      val person: Person               = Person(name = "test", age = 10)
+      val personService  = new PersonService()
+      val cardService    = new CardService()
+      val person: Person = Person(name = "test", age = 10)
       personService.insert(person).awaitResult
       val card: Card = Card(title = "test", personId = BSONObjectID.generate)
       cardService.insert(card).awaitResult

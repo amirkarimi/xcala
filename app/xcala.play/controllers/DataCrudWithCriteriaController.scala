@@ -11,5 +11,8 @@ trait DataCrudWithCriteriaController[A, B] extends DataCrudController[A] with Wi
     with DataSaveService[A]
     with DataReadCriteriaService[A, B]
 
-  protected val readCriteriaService: DataReadService[A] with DataRemoveService with DataSaveService[A] with DataReadCriteriaService[A, B] = defaultService
+  protected val readCriteriaService
+      : DataReadService[A] with DataRemoveService with DataSaveService[A] with DataReadCriteriaService[A, B] =
+    defaultService
+
 }

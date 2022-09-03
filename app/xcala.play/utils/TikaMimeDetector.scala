@@ -17,8 +17,7 @@ object TikaMimeDetector {
     val helpingMeta = new Metadata()
     helpingMeta.set(TikaCoreProperties.RESOURCE_NAME_KEY, fileName)
 
-    tika
-      .getDetector
+    tika.getDetector
       .detect(TikaInputStream.get(new FileInputStream(file)), helpingMeta)
       .toString
 
