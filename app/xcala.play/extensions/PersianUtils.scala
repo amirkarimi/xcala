@@ -25,7 +25,8 @@ object PersianUtils {
     }
 
     /** Format => yyyy-MM-dd HH:mm
-      * @param addTime if true return with time
+      * @param addTime
+      *   if true return with time
       * @return
       */
     def toJalaliDateTimeString(addTime: Boolean = true): String = {
@@ -51,7 +52,8 @@ object PersianUtils {
 
     def toGlobalDateString(implicit messages: Messages): String = toGlobalDateTimeString(messages, addTime = false)
 
-    def toGlobalLongDateString(implicit messages: Messages): String = toGlobalLongDateTimeString(messages, addTime = false)
+    def toGlobalLongDateString(implicit messages: Messages): String =
+      toGlobalLongDateTimeString(messages, addTime = false)
 
     def toGlobalYear(implicit messages: Messages): Int = {
       if (messages.lang.code == "fa") {

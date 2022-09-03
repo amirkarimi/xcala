@@ -23,6 +23,7 @@ object BSONHandlers {
     def writeTry(localDate: LocalDate): Try[BSONDateTime] = Try(
       BSONDateTime(localDate.toDateTimeAtStartOfDay().getMillis)
     )
+
   }
 
   implicit object DateTimeReader extends BSONReader[DateTime] {

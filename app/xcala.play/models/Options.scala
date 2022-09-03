@@ -17,4 +17,5 @@ trait Options {
 
   protected def toOption(item: Type)(implicit messages: Messages): (Type, String) =
     (item, messages(MessagePrefix + item))
+
 }
