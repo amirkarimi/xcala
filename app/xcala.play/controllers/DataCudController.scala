@@ -37,7 +37,6 @@ trait DataCudController[A]
     filledFormFuture.flatMap { filledForm =>
       filledForm.fold(
         formWithErrors => {
-          DataCudController.logger.debug("Form Error on Create: " + formWithErrors.errors)
           createView(formWithErrors)
         },
         model => {
@@ -71,7 +70,6 @@ trait DataCudController[A]
         filledFormFuture.flatMap { filledForm =>
           filledForm.fold(
             formWithErrors => {
-              DataCudController.logger.debug("Form Error on Edit: " + formWithErrors.errors)
               editView(formWithErrors, model)
             },
             model =>
