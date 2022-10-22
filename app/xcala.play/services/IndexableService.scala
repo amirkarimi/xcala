@@ -10,7 +10,6 @@ import xcala.play.models.IndexedItem
 import xcala.play.extensions.BSONHandlers._
 
 import scala.concurrent.Future
-import play.api.Logging
 import reactivemongo.api.bson.collection.BSONCollection
 
 trait IndexableService[A <: Indexable]
@@ -18,8 +17,7 @@ trait IndexableService[A <: Indexable]
     with DataCollectionService
     with DataRemoveService
     with DataSaveService[A]
-    with DataDocumentHandler[A]
-    with Logging {
+    with DataDocumentHandler[A] {
   implicit val indexedItemHandler: BSONDocumentHandler[IndexedItem] = Macros.handler[IndexedItem]
 
   lazy val indexedItemCollection: Future[BSONCollection] = {
@@ -48,7 +46,6 @@ trait IndexableService[A <: Indexable]
 
     result.map { objectId =>
       saveItem(objectId, model).recover { case err =>
-        logger.error("Saving indexed item error: " + err.toString)
       }
     }
 
