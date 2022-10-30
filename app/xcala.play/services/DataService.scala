@@ -33,7 +33,7 @@ trait DataCollectionService extends DataService {
     }
   }
 
-  protected def onCollectionInitialized(collection: BSONCollection): Unit = {}
+  protected def onCollectionInitialized(@annotation.nowarn collection: BSONCollection): Unit = {}
 }
 
 trait WithDbCommand extends DataService {

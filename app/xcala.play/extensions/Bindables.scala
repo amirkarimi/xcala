@@ -3,7 +3,6 @@ package xcala.play.extensions
 import play.api.mvc.PathBindable
 import reactivemongo.api.bson.BSONObjectID
 import play.api.mvc.QueryStringBindable
-import play.api.data.format.Formatter
 import play.api.i18n.Lang
 import play.api.mvc.JavascriptLiteral
 

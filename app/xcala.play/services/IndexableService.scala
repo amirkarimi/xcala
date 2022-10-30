@@ -40,13 +40,12 @@ trait IndexableService[A <: Indexable]
   }
 
   abstract override def save(model: A): Future[BSONObjectID] = {
-    val document = documentHandler.writeTry(model).get
+    documentHandler.writeTry(model).get
 
     val result = super.save(model)
 
     result.map { objectId =>
-      saveItem(objectId, model).recover { case err =>
-      }
+      saveItem(objectId, model)
     }
 
     result

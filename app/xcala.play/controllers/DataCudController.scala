@@ -1,6 +1,5 @@
 package xcala.play.controllers
 
-import play.api.Logger
 import play.api.data.Form
 import play.api.i18n.I18nSupport
 import play.api.i18n.Messages
@@ -42,7 +41,7 @@ trait DataCudController[A]
         model => {
           cudService
             .insert(model)
-            .map { objectId =>
+            .map { _ =>
               successfulResult(Messages("message.successfulSave"))
             }
             .recoverWith { case throwable: Throwable =>
@@ -103,8 +102,4 @@ trait DataCudController[A]
       }
   }
 
-}
-
-object DataCudController {
-  private val logger = Logger("DataCudController")
 }

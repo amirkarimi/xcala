@@ -59,5 +59,14 @@ TwirlKeys.templateImports ++= Seq(
   "_root_.xcala.play.extensions.MultilangHelper._"
 )
 
+scalacOptions ++= Seq(
+  "-Ywarn-unused",
+  "-Ywarn-dead-code",
+  "-Xlint",
+  "-Wconf:cat=unused-imports&site=.*views.html.*:s", // Silence import warnings in Play html files
+  "-Wconf:cat=unused-imports&site=<empty>:s",        // Silence import warnings on Play `routes` files
+  "-Wconf:cat=unused-imports&site=router:s"          // Silence import warnings on Play `routes` files
+)
+
 publishConfiguration      := publishConfiguration.value.withOverwrite(true)
 publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
