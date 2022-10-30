@@ -16,7 +16,9 @@ trait DataReadController[A] extends InjectedController with WithComposableAction
 
   def indexResultView(paginated: Paginated[A])(implicit request: RequestType[_]): Future[Result]
 
-  def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_]): Future[Paginated[A]] = {
+  def getPaginatedData(
+      queryOptions: QueryOptions
+  )(implicit @annotation.nowarn request: RequestType[_]): Future[Paginated[A]] = {
     readService.find(BSONDocument(), queryOptions).map { dataWithTotalCount =>
       Paginated(
         dataWithTotalCount.data,

@@ -15,7 +15,7 @@
 	</tr>
 	@rows.map { row =>
 		<tr>
-			@row.map { case (col, value, css) =>
+			@row.map { case (_, value, css) =>
 				<td@css.map(c => Html(s" class='${c}'"))>
 					@Html(value)
 				</td>
