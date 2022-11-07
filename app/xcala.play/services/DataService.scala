@@ -93,7 +93,7 @@ trait DataSaveService[A] {
   */
 trait DataReadServiceImpl[A] extends DataCollectionService with DataDocumentHandler[A] with DataReadService[A] {
 
-  def findQuery(query: BSONDocument) = collectionFuture.map(_.find(query))
+  def findQuery(query: BSONDocument): Future[BSONCollection#QueryBuilder] = collectionFuture.map(_.find(query))
 
   def findById(id: BSONObjectID): Future[Option[A]] =
     collectionFuture.flatMap(_.find(BSONDocument("_id" -> id)).cursor[A]().headOption)

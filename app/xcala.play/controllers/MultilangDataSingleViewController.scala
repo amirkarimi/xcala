@@ -25,7 +25,7 @@ trait MultilangDataSingleViewController[A <: WithLang]
 
   def view(
       id: BSONObjectID
-  ) = action.async { implicit request =>
+  ): Action[AnyContent] = action.async { implicit request =>
     readService.findById(id).flatMap {
       case None => Future.successful(defaultNotFound)
       case Some(model) =>
