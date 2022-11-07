@@ -2,7 +2,7 @@ package views.html.xcala.play
 
 object briefHtml {
 
-  def apply(content: String, wordCount: Int = 0, addEllipsis: Boolean = true) = {
+  def apply(content: String, wordCount: Int = 0, addEllipsis: Boolean = true): String = {
     // Remove HTML tags
     val original = content.replaceAll("(?i)<[^>]*>", " ").replaceAll("\\s+", " ").trim()
 
