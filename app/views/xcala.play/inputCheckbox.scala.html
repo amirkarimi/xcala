@@ -3,7 +3,7 @@
 @import bootstrap3.DefaultHelpers.horizontalField
 
 @elements = @{ helper.FieldElements(field.id, field, Html(""), args.toMap, messages) }
-@boxValue = @{ args.toMap.get('value).getOrElse("true") }
+@boxValue = @{ args.toMap.getOrElse('value, "true").toString }
 
 <div class="form-group @if(elements.hasErrors) {has-error}">
 	<div class="col-sm-offset-2 col-sm-6">

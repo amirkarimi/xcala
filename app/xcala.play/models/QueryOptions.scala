@@ -4,7 +4,7 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.mvc.Request
 
-case class QueryOptions(
+final case class QueryOptions(
     page: Int = 1,
     pageSizeOpt: Option[Int] = None,
     override val sortExpression: Option[String] = None

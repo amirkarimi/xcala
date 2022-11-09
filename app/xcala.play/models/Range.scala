@@ -1,3 +1,3 @@
 package xcala.play.models
 
-case class Range[A](from: A, to: A)
+final case class Range[A](from: A, to: A)

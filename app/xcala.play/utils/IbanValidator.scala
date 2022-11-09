@@ -19,7 +19,7 @@ object IbanValidator {
     val arranged        = account + country + check
     val arrangedInt     = convertToDigits(arranged)
     val arrangedDecimal = BigDecimal(arrangedInt)
-    arrangedDecimal % 97 == 1
+    arrangedDecimal % 97 == BigDecimal(1)
   }
 
   def convertToDigits(in: String): String = {

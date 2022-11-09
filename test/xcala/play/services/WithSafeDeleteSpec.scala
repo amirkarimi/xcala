@@ -53,7 +53,7 @@ class WithSafeDeleteSpec extends Specification {
       val card: Card = Card(title = "test", personId = person.id)
       cardService.insert(card).awaitResult
 
-      personService.remove(person.id).awaitResult must throwA[DeleteConstraintException]
+      personService.remove(person.id).awaitResult must throwA[DeleteConstraintError]
       personService.findById(person.id).awaitResult must beSome(person)
     }
 
@@ -67,7 +67,7 @@ class WithSafeDeleteSpec extends Specification {
       val card: Card = Card(title = "test", personId = person1.id)
       cardService.insert(card).awaitResult
 
-      personService.remove(BSONDocument("name" -> "test")).awaitResult must throwA[DeleteConstraintException]
+      personService.remove(BSONDocument("name" -> "test")).awaitResult must throwA[DeleteConstraintError]
       personService.findById(person1.id).awaitResult must beSome(person1)
       personService.findById(person2.id).awaitResult must beSome(person2)
     }
@@ -76,8 +76,8 @@ class WithSafeDeleteSpec extends Specification {
 }
 
 object WithSafeDeleteSpecHelpers {
-  case class Person(@Key("_id") id: BSONObjectID = BSONObjectID.generate, name: String, age: Int)
-  case class Card(@Key("_id") id: BSONObjectID = BSONObjectID.generate, title: String, personId: BSONObjectID)
+  final case class Person(@Key("_id") id: BSONObjectID = BSONObjectID.generate, name: String, age: Int)
+  final case class Card(@Key("_id") id: BSONObjectID = BSONObjectID.generate, title: String, personId: BSONObjectID)
 
   class PersonService(implicit
       val ec: ExecutionContext,

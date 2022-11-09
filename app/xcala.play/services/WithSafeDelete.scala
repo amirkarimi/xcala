@@ -32,7 +32,7 @@ trait WithSafeDelete extends DataCollectionService with DataRemoveService {
             dbFuture.flatMap { db =>
               val collection: BSONCollection = db.collection(collectionName)
               collection.count(Some(query)).map { count =>
-                if (count > 0) throw new DeleteConstraintException(collectionName, query, deletingId)
+                if (count > 0) throw new DeleteConstraintError(collectionName, query, deletingId)
               }
             }
           }
@@ -47,5 +47,4 @@ trait WithSafeDelete extends DataCollectionService with DataRemoveService {
 
 }
 
-class DeleteConstraintException(val collectionName: String, val query: BSONDocument, val id: BSONObjectID)
-    extends Throwable
+class DeleteConstraintError(val collectionName: String, val query: BSONDocument, val id: BSONObjectID) extends Throwable

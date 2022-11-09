@@ -7,21 +7,19 @@ import play.api.data.format.Formats._
 import play.api.data.format.Formatter
 import play.api.libs.json._
 import reactivemongo.api.bson.BSONObjectID
+import scala.util.Try
 
 object Formats {
 
   /*
    * Copied from Play framework repository.
    */
-  private def parsing[T](parse: String => T, errMsg: String, errArgs: Seq[Any])(
+  private def parsing[T](parse: String => Try[T], errMsg: String, errArgs: Seq[Any])(
       key: String,
       data: Map[String, String]
   ): Either[Seq[FormError], T] = {
     stringFormat.bind(key, data).right.flatMap { s =>
-      scala.util.control.Exception
-        .allCatch[T]
-        .either(parse(s))
-        .left
+      parse(s).toEither.left
         .map(_ => Seq(FormError(key, errMsg, errArgs)))
     }
   }
@@ -29,7 +27,7 @@ object Formats {
   implicit val bsonObjectIDFormatter: Formatter[BSONObjectID] = new Formatter[BSONObjectID] {
 
     def bind(key: String, data: Map[String, String]): Either[Seq[FormError], BSONObjectID] = {
-      parsing(BSONObjectID.parse(_).get, "error.objectId", Nil)(key, data)
+      parsing(BSONObjectID.parse(_), "error.objectId", Nil)(key, data)
     }
 
     def unbind(key: String, value: BSONObjectID): Map[String, String] = Map(key -> value.stringify)

@@ -2,7 +2,7 @@ package xcala.play.models
 
 import play.api.i18n.Messages
 
-case class Col[A](
+final case class Col[A](
     name: String,
     fieldMapper: A => String,
     sortExpression: String = "",
