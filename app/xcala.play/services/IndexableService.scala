@@ -11,6 +11,8 @@ import xcala.play.extensions.BSONHandlers._
 
 import scala.concurrent.Future
 import reactivemongo.api.bson.collection.BSONCollection
+import scala.util.Success
+import scala.util.Failure
 
 trait IndexableService[A <: Indexable]
     extends DataService
@@ -40,15 +42,18 @@ trait IndexableService[A <: Indexable]
   }
 
   abstract override def save(model: A): Future[BSONObjectID] = {
-    documentHandler.writeTry(model).get
+    documentHandler.writeTry(model) match {
+      case Success(_) =>
+        val result = super.save(model)
 
-    val result = super.save(model)
+        result.map { objectId =>
+          saveItem(objectId, model)
+        }
 
-    result.map { objectId =>
-      saveItem(objectId, model)
+        result
+      case Failure(e) =>
+        Future.failed(e)
     }
-
-    result
   }
 
   private def saveItem(id: BSONObjectID, model: Indexable): Future[WriteResult] = {

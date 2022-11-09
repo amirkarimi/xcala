@@ -150,12 +150,12 @@ trait DataReadServiceImpl[A] extends DataCollectionService with DataDocumentHand
       }
   }
 
-  protected def applyDefaultSort(sortInfos: List[SortInfo]): List[SortInfo] = sortInfos match {
+  protected def applyDefaultSort(sortInfos: Seq[SortInfo]): Seq[SortInfo] = sortInfos match {
     case Nil => defaultSort
     case _   => sortInfos
   }
 
-  protected def defaultSort: List[SortInfo] = Nil
+  protected def defaultSort: Seq[SortInfo] = Nil
 }
 
 /** Represents the CRUD service.

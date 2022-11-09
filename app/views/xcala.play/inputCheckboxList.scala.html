@@ -7,7 +7,7 @@
 	@items.map { item =>
 		<label class="checkbox">
 			@defining(field.indexes.map(i => field("[" + i + "]").value.getOrElse(""))) { fieldValues =>
-			<input type="checkbox" name="@(field.name)[]" value="@item._1" @if(fieldValues.exists(_ == item._1)){checked}>
+			<input type="checkbox" name="@(field.name)[]" value="@item._1" @if(fieldValues.contains(item._1)){checked}>
 			}
 			@item._2
 		</label> 

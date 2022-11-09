@@ -17,8 +17,8 @@ trait WithMultilangCriteria[A <: WithLang, B]
 
   override def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_]): Future[Paginated[A]] = {
     val requestCriteriaData = criteriaForm.bindFromRequest.data
-    val modifiedData = requestCriteriaData.toList.filter(_._1 != "lang") :+ ("lang" -> request2Messages.lang.code)
-    val criteriaOpt  = criteriaForm.bind(modifiedData.toMap).value
+    val modifiedData        = requestCriteriaData.filter(_._1 != "lang") + ("lang" -> request2Messages.lang.code)
+    val criteriaOpt         = criteriaForm.bind(modifiedData.toMap).value
 
     readService.find(criteriaOpt, queryOptions).map { dataWithTotalCount =>
       Paginated(dataWithTotalCount, queryOptions, criteriaOpt, criteriaForm)

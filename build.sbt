@@ -40,6 +40,46 @@ libraryDependencies ++= Seq(
   specs2               % Test
 )
 
+ThisBuild / scapegoatVersion := "1.4.17"
+
+scapegoatIgnoredFiles := Seq(
+  ".*/ReverseRoutes.scala",
+  ".*/JavaScriptReverseRoutes.scala",
+  ".*/Routes.scala"
+)
+
+scapegoatDisabledInspections := Seq(
+  "DuplicateImport",
+  "CatchThrowable",
+  "UnusedMethodParameter",
+  "OptionGet",
+  "BooleanParameter",
+  "VariableShadowing",
+  "UnsafeTraversableMethods",
+  "CatchException",
+  "EitherGet",
+  "ComparingFloatingPointTypes",
+  "PartialFunctionInsteadOfMatch",
+  "AsInstanceOf",
+  "ClassNames"
+)
+
+(Compile / compile) := Def.taskDyn {
+  val c = (Compile / compile).value
+  Def.task {
+    (Compile / scapegoat).toTask.value
+    c
+  }
+}.value
+
+(Test / compile) := Def.taskDyn {
+  val c = (Test / compile).value
+  Def.task {
+    (Test / scapegoat).toTask.value
+    c
+  }
+}.value
+
 Assets / LessKeys.less / includeFilter := "*.less"
 Assets / LessKeys.less / excludeFilter := "_*.less"
 

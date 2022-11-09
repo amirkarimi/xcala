@@ -6,8 +6,8 @@ import com.bahmanm.persianutils.DateConverter._
 
 object PersianUtils {
 
-  private final val monthNames =
-    List("فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند")
+  private final val monthNames: IndexedSeq[String] =
+    IndexedSeq("فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند")
 
   implicit class PersianDateConverter(val dateTime: DateTime) extends AnyVal {
 

@@ -6,8 +6,8 @@ import play.api.mvc.Request
 
 abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Option[String] = None) {
 
-  lazy val sortInfos: List[SortInfo] =
-    sortExpression.toList.flatMap(expr => expr.split(",").map(s => SortInfo.fromExpression(s)))
+  lazy val sortInfos: Seq[SortInfo] =
+    sortExpression.toSeq.flatMap(expr => expr.split(",").map(s => SortInfo.fromExpression(s)))
 
   def resetSort(sortExpression: Option[String]): A
 
@@ -41,7 +41,7 @@ abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Opti
 
 }
 
-case class SortOptions(override val sortExpression: Option[String] = None)
+final case class SortOptions(override val sortExpression: Option[String] = None)
     extends SortOptionsBase[SortOptions](sortExpression) {
   def resetSort(sortExpression: Option[String]): SortOptions = copy(sortExpression = sortExpression)
 }

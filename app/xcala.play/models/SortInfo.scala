@@ -1,6 +1,6 @@
 package xcala.play.models
 
-case class SortInfo(field: String, direction: Int = 1) {
+final case class SortInfo(field: String, direction: Int = 1) {
   def toggleDirection: SortInfo = copy(direction = direction * -1)
 
   override def toString: String = {

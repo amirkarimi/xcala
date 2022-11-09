@@ -37,5 +37,5 @@ object InputParser {
     }
   }
 
-  case class InputInfo(tag: String, args: String, body: String)
+  final case class InputInfo(tag: String, args: String, body: String)
 }
