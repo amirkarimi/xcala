@@ -36,7 +36,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-slf4j"    % "2.6.19",
   "com.bahmanm"       %% "persianutils"  % "4.0",
   "io.lemonlabs"      %% "scala-uri"     % "4.0.2",
-  "org.apache.tika"    % "tika-core"     % "2.4.1",
+  "org.apache.tika"    % "tika-core"     % "2.6.0",
   specs2               % Test
 )
 
