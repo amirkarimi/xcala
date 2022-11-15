@@ -1,4 +1,4 @@
-@(label: String, value: Any, labelDivSize: Int = 2, copyToClipboardValue: Option[String] = None, style: Option[String] = None)(implicit messages: Messages)
+@(label: String, value: Any, labelDivSize: Int = 4, copyToClipboardValue: Option[String] = None, style: Option[String] = None)(implicit messages: Messages)
 <div class="form-group">
 	<label class="col-sm-@labelDivSize control-label">@Messages(label)</label>
 	<div class="col-sm-@(12 - labelDivSize)">
