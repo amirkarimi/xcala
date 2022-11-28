@@ -1,8 +1,8 @@
-ARG JVM=11.0.14.1
-ARG SBT_VERSION=1.6.2
-ARG SCALA_VERSION=2.12.15
+ARG JVM=openjdk-11.0.16
+ARG SBT_VERSION=1.8.0
+ARG SCALA_VERSION=2.12.17
 
-FROM hub.hamdocker.ir/hseeberger/scala-sbt:${JVM}_${SBT_VERSION}_${SCALA_VERSION} as builder
+FROM hub.hamdocker.ir/sbtscala/scala-sbt:${JVM}_${SBT_VERSION}_${SCALA_VERSION} as builder
 
 ARG NEXUS_KEY
 

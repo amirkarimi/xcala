@@ -2,7 +2,7 @@
 
 <div class="pull-right">
 	<label>@Messages("foundResult"):</label>
-	<span>@paginated.totalCount.formatted("%,d")</span>
+	<span>@{"%,d".format(paginated.totalCount)}</span>
 </div>
 
 <table class="table table-striped">

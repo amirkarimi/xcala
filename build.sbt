@@ -2,11 +2,11 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.6-SNAPSHOT"
+version := "0.7-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.12.15"
+scalaVersion := "2.12.17"
 
 resolvers ++= Seq(
   "Atlassian Releases".at("https://maven.atlassian.com/public/"),
@@ -30,17 +30,19 @@ libraryDependencies ++= Seq(
   ws,
   ehcache,
   filters,
-  "org.reactivemongo" %% "reactivemongo" % "1.0.10",
-  "com.typesafe.akka" %% "akka-testkit"  % "2.6.19" % "test",
-  "com.typesafe.akka" %% "akka-stream"   % "2.6.19",
-  "com.typesafe.akka" %% "akka-slf4j"    % "2.6.19",
-  "com.bahmanm"       %% "persianutils"  % "4.0",
-  "io.lemonlabs"      %% "scala-uri"     % "4.0.2",
-  "org.apache.tika"    % "tika-core"     % "2.6.0",
+  "org.reactivemongo" %% "reactivemongo"              % "1.0.10",
+  "com.typesafe.akka" %% "akka-actor-typed"           % "2.7.0",
+  "com.typesafe.akka" %% "akka-testkit"               % "2.7.0" % "test",
+  "com.typesafe.akka" %% "akka-serialization-jackson" % "2.7.0",
+  "com.typesafe.akka" %% "akka-stream"                % "2.7.0",
+  "com.typesafe.akka" %% "akka-slf4j"                 % "2.7.0",
+  "com.bahmanm"       %% "persianutils"               % "4.0",
+  "io.lemonlabs"      %% "scala-uri"                  % "4.0.3",
+  "org.apache.tika"    % "tika-core"                  % "2.6.0",
   specs2               % Test
 )
 
-ThisBuild / scapegoatVersion := "1.4.17"
+ThisBuild / scapegoatVersion := "2.0.0"
 
 scapegoatIgnoredFiles := Seq(
   ".*/ReverseRoutes.scala",
