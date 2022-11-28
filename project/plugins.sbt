@@ -1,5 +1,5 @@
 // The Play plugin
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.15")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.18")
 
 // web plugins
 addSbtPlugin("com.typesafe.sbt" % "sbt-coffeescript" % "1.0.2")
@@ -17,3 +17,8 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.2")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.10.4")
 
 addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.1.1")
+
+// This fixes scala-xml version conflict in plugin dependencies
+ThisBuild / libraryDependencySchemes ++= Seq(
+  "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+)
