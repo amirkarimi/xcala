@@ -113,3 +113,5 @@ scalacOptions ++= Seq(
 
 publishConfiguration      := publishConfiguration.value.withOverwrite(true)
 publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
+
+Test / javaOptions ++= Seq("--add-opens=java.base/java.lang=ALL-UNNAMED")
