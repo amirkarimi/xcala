@@ -39,6 +39,7 @@ libraryDependencies ++= Seq(
   "com.bahmanm"       %% "persianutils"               % "4.0",
   "io.lemonlabs"      %% "scala-uri"                  % "4.0.3",
   "org.apache.tika"    % "tika-core"                  % "2.6.0",
+  "ch.qos.logback"     % "logback-classic"            % "1.4.5",
   specs2               % Test
 )
 
