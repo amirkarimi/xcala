@@ -2,7 +2,7 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.7-SNAPSHOT"
+version := "0.8-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -30,17 +30,22 @@ libraryDependencies ++= Seq(
   ws,
   ehcache,
   filters,
-  "org.reactivemongo" %% "reactivemongo"              % "1.0.10",
-  "com.typesafe.akka" %% "akka-actor-typed"           % "2.7.0",
-  "com.typesafe.akka" %% "akka-testkit"               % "2.7.0" % "test",
-  "com.typesafe.akka" %% "akka-serialization-jackson" % "2.7.0",
-  "com.typesafe.akka" %% "akka-stream"                % "2.7.0",
-  "com.typesafe.akka" %% "akka-slf4j"                 % "2.7.0",
-  "com.bahmanm"       %% "persianutils"               % "4.0",
-  "io.lemonlabs"      %% "scala-uri"                  % "4.0.3",
-  "org.apache.tika"    % "tika-core"                  % "2.6.0",
-  "ch.qos.logback"     % "logback-classic"            % "1.4.5",
-  specs2               % Test
+  jodaForms,
+  "org.reactivemongo"     %% "reactivemongo"              % "1.0.10",
+  "com.typesafe.akka"     %% "akka-actor-typed"           % "2.7.0",
+  "com.typesafe.akka"     %% "akka-testkit"               % "2.7.0" % "test",
+  "com.typesafe.akka"     %% "akka-serialization-jackson" % "2.7.0",
+  "com.typesafe.akka"     %% "akka-stream"                % "2.7.0",
+  "com.typesafe.akka"     %% "akka-slf4j"                 % "2.7.0",
+  "com.bahmanm"           %% "persianutils"               % "4.0",
+  "io.lemonlabs"          %% "scala-uri"                  % "4.0.3",
+  "org.apache.tika"        % "tika-core"                  % "2.6.0",
+  "ch.qos.logback"         % "logback-classic"            % "1.4.5",
+  "io.sentry"              % "sentry-logback"             % "6.9.1",
+  "io.minio"               % "minio"                      % "8.4.6",
+  "commons-io"             % "commons-io"                 % "2.11.0",
+  "com.sksamuel.scrimage" %% "scrimage-scala"             % "4.0.32",
+  specs2                   % Test
 )
 
 ThisBuild / scapegoatVersion := "2.0.0"
