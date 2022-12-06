@@ -11,17 +11,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import akka.stream.scaladsl.Source
-import akka.stream.IOResult
-import akka.util.ByteString
 import xcala.play.models.FileInfo
+import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
+import java.io.InputStream
 
 object FileInfoService {
 
   final case class FileObject(
       id: BSONObjectID,
       name: String,
-      content: Source[ByteString, Future[IOResult]],
+      content: InputStream,
       contentType: Option[String],
       contentLength: Option[Long]
   ) {
@@ -83,12 +84,17 @@ class FileInfoService @Inject() (
       }
   }
 
-  def findObjectById(id: BSONObjectID): Future[Option[FileObject]] = {
-    fileStorageService.findByObjectName(id.stringify).map(_.flatMap(toFileObject))
+  def findObjectById(id: BSONObjectID): Future[FileObject] = {
+    fileStorageService.findByObjectName(id.stringify).transform {
+      case Success(value) =>
+        toFileObject(value)
+      case Failure(exception) =>
+        Failure(exception)
+    }
   }
 
-  private def toFileObject(fileS3Object: FileS3Object): Option[FileObject] =
-    BSONObjectID.parse(fileS3Object.objectName).toOption.map { id =>
+  private def toFileObject(fileS3Object: FileS3Object): Try[FileObject] =
+    BSONObjectID.parse(fileS3Object.objectName).map { id =>
       FileObject(
         id = id,
         name = fileS3Object.originalName,

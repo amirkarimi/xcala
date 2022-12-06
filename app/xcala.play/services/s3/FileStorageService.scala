@@ -21,22 +21,21 @@ import scala.util.Success
 import scala.util.Try
 import io.sentry.Sentry
 import io.sentry.Hint
-import akka.stream.scaladsl.StreamConverters
-import akka.stream.IOResult
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
-import akka.stream.scaladsl.Flow
-import akka.actor.ActorSystem
-import scala.concurrent.duration._
 import javax.inject.Singleton
 import javax.inject.Inject
+import java.util.concurrent.TimeUnit
+import okhttp3.OkHttpClient
+import okhttp3.ConnectionPool
+import okhttp3.Protocol
+import java.util.Arrays
+import java.io.InputStream
 
 object FileStorageService {
 
   final case class FileS3Object(
       objectName: String,
       originalName: String,
-      content: Source[ByteString, Future[IOResult]],
+      content: InputStream,
       contentType: Option[String],
       contentLength: Option[Long],
       path: Option[String]
@@ -46,8 +45,7 @@ object FileStorageService {
 
 @Singleton
 class FileStorageService @Inject() (
-    config: play.api.Configuration,
-    actorSystem: ActorSystem
+    config: play.api.Configuration
 )(implicit val ec: ExecutionContext) {
 
   import FileStorageService._
@@ -115,67 +113,39 @@ class FileStorageService @Inject() (
     *   String, directory of the file. Ex: first/second/thirdFolder/
     * @return
     */
-  def findByObjectName(objectName: String, path: Option[String] = None): Future[Option[FileS3Object]] =
+  def findByObjectName(objectName: String, path: Option[String] = None): Future[FileS3Object] =
     Future {
-      Try {
+      val cleanPath = getCleanPath(path)
+      val stream = getClient.getObject(
+        GetObjectArgs.builder
+          .bucket(defaultBucketName)
+          .`object`(cleanPath.concat(objectName))
+          .build
+      )
 
-        val cleanPath = getCleanPath(path)
-        val stream = getClient.getObject(
-          GetObjectArgs.builder
-            .bucket(defaultBucketName)
-            .`object`(cleanPath.concat(objectName))
-            .build
-        )
+      val contentType   = Option(stream.headers().get("Content-Type"))
+      val originalName  = Option(stream.headers().get("x-amz-meta-name")).getOrElse(objectName)
+      val contentLength = Option(stream.headers().get("Content-Length")).map(_.toLong)
 
-        val contentType   = Option(stream.headers().get("Content-Type"))
-        val originalName  = Option(stream.headers().get("x-amz-meta-name")).getOrElse(objectName)
-        val contentLength = Option(stream.headers().get("Content-Length")).map(_.toLong)
+      FileS3Object(
+        objectName = objectName,
+        originalName = originalName,
+        content = stream,
+        contentType = contentType,
+        contentLength = contentLength,
+        path = path,
+      )
 
-        val res: Source[ByteString, Future[IOResult]] =
-          StreamConverters.fromInputStream(() => stream)
-        // Just to make sure stream will be closed even if the file download is cancelled or not finished for any reason
-        // Please note that this schedule will be cancelled once the stream is completed.
-        val cancellable = actorSystem.scheduler.scheduleOnce(4.minutes) {
-          try {
-            stream.close()
-          } catch {
-            case e: Throwable => Sentry.captureException(e)
-          }
-        }
-
-        // Add an extra stage for doing cleanups and cancelling the scheduled task
-        val lazyFlow = Flow[ByteString]
-          .concatLazy(Source.lazyFuture { () =>
-            Future {
-              stream.close()
-              cancellable.cancel()
-              ByteString.empty
-            }
-          })
-
-        val withCleanupRes = res.via(lazyFlow).recover { case _: Throwable =>
-          stream.close()
-          ByteString.empty
-        }
-
-        FileS3Object(
-          objectName = objectName,
-          originalName = originalName,
-          content = withCleanupRes,
-          contentType = contentType,
-          contentLength = contentLength,
-          path = path,
-        )
-
-      } match {
-        case Success(f) => Some(f)
+    }
+      .transformWith {
+        case Success(value) =>
+          Future.successful(value)
         case Failure(e) =>
           val hint = new Hint
           hint.set("objectName", objectName)
           Sentry.captureException(e, hint)
-          None
+          Future.failed(e)
       }
-    }
 
   /** Delete file by name and path
     *
@@ -261,6 +231,15 @@ class FileStorageService @Inject() (
 
   }
 
+  val okHttpClient = new OkHttpClient()
+    .newBuilder()
+    .connectTimeout(TimeUnit.SECONDS.toMillis(60), TimeUnit.MILLISECONDS)
+    .writeTimeout(TimeUnit.SECONDS.toMillis(60), TimeUnit.MILLISECONDS)
+    .readTimeout(TimeUnit.SECONDS.toMillis(60), TimeUnit.MILLISECONDS)
+    .connectionPool(new ConnectionPool(10, 15, TimeUnit.SECONDS))
+    .protocols(Arrays.asList(Protocol.HTTP_1_1))
+    .build()
+
   /** Make S3 client object
     *
     * @return
@@ -270,6 +249,7 @@ class FileStorageService @Inject() (
     val secretKey = config.get[String]("fileStorage.s3.secretKey")
     MinioClient.builder
       .endpoint(baseURL)
+      .httpClient(okHttpClient)
       .credentials(accessKey, secretKey)
       .build
   }
