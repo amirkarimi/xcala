@@ -40,17 +40,28 @@ import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.ScaleMethod
 import io.sentry.Hint
 
-import java.io.ByteArrayOutputStream
-import akka.util.ByteString
 import play.api.mvc.MultipartFormData
 import xcala.play.utils.WithExecutionContext
+import akka.util.ByteString
+import java.io.ByteArrayOutputStream
+import scala.concurrent._
+import scala.concurrent.blocking
+import akka.stream.scaladsl.Source
+import akka.stream.IOResult
+import akka.actor.ActorSystem
+import akka.stream.scaladsl.Flow
 
-trait FileControllerBase extends InjectedController with WithComposableActions with WithExecutionContext with I18nSupport {
+trait FileControllerBase
+    extends InjectedController
+    with WithComposableActions
+    with WithExecutionContext
+    with I18nSupport {
 
   val fileInfoService: FileInfoService
   val folderService: FolderService
   val cache: AsyncCacheApi
   val configuration: Configuration
+  val actorSystem: ActorSystem
   implicit val mat: Materializer
 
   def defaultInternalServerError(implicit adminRequest: RequestType[_]): Result
@@ -202,14 +213,61 @@ trait FileControllerBase extends InjectedController with WithComposableActions w
   }
 
   private def renderFile(id: BSONObjectID, dispositionMode: String): Future[Result] = {
-    fileInfoService.findObjectById(id).map {
-      case None       => NotFound
-      case Some(file) => renderFile(file, dispositionMode)
+    fileInfoService.findObjectById(id).transform {
+
+      case Success(file) =>
+        Success(renderFile(file, dispositionMode))
+
+      case Failure(e) if e.getMessage.toLowerCase.contains("not exist") =>
+        Success(NotFound)
+
+      case _ =>
+        Success(InternalServerError)
+
     }
   }
 
   private def renderFile(file: FileObject, dispositionMode: String): Result = {
-    val body = HttpEntity.Streamed.apply(file.content, file.contentLength, file.contentType)
+    val res: Source[ByteString, Future[IOResult]] =
+      StreamConverters
+        .fromInputStream(() => file.content)
+        .idleTimeout(15.seconds)
+        .initialTimeout(15.seconds)
+        .completionTimeout(60.seconds)
+        .recover { case e: Throwable =>
+          val hint = new Hint
+          hint.set("hint", "on stream recover")
+          Sentry.captureException(e, hint)
+          file.content.close()
+          ByteString.empty
+        }
+
+    // Just to make sure stream will be closed even if the file download is cancelled or not finished for any reason
+    // Please note that this schedule will be cancelled once the stream is completed.
+    val cancellable = actorSystem.scheduler.scheduleOnce(4.minutes) {
+      try {
+        file.content.close()
+      } catch {
+        case e: Throwable =>
+          val hint = new Hint
+          hint.set("hint", "on inactivity cleanup schedule")
+          Sentry.captureException(e, hint)
+      }
+    }
+
+    // Add an extra stage for doing cleanups and cancelling the scheduled task
+    val lazyFlow = Flow[ByteString]
+      .concatLazy(Source.lazyFuture { () =>
+        Future {
+          file.content.close()
+          cancellable.cancel()
+          ByteString.empty
+        }
+      })
+
+    val withCleanupRes = res.via(lazyFlow)
+
+    val body = HttpEntity.Streamed.apply(withCleanupRes, file.contentLength, file.contentType)
 
     Result(
       header = ResponseHeader(OK),
@@ -235,17 +293,17 @@ trait FileControllerBase extends InjectedController with WithComposableActions w
   ): Action[AnyContent] = Action.async {
     BSONObjectID.parse(id.split('.').headOption.getOrElse(id)) match {
       case Success(bsonObjectId) =>
-        fileInfoService.findObjectById(bsonObjectId).flatMap {
-          case Some(file) if !file.isImage =>
+        fileInfoService.findObjectById(bsonObjectId).transformWith {
+          case Success(file) if !file.isImage =>
             Future.successful(renderFile(file, CONTENT_DISPOSITION_INLINE))
-          case Some(file) if file.isImage && width.isEmpty && height.isEmpty =>
+          case Success(file) if file.isImage && width.isEmpty && height.isEmpty =>
             Future.successful(renderFile(file, CONTENT_DISPOSITION_INLINE))
-          case Some(file) if file.isImage =>
+          case Success(file) if file.isImage =>
             cache
               .getOrElseUpdate(s"image$id${width.getOrElse("")}${height.getOrElse("")}") {
 
                 Future {
-                  val is: InputStream = file.content.runWith(StreamConverters.asInputStream(120.seconds))
+                  val is: InputStream = file.content
 
                   val image: ImmutableImage = ImmutableImage.loader().fromStream(is)
 
@@ -268,7 +326,7 @@ trait FileControllerBase extends InjectedController with WithComposableActions w
                     file.contentType.getOrElse(""),
                     widthToHeightRatio
                   )
-                }
+                }.flatten
               }
               .transformWith {
                 case Success(result) =>
@@ -278,8 +336,12 @@ trait FileControllerBase extends InjectedController with WithComposableActions w
                   Sentry.captureMessage("An Error has occurred while loading the image file: " + id)
                   Future.successful(InternalServerError)
               }
+          case Failure(e) if e.getMessage.toLowerCase.contains("not exist") =>
+            Future.successful(NotFound)
 
-          case _ => Future.successful(NotFound)
+          case _ =>
+            Future.successful(InternalServerError)
+
         }
       case Failure(exception) =>
         val hint = new Hint
@@ -296,34 +358,38 @@ trait FileControllerBase extends InjectedController with WithComposableActions w
       height: Option[Int],
       contentType: String,
       widthToHeightRatio: Double
-  ): Result = {
-    val outImage = (width, height) match {
-      case (Some(width), Some(height)) =>
-        if ((width.toDouble / height) > widthToHeightRatio) {
-          image.scaleToHeight(height, ScaleMethod.Lanczos3)
-        } else if ((width.toDouble / height) < widthToHeightRatio) {
-          image.scaleToWidth(width, ScaleMethod.Lanczos3)
-        } else {
-          image.cover(width, height)
+  ): Future[Result] =
+    Future {
+      blocking {
+        val outImage = (width, height) match {
+          case (Some(width), Some(height)) =>
+            if ((width.toDouble / height) > widthToHeightRatio) {
+              image.scaleToHeight(height, ScaleMethod.Lanczos3)
+            } else if ((width.toDouble / height) < widthToHeightRatio) {
+              image.scaleToWidth(width, ScaleMethod.Lanczos3)
+            } else {
+              image.cover(width, height)
+            }
+          case (Some(width), None) =>
+            image.scaleToWidth(width)
+          case (None, Some(height)) =>
+            image.scaleToHeight(height)
+          case _ =>
+            throw new IllegalArgumentException()
         }
-      case (Some(width), None) =>
-        image.scaleToWidth(width)
-      case (None, Some(height)) =>
-        image.scaleToHeight(height)
-      case _ =>
-        throw new IllegalArgumentException()
+
+        val bos = new ByteArrayOutputStream()
+        getImageWriter(contentType).write(outImage, ImageMetadata.fromImage(outImage), bos)
+
+        bos.close()
+
+        val body = HttpEntity.Strict(
+          ByteString(bos.toByteArray),
+          Some(contentType)
+        )
+        Result(header = ResponseHeader(200), body)
+      }
     }
-
-    val bos = new ByteArrayOutputStream()
-    getImageWriter(contentType).write(outImage, ImageMetadata.fromImage(outImage), bos)
-
-    val body = HttpEntity.Strict(
-      ByteString(bos.toByteArray),
-      Some(contentType)
-    )
-
-    Result(header = ResponseHeader(200), body)
-  }
 
   private def getImageWriter(contentType: String): ImageWriter = contentType match {
     case "image/gif" => GifWriter.Default
