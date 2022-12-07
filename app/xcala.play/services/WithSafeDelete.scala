@@ -1,11 +1,11 @@
 package xcala.play.services
 
+import scala.concurrent.Future
+
 import reactivemongo.api.bson.BSONDocument
 import reactivemongo.api.bson.BSONObjectID
 import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.commands.WriteResult
-
-import scala.concurrent.Future
 
 trait WithSafeDelete extends DataCollectionService with DataRemoveService {
 

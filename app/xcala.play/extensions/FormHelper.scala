@@ -1,10 +1,11 @@
 package xcala.play.extensions
 
+import xcala.play.utils.KeywordExtractor
+
 import play.api.data.Form
 import play.api.data.FormError
 import play.api.data.Mapping
 import play.api.i18n.Messages
-import xcala.play.utils.KeywordExtractor
 
 object FormHelper {
 

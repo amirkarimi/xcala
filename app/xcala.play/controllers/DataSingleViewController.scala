@@ -1,11 +1,13 @@
 package xcala.play.controllers
 
-import play.api.mvc.{Action, AnyContent, Result, Results}
-import reactivemongo.api.bson.BSONObjectID
 import xcala.play.services.DataReadService
+import xcala.play.utils.WithExecutionContext
+
+import play.api.mvc.{Action, AnyContent, Result, Results}
 
 import scala.concurrent.Future
-import xcala.play.utils.WithExecutionContext
+
+import reactivemongo.api.bson.BSONObjectID
 
 trait DataSingleViewController[A] extends Results with WithComposableActions with WithExecutionContext {
 

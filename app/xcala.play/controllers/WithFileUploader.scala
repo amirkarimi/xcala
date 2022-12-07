@@ -1,20 +1,22 @@
 package xcala.play.controllers
 
-import io.sentry.Sentry
-import org.apache.commons.io.FilenameUtils
-import org.joda.time.DateTime
-import play.api.data.{Form, FormError}
-import play.api.i18n.Messages
-import play.api.libs.Files.TemporaryFile
-import play.api.mvc._
-import reactivemongo.api.bson.BSONObjectID
 import xcala.play.models.FileInfo
 import xcala.play.services.FileInfoService
 import xcala.play.utils.{TikaMimeDetector, WithExecutionContext}
 
+import play.api.data.{Form, FormError}
+import play.api.i18n.Messages
+import play.api.libs.Files.TemporaryFile
+import play.api.mvc._
+
 import java.nio.file.Files.readAllBytes
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
+
+import io.sentry.Sentry
+import org.apache.commons.io.FilenameUtils
+import org.joda.time.DateTime
+import reactivemongo.api.bson.BSONObjectID
 
 object WithFileUploader {
   val AutoUploadSuffix = "_autoupload"
@@ -63,7 +65,7 @@ trait WithFileUploader extends WithExecutionContext {
       .map { f =>
         FormError(
           f.key.dropRight(AutoUploadSuffix.length + 1),
-          Messages("error.fileToLarge", maxLength.get / 1024),
+          Messages("error.fileToLarge", maxLength.get / 1024)
         )
       }
 

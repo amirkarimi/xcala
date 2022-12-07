@@ -1,7 +1,7 @@
 package xcala.play.controllers
 
-import play.api.mvc._
 import play.api.i18n.Messages
+import play.api.mvc._
 
 trait WithMainPageResults extends Results {
 

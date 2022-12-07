@@ -1,14 +1,15 @@
 package xcala.play.services
 
-import org.specs2.mutable.Specification
 import play.api.Configuration
+
+import scala.concurrent.ExecutionContext
+
+import org.specs2.mutable.Specification
 import reactivemongo.api.bson.BSONDocument
 import reactivemongo.api.bson.BSONDocumentHandler
 import reactivemongo.api.bson.BSONObjectID
 import reactivemongo.api.bson.Macros
 import reactivemongo.api.bson.Macros.Annotations.Key
-
-import scala.concurrent.ExecutionContext
 
 class WithSafeDeleteSpec extends Specification {
 

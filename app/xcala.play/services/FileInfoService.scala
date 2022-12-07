@@ -1,21 +1,22 @@
 package xcala.play.services
 
-import reactivemongo.api.bson._
-import reactivemongo.api.commands.WriteResult
 import FileInfoService.FileObject
 import s3.FileStorageService
 import s3.FileStorageService.FileS3Object
 import xcala.play.extensions.BSONHandlers._
+import xcala.play.models.FileInfo
 
+import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import xcala.play.models.FileInfo
-import scala.util.Try
-import scala.util.Success
 import scala.util.Failure
-import java.io.InputStream
+import scala.util.Success
+import scala.util.Try
+
+import reactivemongo.api.bson._
+import reactivemongo.api.commands.WriteResult
 
 object FileInfoService {
 

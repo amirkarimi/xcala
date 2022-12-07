@@ -1,11 +1,13 @@
 package xcala.play.controllers
 
-import scala.concurrent.Future
-import xcala.play.services._
-import play.api.data.Form
 import xcala.play.models._
-import play.api.i18n.I18nSupport
+import xcala.play.services._
 import xcala.play.utils.WithExecutionContext
+
+import play.api.data.Form
+import play.api.i18n.I18nSupport
+
+import scala.concurrent.Future
 
 trait WithMultilangCriteria[A <: WithLang, B]
     extends MultilangDataReadController[A]

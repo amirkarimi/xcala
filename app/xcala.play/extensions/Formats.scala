@@ -1,13 +1,15 @@
 package xcala.play.extensions
 
-import scala.util.Success
-import scala.util.Failure
 import play.api.data._
 import play.api.data.format.Formats._
 import play.api.data.format.Formatter
 import play.api.libs.json._
-import reactivemongo.api.bson.BSONObjectID
+
+import scala.util.Failure
+import scala.util.Success
 import scala.util.Try
+
+import reactivemongo.api.bson.BSONObjectID
 
 object Formats {
 

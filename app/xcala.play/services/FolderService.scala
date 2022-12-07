@@ -2,13 +2,14 @@ package xcala.play.services
 
 import xcala.play.models.FileInfo
 import xcala.play.models.Folder
-import reactivemongo.api.bson.{BSONDocument, BSONDocumentHandler, BSONObjectID, Macros}
-import reactivemongo.api.commands.WriteResult
 
 import javax.inject.Inject
 import javax.inject.Singleton
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+
+import reactivemongo.api.bson.{BSONDocument, BSONDocumentHandler, BSONObjectID, Macros}
+import reactivemongo.api.commands.WriteResult
 
 @Singleton
 class FolderService @Inject() (

@@ -1,55 +1,53 @@
 package xcala.play.controllers
 
-import xcala.play.services._
 import xcala.play.models._
-import play.api.cache.AsyncCacheApi
-import play.api.Configuration
-import akka.stream.Materializer
-import play.api.mvc.Action
-import play.api.mvc.AnyContent
-import reactivemongo.api.bson._
+import xcala.play.services._
+import xcala.play.services.FileInfoService.FileObject
+import xcala.play.utils.WithExecutionContext
 
-import scala.concurrent.Future
-import play.api.mvc.InjectedController
-import play.api.mvc.Result
+import akka.actor.ActorSystem
+import akka.stream.IOResult
+import akka.stream.Materializer
+import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.StreamConverters
+import akka.util.ByteString
+import play.api.Configuration
+import play.api.cache.AsyncCacheApi
+import play.api.http.HttpEntity
 import play.api.i18n.{I18nSupport, Messages}
 import play.api.libs.Files
-import org.joda.time.DateTime
-
-import java.nio.file.Files.readAllBytes
-import play.api.libs.json.JsValue
 import play.api.libs.json.Json
+import play.api.libs.json.JsValue
 import play.api.mvc._
-import org.apache.commons.io.FilenameUtils
-import io.sentry.Sentry
-import play.api.http.HttpEntity
-import FileInfoService.FileObject
+import play.api.mvc.Action
+import play.api.mvc.AnyContent
+import play.api.mvc.InjectedController
+import play.api.mvc.MultipartFormData
+import play.api.mvc.Result
 
-import scala.util.Success
-import scala.util.Failure
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import akka.stream.scaladsl.StreamConverters
-
+import java.nio.file.Files.readAllBytes
+import scala.concurrent._
+import scala.concurrent.Future
+import scala.concurrent.blocking
 import scala.concurrent.duration._
+import scala.util.Failure
+import scala.util.Success
+
+import com.sksamuel.scrimage.ImmutableImage
+import com.sksamuel.scrimage.ScaleMethod
 import com.sksamuel.scrimage.metadata.ImageMetadata
 import com.sksamuel.scrimage.nio.GifWriter
 import com.sksamuel.scrimage.nio.ImageWriter
 import com.sksamuel.scrimage.nio.JpegWriter
 import com.sksamuel.scrimage.nio.PngWriter
-import com.sksamuel.scrimage.ImmutableImage
-import com.sksamuel.scrimage.ScaleMethod
 import io.sentry.Hint
-
-import play.api.mvc.MultipartFormData
-import xcala.play.utils.WithExecutionContext
-import akka.util.ByteString
-import java.io.ByteArrayOutputStream
-import scala.concurrent._
-import scala.concurrent.blocking
-import akka.stream.scaladsl.Source
-import akka.stream.IOResult
-import akka.actor.ActorSystem
-import akka.stream.scaladsl.Flow
+import io.sentry.Sentry
+import org.apache.commons.io.FilenameUtils
+import org.joda.time.DateTime
+import reactivemongo.api.bson._
 
 trait FileControllerBase
     extends InjectedController

@@ -2,11 +2,14 @@ package xcala.play.controllers
 
 import xcala.play.models.Paginated
 import xcala.play.models.QueryOptions
-import play.api.mvc._
-import reactivemongo.api.bson._
 import xcala.play.services._
-import scala.concurrent.Future
 import xcala.play.utils.WithExecutionContext
+
+import play.api.mvc._
+
+import scala.concurrent.Future
+
+import reactivemongo.api.bson._
 
 trait DataReadController[A] extends InjectedController with WithComposableActions with WithExecutionContext {
 

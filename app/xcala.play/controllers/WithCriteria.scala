@@ -1,11 +1,13 @@
 package xcala.play.controllers
 
-import xcala.play.services.DataReadCriteriaService
-import play.api.mvc._
-import play.api.data.Form
-import scala.concurrent.Future
 import xcala.play.models._
+import xcala.play.services.DataReadCriteriaService
 import xcala.play.utils.WithExecutionContext
+
+import play.api.data.Form
+import play.api.mvc._
+
+import scala.concurrent.Future
 
 trait WithCriteria[A, B] extends DataReadController[A] with WithFormBinding with WithExecutionContext {
   self: InjectedController =>

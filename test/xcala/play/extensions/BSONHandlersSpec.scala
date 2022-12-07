@@ -1,10 +1,11 @@
 package xcala.play.extensions
 
-import org.specs2.mutable._
-import org.specs2.runner._
-import org.junit.runner._
 import xcala.play.models.MultilangModel
 import xcala.play.models.Range
+
+import org.junit.runner._
+import org.specs2.mutable._
+import org.specs2.runner._
 import reactivemongo.api.bson._
 
 @RunWith(classOf[JUnitRunner])

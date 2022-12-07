@@ -1,11 +1,12 @@
 package xcala.play.utils
 
-import org.apache.tika.metadata.Metadata
-import org.apache.tika.metadata.TikaCoreProperties
-import org.apache.tika.config.TikaConfig
-import org.apache.tika.io.TikaInputStream
 import java.io.File
 import java.io.FileInputStream
+
+import org.apache.tika.config.TikaConfig
+import org.apache.tika.io.TikaInputStream
+import org.apache.tika.metadata.Metadata
+import org.apache.tika.metadata.TikaCoreProperties
 
 object TikaMimeDetector {
 

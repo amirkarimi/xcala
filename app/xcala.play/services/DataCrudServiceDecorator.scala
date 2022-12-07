@@ -1,9 +1,11 @@
 package xcala.play.services
 
+import xcala.play.utils.WithExecutionContext
+
 import scala.concurrent.Future
+
 import reactivemongo.api.bson._
 import reactivemongo.api.commands.WriteResult
-import xcala.play.utils.WithExecutionContext
 
 trait DataCrudServiceDecorator[A, B]
     extends DataReadServiceDecorator[A, B]

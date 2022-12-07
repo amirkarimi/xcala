@@ -1,12 +1,14 @@
 package xcala.play.extensions
 
-import org.specs2.mutable._
-import play.api.i18n._
+import FormHelper._
+import xcala.play.services.WithTestDb
+
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats._
-import FormHelper._
-import xcala.play.services.WithTestDb
+import play.api.i18n._
+
+import org.specs2.mutable._
 
 class FormHelperSpec extends Specification {
 

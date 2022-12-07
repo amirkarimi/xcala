@@ -1,9 +1,8 @@
 package xcala.play.services
 
+import xcala.play.helpers.FutureHelpers._
+
 import akka.actor.ActorSystem
-import org.specs2.execute.AsResult
-import org.specs2.execute.Result
-import org.specs2.mutable.Around
 import play.api._
 import play.api.i18n.Lang
 import play.api.i18n.LangImplicits
@@ -12,11 +11,13 @@ import play.api.i18n.MessagesApi
 import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
 
-import scala.util.Random
-import xcala.play.helpers.FutureHelpers._
-
 import scala.concurrent.ExecutionContext
 import scala.reflect.ClassTag
+import scala.util.Random
+
+import org.specs2.execute.AsResult
+import org.specs2.execute.Result
+import org.specs2.mutable.Around
 
 trait WithTestDb extends Around with LangImplicits {
 

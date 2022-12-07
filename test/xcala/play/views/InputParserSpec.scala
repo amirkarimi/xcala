@@ -1,9 +1,10 @@
 package xcala.play.views
 
+import views.html.xcala.play.bootstrap3._
+
+import org.junit.runner._
 import org.specs2.mutable._
 import org.specs2.runner._
-import org.junit.runner._
-import views.html.xcala.play.bootstrap3._
 
 @RunWith(classOf[JUnitRunner])
 class InputParserSpec extends Specification {

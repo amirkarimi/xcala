@@ -1,8 +1,9 @@
 package xcala.play.extensions
 
+import xcala.play.models.MultilangModel
+
 import play.api.data._
 import play.api.data.Forms._
-import xcala.play.models.MultilangModel
 
 object Forms {
   def multilangText: Mapping[List[MultilangModel[String]]] = multilangMapping(nonEmptyText)

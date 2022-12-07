@@ -1,18 +1,19 @@
 package xcala.play.services
 
-import org.joda.time.DateTime
-import reactivemongo.api.bson.Macros
-import reactivemongo.api.bson._
-import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.indexes._
+import xcala.play.extensions.BSONHandlers._
 import xcala.play.models.Indexable
 import xcala.play.models.IndexedItem
-import xcala.play.extensions.BSONHandlers._
 
 import scala.concurrent.Future
-import reactivemongo.api.bson.collection.BSONCollection
-import scala.util.Success
 import scala.util.Failure
+import scala.util.Success
+
+import org.joda.time.DateTime
+import reactivemongo.api.bson._
+import reactivemongo.api.bson.Macros
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.commands.WriteResult
+import reactivemongo.api.indexes._
 
 trait IndexableService[A <: Indexable]
     extends DataService
