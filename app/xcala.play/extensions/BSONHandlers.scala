@@ -1,15 +1,16 @@
 package xcala.play.extensions
 
-import reactivemongo.api.bson._
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
 import xcala.play.models.MultilangModel
 import xcala.play.models.Range
 
+import scala.reflect.ClassTag
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-import scala.reflect.ClassTag
+
+import org.joda.time.DateTime
+import org.joda.time.LocalDate
+import reactivemongo.api.bson._
 
 object BSONHandlers {
 

@@ -1,12 +1,12 @@
 package xcala.play.extensions
 
-import play.api.mvc.Filter
 import akka.stream.Materializer
+import play.api.mvc.Filter
 import play.api.mvc.RequestHeader
 import play.api.mvc.Result
 
-import scala.concurrent.Future
 import javax.inject.Inject
+import scala.concurrent.Future
 import scala.util.matching.Regex
 
 object UrlParamsFilter {

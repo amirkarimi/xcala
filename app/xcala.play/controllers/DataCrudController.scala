@@ -1,8 +1,9 @@
 package xcala.play.controllers
 
-import xcala.play.services._
-import play.api.mvc.InjectedController
 import xcala.play.models.Permission
+import xcala.play.services._
+
+import play.api.mvc.InjectedController
 
 trait DataCrudController[A] extends DataReadController[A] with DataCudController[A] {
   self: InjectedController =>

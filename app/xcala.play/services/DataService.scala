@@ -1,16 +1,18 @@
 package xcala.play.services
 
+import xcala.play.extensions.BSONHandlers._
+import xcala.play.models._
+import xcala.play.utils.WithExecutionContext
+
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import reactivemongo.api.bson._
-import reactivemongo.api.FailoverStrategy
-import reactivemongo.api._
-import reactivemongo.api.bson.collection._
-import xcala.play.models._
-import xcala.play.extensions.BSONHandlers._
+
 import org.joda.time.DateTime
+import reactivemongo.api._
+import reactivemongo.api.FailoverStrategy
+import reactivemongo.api.bson._
+import reactivemongo.api.bson.collection._
 import reactivemongo.api.commands._
-import xcala.play.utils.WithExecutionContext
 
 /** Represents the data service foundation.
   */

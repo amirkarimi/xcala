@@ -1,12 +1,14 @@
 package xcala.play.controllers
 
-import play.api.i18n.I18nSupport
-import reactivemongo.api.bson._
 import xcala.play.models._
 import xcala.play.services._
+import xcala.play.utils.WithExecutionContext
+
+import play.api.i18n.I18nSupport
 
 import scala.concurrent.Future
-import xcala.play.utils.WithExecutionContext
+
+import reactivemongo.api.bson._
 
 trait MultilangDataReadController[A <: WithLang]
     extends DataReadController[A]

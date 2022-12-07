@@ -1,8 +1,24 @@
 package xcala.play.services.s3
 
+import okhttp3.ConnectionPool
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
+
 import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.lang
+import java.util.Arrays
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
+import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
+
 import io.minio.BucketExistsArgs
 import io.minio.GetObjectArgs
 import io.minio.ListObjectsArgs
@@ -12,23 +28,8 @@ import io.minio.RemoveObjectArgs
 import io.minio.Result
 import io.minio.UploadObjectArgs
 import io.minio.messages.Item
-
-import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
-import scala.util.Failure
-import scala.util.Success
-import scala.util.Try
-import io.sentry.Sentry
 import io.sentry.Hint
-import javax.inject.Singleton
-import javax.inject.Inject
-import java.util.concurrent.TimeUnit
-import okhttp3.OkHttpClient
-import okhttp3.ConnectionPool
-import okhttp3.Protocol
-import java.util.Arrays
-import java.io.InputStream
+import io.sentry.Sentry
 
 object FileStorageService {
 
@@ -133,7 +134,7 @@ class FileStorageService @Inject() (
         content = stream,
         contentType = contentType,
         contentLength = contentLength,
-        path = path,
+        path = path
       )
 
     }

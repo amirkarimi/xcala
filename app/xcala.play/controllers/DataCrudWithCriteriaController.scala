@@ -1,6 +1,7 @@
 package xcala.play.controllers
 
 import xcala.play.services._
+
 import play.api.mvc.InjectedController
 
 trait DataCrudWithCriteriaController[A, B] extends DataCrudController[A] with WithCriteria[A, B] {

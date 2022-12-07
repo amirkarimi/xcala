@@ -1,7 +1,9 @@
 package xcala.play.services
 
 import xcala.play.models._
+
 import scala.concurrent.Future
+
 import reactivemongo.api.bson.BSONDocument
 
 trait DataReadCriteriaService[A, B] extends DataReadService[A] {

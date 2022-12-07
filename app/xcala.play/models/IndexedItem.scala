@@ -1,8 +1,8 @@
 package xcala.play.models
 
+import org.joda.time.DateTime
 import reactivemongo.api.bson.BSONObjectID
 import reactivemongo.api.bson.Macros.Annotations.Key
-import org.joda.time.DateTime
 
 final case class IndexedItem(
     @Key("_id") id: Option[BSONObjectID],

@@ -1,7 +1,9 @@
 package xcala.play.extensions
 
-import play.api.mvc._
 import xcala.play.models._
+
+import play.api.mvc._
+
 import io.lemonlabs.uri.typesafe.dsl._
 
 object PaginatedPersistor {

@@ -1,9 +1,10 @@
 package views.html.xcala.play
 
-import play.api.i18n.Messages
 import xcala.play.models._
-import play.twirl.api.HtmlFormat
+
+import play.api.i18n.Messages
 import play.twirl.api.Html
+import play.twirl.api.HtmlFormat
 
 object grid {
 

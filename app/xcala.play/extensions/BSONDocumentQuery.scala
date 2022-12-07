@@ -1,8 +1,9 @@
 package xcala.play.extensions
 
+import xcala.play.models._
+
 import org.joda.time.DateTime
 import reactivemongo.api.bson._
-import xcala.play.models._
 
 object BSONDocumentQuery {
 

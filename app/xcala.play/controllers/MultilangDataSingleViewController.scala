@@ -1,15 +1,17 @@
 package xcala.play.controllers
 
+import xcala.play.models._
+import xcala.play.services._
+import xcala.play.utils.WithExecutionContext
+
 import play.api.i18n.I18nSupport
 import play.api.i18n.Lang
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import reactivemongo.api.bson._
-import xcala.play.models._
-import xcala.play.services._
 
 import scala.concurrent.Future
-import xcala.play.utils.WithExecutionContext
+
+import reactivemongo.api.bson._
 
 trait MultilangDataSingleViewController[A <: WithLang]
     extends Results

@@ -1,8 +1,10 @@
 package xcala.play.services
 
-import scala.concurrent.Future
-import reactivemongo.api._
 import xcala.play.utils.WithExecutionContext
+
+import scala.concurrent.Future
+
+import reactivemongo.api._
 
 trait DatabaseConfig extends WithExecutionContext {
   def mongoUri: String

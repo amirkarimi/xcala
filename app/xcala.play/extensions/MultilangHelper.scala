@@ -1,6 +1,7 @@
 package xcala.play.extensions
 
 import xcala.play.models.MultilangModel
+
 import play.api.i18n.Messages
 
 object MultilangHelper {

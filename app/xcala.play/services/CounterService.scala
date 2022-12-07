@@ -1,11 +1,12 @@
 package xcala.play.services
 
-import reactivemongo.api.bson._
-import reactivemongo.api.bson.collection.BSONCollection
-import reactivemongo.api.commands.WriteResult
 import xcala.play.utils.WithExecutionContext
 
 import scala.concurrent.Future
+
+import reactivemongo.api.bson._
+import reactivemongo.api.bson.collection.BSONCollection
+import reactivemongo.api.commands.WriteResult
 
 trait CounterService extends DataService with WithExecutionContext {
 

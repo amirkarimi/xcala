@@ -1,9 +1,10 @@
 package xcala.play.extensions
 
+import xcala.play.models.WrappedHeaders
+
+import play.api.i18n.Lang
 import play.api.mvc._
 import play.mvc.Http.HeaderNames
-import play.api.i18n.Lang
-import xcala.play.models.WrappedHeaders
 
 object HttpHelper {
 

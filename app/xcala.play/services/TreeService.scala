@@ -1,10 +1,13 @@
 package xcala.play.services
 
-import scala.concurrent.Future
-import reactivemongo.api.bson._
-import play.api.i18n.Lang
 import xcala.play.models._
 import xcala.play.utils.WithExecutionContext
+
+import play.api.i18n.Lang
+
+import scala.concurrent.Future
+
+import reactivemongo.api.bson._
 
 trait TreeService[A, B <: TreeModelBase[B]]
     extends DataReadServiceImpl[A]
