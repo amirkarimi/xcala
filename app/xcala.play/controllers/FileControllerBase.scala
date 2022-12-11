@@ -2,7 +2,6 @@ package xcala.play.controllers
 
 import xcala.play.models._
 import xcala.play.services._
-import xcala.play.services.FileInfoService.FileObject
 import xcala.play.utils.WithExecutionContext
 
 import akka.actor.ActorSystem
@@ -27,11 +26,9 @@ import play.api.mvc.MultipartFormData
 import play.api.mvc.Result
 
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import java.nio.file.Files.readAllBytes
 import scala.concurrent._
 import scala.concurrent.Future
-import scala.concurrent.blocking
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
@@ -49,23 +46,24 @@ import org.apache.commons.io.FilenameUtils
 import org.joda.time.DateTime
 import reactivemongo.api.bson._
 
-trait FileControllerBase
+private[controllers] trait FileControllerBase
     extends InjectedController
     with WithComposableActions
     with WithExecutionContext
     with I18nSupport {
 
+  implicit val messagesProvider: Messages
   val fileInfoService: FileInfoService
   val folderService: FolderService
   val cache: AsyncCacheApi
-  val configuration: Configuration
   val actorSystem: ActorSystem
+  implicit val configuration: Configuration
   implicit val mat: Materializer
 
   def defaultInternalServerError(implicit adminRequest: RequestType[_]): Result
 
-  private val CONTENT_DISPOSITION_ATTACHMENT = "attachment"
-  private val CONTENT_DISPOSITION_INLINE     = "inline"
+  protected val CONTENT_DISPOSITION_ATTACHMENT = "attachment"
+  protected val CONTENT_DISPOSITION_INLINE     = "inline"
 
   def selector: Action[AnyContent]
 
@@ -126,6 +124,7 @@ trait FileControllerBase
           case Right(fileId) =>
             Ok(s"""{"id":"${fileId.stringify}", "label":"${fileInfo.name}"}""")
           case Left(e) =>
+            Sentry.captureException(new Throwable(e))
             InternalServerError(e)
         }
       }
@@ -205,27 +204,13 @@ trait FileControllerBase
       .map { _ =>
         Ok("Ok")
       }
-      .recover { case _: Throwable =>
+      .recover { case e: Throwable =>
+        Sentry.captureException(e)
         defaultInternalServerError
       }
   }
 
-  private def renderFile(id: BSONObjectID, dispositionMode: String): Future[Result] = {
-    fileInfoService.findObjectById(id).transform {
-
-      case Success(file) =>
-        Success(renderFile(file, dispositionMode))
-
-      case Failure(e) if e.getMessage.toLowerCase.contains("not exist") =>
-        Success(NotFound)
-
-      case _ =>
-        Success(InternalServerError)
-
-    }
-  }
-
-  private def renderFile(file: FileObject, dispositionMode: String): Result = {
+  protected def renderFile(file: FileInfoService.FileObject, dispositionMode: String): Result = {
     val res: Source[ByteString, Future[IOResult]] =
       StreamConverters
         .fromInputStream(() => file.content)
@@ -280,77 +265,23 @@ trait FileControllerBase
     )
   }
 
-  def getFile(id: BSONObjectID): Action[AnyContent] = Action.async {
-    renderFile(id, CONTENT_DISPOSITION_ATTACHMENT)
-  }
+  protected def renderFile(id: BSONObjectID, dispositionMode: String): Future[Result] = {
+    fileInfoService.findObjectById(id).transform {
 
-  def getImage(
-      id: String,
-      width: Option[Int],
-      height: Option[Int]
-  ): Action[AnyContent] = Action.async {
-    BSONObjectID.parse(id.split('.').headOption.getOrElse(id)) match {
-      case Success(bsonObjectId) =>
-        fileInfoService.findObjectById(bsonObjectId).transformWith {
-          case Success(file) if !file.isImage =>
-            Future.successful(renderFile(file, CONTENT_DISPOSITION_INLINE))
-          case Success(file) if file.isImage && width.isEmpty && height.isEmpty =>
-            Future.successful(renderFile(file, CONTENT_DISPOSITION_INLINE))
-          case Success(file) if file.isImage =>
-            cache
-              .getOrElseUpdate(s"image$id${width.getOrElse("")}${height.getOrElse("")}") {
+      case Success(file) =>
+        Success(renderFile(file, dispositionMode))
 
-                Future {
-                  val is: InputStream = file.content
+      case Failure(e) if e.getMessage.toLowerCase.contains("not exist") =>
+        Success(NotFound)
 
-                  val image: ImmutableImage = ImmutableImage.loader().fromStream(is)
+      case Failure(e) =>
+        Sentry.captureException(e)
+        Success(InternalServerError)
 
-                  // Applying cleanups
-                  is.close()
-
-                  val safeWidth =
-                    Seq(configuration.getOptional[Int]("file.image.maxResize.width"), width).flatten
-                      .reduceOption(_ min _)
-                  val safeHeight =
-                    Seq(configuration.getOptional[Int]("file.image.maxResize.height"), height).flatten
-                      .reduceOption(_ min _)
-
-                  val widthToHeightRatio: Double = image.width.toDouble / image.height
-
-                  renderImage(
-                    image,
-                    safeWidth,
-                    safeHeight,
-                    file.contentType.getOrElse(""),
-                    widthToHeightRatio
-                  )
-                }.flatten
-              }
-              .transformWith {
-                case Success(result) =>
-                  Future.successful(result)
-                case Failure(e) =>
-                  Sentry.captureException(e)
-                  Sentry.captureMessage("An Error has occurred while loading the image file: " + id)
-                  Future.successful(InternalServerError)
-              }
-          case Failure(e) if e.getMessage.toLowerCase.contains("not exist") =>
-            Future.successful(NotFound)
-
-          case _ =>
-            Future.successful(InternalServerError)
-
-        }
-      case Failure(exception) =>
-        val hint = new Hint
-        hint.set("id", id)
-        Sentry.captureException(exception)
-        Future.successful(NotFound)
     }
-
   }
 
-  private def renderImage(
+  protected def renderImage(
       image: ImmutableImage,
       width: Option[Int],
       height: Option[Int],
@@ -389,7 +320,7 @@ trait FileControllerBase
       }
     }
 
-  private def getImageWriter(contentType: String): ImageWriter = contentType match {
+  protected def getImageWriter(contentType: String): ImageWriter = contentType match {
     case "image/gif" => GifWriter.Default
     case "image/png" => PngWriter.MinCompression
     case _           => JpegWriter.Default
