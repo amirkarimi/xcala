@@ -26,6 +26,7 @@ import play.api.mvc.MultipartFormData
 import play.api.mvc.Result
 
 import java.io.ByteArrayOutputStream
+import java.net.SocketTimeoutException
 import java.nio.file.Files.readAllBytes
 import scala.concurrent._
 import scala.concurrent.Future
@@ -271,13 +272,18 @@ private[controllers] trait FileControllerBase
       case Success(file) =>
         Success(renderFile(file, dispositionMode))
 
-      case Failure(e) if e.getMessage.toLowerCase.contains("not exist") =>
-        Success(NotFound)
-
       case Failure(e) =>
-        Sentry.captureException(e)
-        Success(InternalServerError)
+        e match {
+          case _: SocketTimeoutException =>
+            Success(InternalServerError)
 
+          case e if e.getMessage.toLowerCase.contains("not exist") =>
+            Success(NotFound)
+
+          case e =>
+            Sentry.captureException(e)
+            Success(InternalServerError)
+        }
     }
   }
 

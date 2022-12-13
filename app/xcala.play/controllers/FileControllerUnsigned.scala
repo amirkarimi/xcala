@@ -4,6 +4,7 @@ import xcala.play.utils.SourceUtils
 
 import play.api.mvc._
 
+import java.net.SocketTimeoutException
 import scala.concurrent.Future
 import scala.util.Failure
 import scala.util.Success
@@ -78,12 +79,18 @@ trait FileControllerUnsigned extends FileControllerBase {
                   Sentry.captureException(e, hint)
                   Future.successful(InternalServerError)
               }
-          case Failure(e) if e.getMessage.toLowerCase.contains("not exist") =>
-            Future.successful(NotFound)
-
           case Failure(e) =>
-            Sentry.captureException(e)
-            Future.successful(InternalServerError)
+            e match {
+              case _: SocketTimeoutException =>
+                Future.successful(InternalServerError)
+
+              case e if e.getMessage.toLowerCase.contains("not exist") =>
+                Future.successful(NotFound)
+
+              case e =>
+                Sentry.captureException(e)
+                Future.successful(InternalServerError)
+            }
 
         }
       case Failure(exception) =>
