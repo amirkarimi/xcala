@@ -65,7 +65,7 @@ trait WithFileUploader extends WithExecutionContext {
       .map { f =>
         FormError(
           f.key.dropRight(AutoUploadSuffix.length + 1),
-          Messages("error.fileToLarge", maxLength.get / 1024)
+          Messages("error.fileToLargeMB", maxLength.get / 1024 / 1024)
         )
       }
 
@@ -118,7 +118,7 @@ trait WithFileUploader extends WithExecutionContext {
     }
   }
 
-  private def saveFile(filePart: MultipartFormData.FilePart[TemporaryFile]): Future[Option[BSONObjectID]] = {
+  protected def saveFile(filePart: MultipartFormData.FilePart[TemporaryFile]): Future[Option[BSONObjectID]] = {
     val fileExtension = FilenameUtils.getExtension(filePart.filename)
 
     val fileInfo = FileInfo(
