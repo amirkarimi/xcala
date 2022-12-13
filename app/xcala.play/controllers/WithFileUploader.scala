@@ -65,7 +65,7 @@ trait WithFileUploader extends WithExecutionContext {
       .map { f =>
         FormError(
           f.key.dropRight(AutoUploadSuffix.length + 1),
-          Messages("error.fileToLargeMB", maxLength.get / 1024 / 1024)
+          Messages("error.fileToLargeMB", maxLength.get / 1024.0 / 1024.0)
         )
       }
 
