@@ -118,7 +118,7 @@ trait WithFileUploader extends WithExecutionContext {
     }
   }
 
-  protected def saveFile(filePart: MultipartFormData.FilePart[TemporaryFile]): Future[Option[BSONObjectID]] = {
+  private def saveFile(filePart: MultipartFormData.FilePart[TemporaryFile]): Future[Option[BSONObjectID]] = {
     val fileExtension = FilenameUtils.getExtension(filePart.filename)
 
     val fileInfo = FileInfo(
