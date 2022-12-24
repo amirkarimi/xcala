@@ -5,6 +5,7 @@ import xcala.play.services._
 import xcala.play.utils.WithExecutionContext
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.model.MediaTypes
 import akka.stream.IOResult
 import akka.stream.Materializer
 import akka.stream.scaladsl.Flow
@@ -37,10 +38,7 @@ import scala.util.Success
 import com.sksamuel.scrimage.ImmutableImage
 import com.sksamuel.scrimage.ScaleMethod
 import com.sksamuel.scrimage.metadata.ImageMetadata
-import com.sksamuel.scrimage.nio.GifWriter
-import com.sksamuel.scrimage.nio.ImageWriter
-import com.sksamuel.scrimage.nio.JpegWriter
-import com.sksamuel.scrimage.nio.PngWriter
+import com.sksamuel.scrimage.webp.WebpWriter
 import io.sentry.Hint
 import io.sentry.Sentry
 import org.apache.commons.io.FilenameUtils
@@ -320,16 +318,15 @@ private[controllers] trait FileControllerBase
 
         val body = HttpEntity.Strict(
           ByteString(bos.toByteArray),
-          Some(contentType)
+          Some(MediaTypes.`image/webp`.value)
         )
         Result(header = ResponseHeader(200), body)
       }
     }
 
-  protected def getImageWriter(contentType: String): ImageWriter = contentType match {
-    case "image/gif" => GifWriter.Default
-    case "image/png" => PngWriter.MinCompression
-    case _           => JpegWriter.Default
+  protected def getImageWriter(contentType: String): WebpWriter = contentType match {
+    // case "image/gif" => Gif2WebpWriter.DEFAULT
+    case _ => WebpWriter.DEFAULT
   }
 
 }
