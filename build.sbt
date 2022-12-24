@@ -2,7 +2,7 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.11.0-SNAPSHOT"
+version := "0.12.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -45,6 +45,7 @@ libraryDependencies ++= Seq(
   "io.minio"               % "minio"                      % "8.4.6",
   "commons-io"             % "commons-io"                 % "2.11.0",
   "com.sksamuel.scrimage" %% "scrimage-scala"             % "4.0.32",
+  "com.sksamuel.scrimage"  % "scrimage-webp"              % "4.0.32",
   specs2                   % Test
 )
 
