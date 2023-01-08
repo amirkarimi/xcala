@@ -15,23 +15,28 @@ trait TreeService[A, B <: TreeModelBase[B]]
     with WithExecutionContext {
   def getModel(entity: A, children: List[B]): B
 
-  def find(lang: Option[Lang]): Future[List[B]] = {
-    findItemsUnder(None, lang)
+  def find(lang: Option[Lang], initialDocument: BSONDocument = BSONDocument()): Future[List[B]] = {
+    findItemsUnder(initialDocument, None, lang)
   }
 
-  private def findItemsUnder(parentId: Option[BSONObjectID], lang: Option[Lang] = None): Future[List[B]] = {
+  private def findItemsUnder(
+      initialDocument: BSONDocument,
+      parentId: Option[BSONObjectID],
+      lang: Option[Lang] = None
+  ): Future[List[B]] = {
     val query = (parentId, lang) match {
       case (None, lang) =>
-        BSONDocument("lang" -> lang.map(_.code), "parentId" -> BSONDocument("$exists" -> false))
+        initialDocument ++ BSONDocument("lang" -> lang.map(_.code), "parentId" -> BSONDocument("$exists" -> false))
 
-      case (Some(id), None) => BSONDocument("parentId" -> id)
-      case _                => throw new IllegalArgumentException
+      case (Some(id), None) =>
+        initialDocument ++ BSONDocument("parentId" -> id)
+      case _ => throw new IllegalArgumentException
     }
 
-    findItemsUnder(query)
+    findItemsUnder(query, initialDocument)
   }
 
-  protected def findItemsUnder(query: BSONDocument): Future[List[B]] = {
+  protected def findItemsUnder(query: BSONDocument, initialDocument: BSONDocument): Future[List[B]] = {
     val itemsFuture = findQuery(query).flatMap { query =>
       query.sort(BSONDocument("order" -> 1)).cursor[BSONDocument]().collect[List]()
     }
@@ -39,7 +44,7 @@ trait TreeService[A, B <: TreeModelBase[B]]
     itemsFuture.flatMap { items =>
       val itemModels = items.map { doc =>
         val id = doc.getAsOpt[BSONObjectID]("_id")
-        findItemsUnder(id).map { childMenus =>
+        findItemsUnder(initialDocument, id).map { childMenus =>
           getModel(documentHandler.readOpt(doc).get, childMenus)
         }
       }
