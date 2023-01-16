@@ -35,7 +35,8 @@ trait DataCollectionService extends DataService {
     }
   }
 
-  protected def onCollectionInitialized(@annotation.nowarn collection: BSONCollection): Unit = {}
+  protected def onCollectionInitialized(collection: BSONCollection): Unit = {}
+
 }
 
 trait WithDbCommand extends DataService {
@@ -206,7 +207,7 @@ trait DataCrudService[A]
   private def getDocWithId(model: A) = {
     val fieldName = "_id"
     val doc       = documentHandler.writeOpt(model).get
-    val objectId  = doc.getAsOpt[BSONObjectID](fieldName).getOrElse(BSONObjectID.generate)
+    val objectId  = doc.getAsOpt[BSONObjectID](fieldName).getOrElse(BSONObjectID.generate())
     val newDoc = BSONDocument(
       doc.elements.filter(_.name != fieldName).map(e => (e.name, e.value)) :+ (fieldName -> objectId)
     )

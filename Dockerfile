@@ -1,6 +1,6 @@
 ARG JVM=openjdk-11.0.16
-ARG SBT_VERSION=1.8.0
-ARG SCALA_VERSION=2.12.17
+ARG SBT_VERSION=1.8.1
+ARG SCALA_VERSION=2.13.10
 
 FROM hub.hamdocker.ir/sbtscala/scala-sbt:${JVM}_${SBT_VERSION}_${SCALA_VERSION} as builder
 

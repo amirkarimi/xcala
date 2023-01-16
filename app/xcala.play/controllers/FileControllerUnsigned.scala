@@ -92,6 +92,8 @@ trait FileControllerUnsigned extends FileControllerBase {
                 Future.successful(InternalServerError)
             }
 
+          case _ => ???
+
         }
       case Failure(exception) =>
         val hint = new Hint

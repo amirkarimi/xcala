@@ -1,6 +1,6 @@
 @(field: Field, hasTimePicker: Boolean, args: (Symbol,Any)*)(implicit messages: Messages)
 
-@htmlArgs = @{args.filter(arg => !arg._1.name.startsWith("_") && arg._1 != 'id).toMap}
+@htmlArgs = @{args.filter(arg => !arg._1.name.startsWith("_") && arg._1 != Symbol("id")).toMap}
 
 <input type="hidden"
 	class="datetimepicker"

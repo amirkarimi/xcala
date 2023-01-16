@@ -69,7 +69,7 @@ class FileInfoService @Inject() (
   }
 
   def upload(fileInfo: FileInfo, content: Array[Byte]): Future[Either[String, BSONObjectID]] = {
-    val id = BSONObjectID.generate
+    val id = BSONObjectID.generate()
     fileStorageService
       .upload(
         objectName = id.stringify,

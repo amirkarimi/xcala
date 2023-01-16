@@ -29,7 +29,9 @@ object BSONDocumentQuery {
             doc ++ BSONDocument(field -> query)
           case SearchType.Contains =>
             doc ++ BSONDocument("keywords." + field -> BSONDocument("$all" -> getQueryParts(query)))
+          case _ => ???
         }
+      case _ => ???
     }
 
     private def getQueryParts(query: String): List[String] = {

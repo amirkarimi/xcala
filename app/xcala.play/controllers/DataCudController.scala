@@ -29,7 +29,7 @@ trait DataCudController[A]
   def editView(form: Form[A], model: A)(implicit request: RequestType[_]): Future[Result]
 
   def create: Action[AnyContent] = action.async { implicit request =>
-    createView(defaultForm.bindFromRequest.discardingErrors)
+    createView(defaultForm.bindFromRequest().discardingErrors)
   }
 
   def createPost: Action[AnyContent] = action.async { implicit request =>

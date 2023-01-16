@@ -25,7 +25,7 @@ sealed abstract class ImageSignatureParameters(id: BSONObjectID, isProtected: Bo
     implicit configuration: Configuration
 ) extends SignatureParameters {
 
-  def asRawText: String =
+  def asRawText(): String =
     s"${id.stringify}-image-${if (isProtected) "protected" else "public"}-${expiryTime.map(_.getMillis.toString).mkString}"
 
   override def isValid(incomingSignature: String): Boolean =
@@ -36,7 +36,7 @@ sealed abstract class ImageSignatureParameters(id: BSONObjectID, isProtected: Bo
 sealed abstract class FileSignatureParameters(id: BSONObjectID, isProtected: Boolean, expiryTime: Option[DateTime])(
     implicit configuration: Configuration
 ) extends SignatureParameters {
-  def asRawText: String = s"${id.stringify}-file-${if (isProtected) "protected" else "public"}"
+  def asRawText(): String = s"${id.stringify}-file-${if (isProtected) "protected" else "public"}"
 
   override def isValid(incomingSignature: String): Boolean =
     super.isValid(incomingSignature) && expiryTime.forall(_.isAfterNow())

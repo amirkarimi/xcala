@@ -55,7 +55,7 @@ object SortOptions {
   )
 
   def getFromRequest()(implicit request: Request[_], formBinding: FormBinding): SortOptions = {
-    form.bindFromRequest.value.getOrElse(SortOptions())
+    form.bindFromRequest().value.getOrElse(SortOptions())
   }
 
 }

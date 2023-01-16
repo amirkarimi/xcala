@@ -12,7 +12,7 @@ trait WithFormBinding {
   protected def bindForm[B](
       form: Form[B]
   )(implicit request: RequestType[_], formBinding: FormBinding): Future[Form[B]] = {
-    Future.successful(form.bindFromRequest)
+    Future.successful(form.bindFromRequest())
   }
 
 }

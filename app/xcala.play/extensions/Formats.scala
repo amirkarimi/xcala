@@ -20,7 +20,7 @@ object Formats {
       key: String,
       data: Map[String, String]
   ): Either[Seq[FormError], T] = {
-    stringFormat.bind(key, data).right.flatMap { s =>
+    stringFormat.bind(key, data).flatMap { s =>
       parse(s).toEither.left
         .map(_ => Seq(FormError(key, errMsg, errArgs)))
     }

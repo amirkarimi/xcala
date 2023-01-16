@@ -9,7 +9,7 @@
     </div>
 }
 
-@helper.input(collectionField, Seq('_ignoreFormControlClass -> true, '_inputDivCol -> 10) ++ args:_*) { (id, name, _, _) =>
+@helper.input(collectionField, Seq(Symbol("_ignoreFormControlClass") -> true, Symbol("_inputDivCol") -> 10) ++ args:_*) { (id, name, _, _) =>
     <div id="@id" class="collection-input" data-collection-scope="@name">
         @helper.repeat(collectionField, 0) { field =>
             @collectionFieldBuilder(field)
