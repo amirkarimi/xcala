@@ -5,12 +5,12 @@
         <div class="row">
             <div class="col-sm-6">
                 @defining(field("from")) { field =>
-                    @inputGenerator(field, ('placeholder -> Messages("from")) +: args)
+                    @inputGenerator(field, (Symbol("placeholder") -> Messages("from")) +: args)
                 }
             </div>
             <div class="col-sm-6">
                 @defining(field("to")) { field =>
-                    @inputGenerator(field, ('placeholder -> Messages("to")) +: args)
+                    @inputGenerator(field, (Symbol("placeholder") -> Messages("to")) +: args)
                 }
             </div>
         </div>

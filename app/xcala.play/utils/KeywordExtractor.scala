@@ -1,11 +1,15 @@
 package xcala.play.utils
 
+import scala.collection.immutable.ArraySeq
+
 object KeywordExtractor {
-  private final val breaks = """؟|\?|؛|!|%|:|=|#|,|،|-|_|\(|\)|\[|\]|\"|\'|/|<br >|[\u200B-\u200D\uFEFF]|<br/>|[<>]""".r
+  val BOM = "\uFEFF"
+
+  private final val breaks = ("""؟|\?|؛|!|%|:|=|#|,|،|-|_|\(|\)|\[|\]|\"|\'|/|<br >|[​-‍]|<br/>|[<>]""" + s"|$BOM").r
 
   def getKeywords(text: String): Seq[String] = {
     val withSpace = breaks.replaceAllIn(text.toLowerCase(), " ").replaceAll("<br  >", " ")
-    withSpace.split(" ").filter(_ != "")
+    ArraySeq.unsafeWrapArray(withSpace.split(" ").filter(_ != ""))
   }
 
   def removeSpecialCharacters(text: String): String = {

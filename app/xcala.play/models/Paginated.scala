@@ -29,7 +29,7 @@ final case class Paginated[A](
   def sort(sortExpression: Option[String]): Paginated[A] = copy(queryOptions = queryOptions.sort(sortExpression))
 
   def toQueryString: String = {
-    val encodedArgs = args.mapValues(java.net.URLEncoder.encode(_, "UTF-8"))
+    val encodedArgs = args.view.mapValues(java.net.URLEncoder.encode(_, "UTF-8"))
 
     val queryStringData = QueryOptions.form.fill(queryOptions).data ++ encodedArgs
 

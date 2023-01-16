@@ -1,7 +1,7 @@
 @(elements: views.html.helper.FieldElements)
 
 @{
-    elements.args.get('_ignoreFormControlClass) match {
+    elements.args.get(Symbol("_ignoreFormControlClass")) match {
         case Some(r: Boolean) if r =>
             elements.input 
         case _ =>

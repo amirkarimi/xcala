@@ -12,9 +12,9 @@ import java.util.Arrays
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import scala.jdk.CollectionConverters._
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
@@ -79,7 +79,7 @@ class FileStorageService @Inject() (
   ): Future[Boolean] = Future {
     Try {
 
-      val userMetaData = mapAsJavaMap(Map("name" -> originalName))
+      val userMetaData = Map("name" -> originalName).asJava
       val cleanPath    = getCleanPath(path)
       val f            = File.createTempFile(objectName, "")
       val fos          = new FileOutputStream(f)

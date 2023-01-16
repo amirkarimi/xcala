@@ -32,7 +32,7 @@ object gridWithPager {
       columns: Col[A]*
   )(implicit messages: Messages): HtmlFormat.Appendable = {
     Html(
-      grid.renderGrid(paginated, updateTarget, columns, messages) +
+      grid.renderGrid(paginated, updateTarget, columns, messages).body +
       (if (!renderSinglePagePager && paginated.pageCount <= 1) {
          ""
        } else {

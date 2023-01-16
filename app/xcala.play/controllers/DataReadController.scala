@@ -32,7 +32,7 @@ trait DataReadController[A] extends InjectedController with WithComposableAction
   }
 
   def index: Action[AnyContent] = action.async { implicit request =>
-    val queryOptions = QueryOptions.getFromRequest
+    val queryOptions = QueryOptions.getFromRequest()
 
     getPaginatedData(queryOptions).flatMap { paginated =>
       request.headers.get("X-Requested-With") match {

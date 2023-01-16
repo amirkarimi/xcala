@@ -6,7 +6,7 @@ version := "0.14.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.12.17"
+scalaVersion := "2.13.10"
 
 resolvers ++= Seq(
   "Atlassian Releases".at("https://maven.atlassian.com/public/"),
@@ -41,8 +41,8 @@ libraryDependencies ++= Seq(
   "io.lemonlabs"          %% "scala-uri"                  % "4.0.3",
   "org.apache.tika"        % "tika-core"                  % "2.6.0",
   "ch.qos.logback"         % "logback-classic"            % "1.4.5",
-  "io.sentry"              % "sentry-logback"             % "6.9.1",
-  "io.minio"               % "minio"                      % "8.4.6",
+  "io.sentry"              % "sentry-logback"             % "6.11.0",
+  "io.minio"               % "minio"                      % "8.5.1",
   "commons-io"             % "commons-io"                 % "2.11.0",
   "com.sksamuel.scrimage" %% "scrimage-scala"             % "4.0.32",
   "com.sksamuel.scrimage"  % "scrimage-webp"              % "4.0.32",
@@ -109,8 +109,8 @@ TwirlKeys.templateImports ++= Seq(
 )
 
 scalacOptions ++= Seq(
-  "-Ywarn-unused",
-  "-Ywarn-dead-code",
+  "-Wunused",
+  "-Wdead-code",
   "-Xlint",
   "-Wconf:cat=unused-imports&site=.*views.html.*:s", // Silence import warnings in Play html files
   "-Wconf:cat=unused-imports&site=<empty>:s",        // Silence import warnings on Play `routes` files

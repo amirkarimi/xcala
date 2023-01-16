@@ -23,7 +23,7 @@ object Bindables {
 
   }
 
-  implicit def optionJavascriptLiteral[T: PathBindable]: JavascriptLiteral[Option[T]] =
+  implicit def optionJavascriptLiteral[T]: JavascriptLiteral[Option[T]] =
     (value: Option[T]) => value.map(_.toString).getOrElse("")
 
   implicit def bsonObjectIDPathBinder(implicit stringBinder: PathBindable[String]): PathBindable[BSONObjectID] =
@@ -31,8 +31,8 @@ object Bindables {
 
       override def bind(key: String, value: String): Either[String, BSONObjectID] = {
         for {
-          id       <- stringBinder.bind(key, value).right
-          objectId <- BSONObjectID.parse(id).toOption.toRight("Invalid BSON object ID").right
+          id       <- stringBinder.bind(key, value)
+          objectId <- BSONObjectID.parse(id).toOption.toRight("Invalid BSON object ID")
         } yield objectId
       }
 

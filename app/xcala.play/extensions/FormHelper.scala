@@ -29,8 +29,9 @@ object FormHelper {
 
     def withErrors(formErrors: Seq[FormError]): Form[A] = {
       formErrors match {
-        case Nil          => form
         case head :: tail => new AdvancedForm(form.withError(head)).withErrors(tail)
+        case _            => form
+
       }
     }
 

@@ -3,7 +3,7 @@
 @elements = @{helper.FieldElements(field.id, field, Html(""), args.toMap, messages)}
 
 @bootstrap3.field(elements) {
-	<div class="@elements.args.getOrElse('class, "")">
+	<div class="@elements.args.getOrElse(Symbol("class"), "")">
 		<span class="buttonset" id="@field.id">
     		@items.map { v =>
       			<input type="radio" id="@(field.id)_@v._1" name="@field.name" value="@v._1" @if(field.value == Some(v._1)){checked="checked"} />

@@ -18,7 +18,7 @@ trait WithMultilangCriteria[A <: WithLang, B]
   def criteriaForm: Form[B]
 
   override def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_]): Future[Paginated[A]] = {
-    val requestCriteriaData = criteriaForm.bindFromRequest.data
+    val requestCriteriaData = criteriaForm.bindFromRequest().data
     val modifiedData        = requestCriteriaData.filter(_._1 != "lang") + ("lang" -> request2Messages.lang.code)
     val criteriaOpt         = criteriaForm.bind(modifiedData.toMap).value
 

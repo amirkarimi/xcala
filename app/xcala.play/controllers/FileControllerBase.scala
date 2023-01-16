@@ -106,7 +106,7 @@ private[controllers] trait FileControllerBase
     val resultsFuture = Future.sequence(
       body.files.map { file =>
         val fileExtension = FilenameUtils.getExtension(file.filename)
-        val id            = BSONObjectID.generate
+        val id            = BSONObjectID.generate()
 
         val fileInfo = FileInfo(
           id = Some(id),

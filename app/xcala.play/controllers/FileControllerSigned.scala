@@ -147,6 +147,8 @@ trait FileControllerSigned extends FileControllerBase {
                 Sentry.captureException(e)
                 Future.successful(InternalServerError)
             }
+
+          case _ => ???
         }
       }
     }

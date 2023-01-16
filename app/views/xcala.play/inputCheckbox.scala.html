@@ -3,11 +3,11 @@
 @import bootstrap3.DefaultHelpers.horizontalField
 
 @elements = @{ helper.FieldElements(field.id, field, Html(""), args.toMap, messages) }
-@boxValue = @{ args.toMap.getOrElse('value, "true").toString }
+@boxValue = @{ args.toMap.getOrElse(Symbol("value"), "true").toString }
 
 <div class="form-group @if(elements.hasErrors) {has-error}">
 	<div class="col-sm-offset-2 col-sm-6">
-		<input type="checkbox" id="@field.id" name="@field.name" value="@boxValue" @(if(field.value == Some(boxValue)) "checked" else "") @toHtmlArgs(elements.args.filterKeys(_ != 'value))>
+		<input type="checkbox" id="@field.id" name="@field.name" value="@boxValue" @(if(field.value == Some(boxValue)) "checked" else "") @toHtmlArgs(elements.args.view.filterKeys(_ != Symbol("value")).toMap)>
 		<label for="@field.id" class="control-label">@elements.label</label>
 	</div>
     <div class="col-sm-4">

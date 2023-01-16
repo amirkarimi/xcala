@@ -31,7 +31,7 @@ object QueryOptions {
   )
 
   def getFromRequest()(implicit request: Request[_], formBinding: FormBinding): QueryOptions = {
-    form.bindFromRequest.value.getOrElse(QueryOptions())
+    form.bindFromRequest().value.getOrElse(QueryOptions())
   }
 
 }

@@ -6,7 +6,7 @@
             <button type="button" class="btn btn-default file-selector-clear">
                 <span class="glyphicon glyphicon-remove small"></span>
             </button>
-            <button type="button" class="btn btn-default file-selector-btn" @args.filter(_._1 == '_fileType).map{fileType => data-fileType="@fileType._2"}>
+            <button type="button" class="btn btn-default file-selector-btn" @args.filter(_._1 == Symbol("_fileType")).map{fileType => data-fileType="@fileType._2"}>
                 <span class="glyphicon glyphicon-folder-open small"></span>
             </button>
         </span>
