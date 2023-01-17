@@ -73,7 +73,7 @@ class BSONHandlersSpec extends Specification {
 
   "Multilang handler with BSONObjectID" should {
     val handler      = BSONHandlers.multilangDocumentHandler[BSONObjectID]
-    val bsonObjectId = BSONObjectID.generate
+    val bsonObjectId = BSONObjectID.generate()
 
     "write correctly" in {
       val model = MultilangModel[BSONObjectID]("en", bsonObjectId)
@@ -90,7 +90,7 @@ class BSONHandlersSpec extends Specification {
 
   "Multilang handler with Option[BSONObjectID]" should {
     val handler      = BSONHandlers.optionalMultilangDocumentHandler[BSONObjectID]
-    val bsonObjectId = BSONObjectID.generate
+    val bsonObjectId = BSONObjectID.generate()
 
     "write correctly" in {
       val model = MultilangModel[Option[BSONObjectID]]("en", Some(bsonObjectId))

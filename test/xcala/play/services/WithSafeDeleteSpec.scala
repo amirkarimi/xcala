@@ -22,10 +22,10 @@ class WithSafeDeleteSpec extends Specification {
       val cardService    = new CardService()
       val person: Person = Person(name = "test", age = 10)
       personService.insert(person).awaitResult
-      val card: Card = Card(title = "test", personId = BSONObjectID.generate)
+      val card: Card = Card(title = "test", personId = BSONObjectID.generate())
       cardService.insert(card).awaitResult
 
-      personService.remove(person.id).awaitReady
+      personService.remove(person.id).awaitReady()
 
       personService.findById(person.id).awaitResult must beNone
     }
@@ -77,8 +77,8 @@ class WithSafeDeleteSpec extends Specification {
 }
 
 object WithSafeDeleteSpecHelpers {
-  final case class Person(@Key("_id") id: BSONObjectID = BSONObjectID.generate, name: String, age: Int)
-  final case class Card(@Key("_id") id: BSONObjectID = BSONObjectID.generate, title: String, personId: BSONObjectID)
+  final case class Person(@Key("_id") id: BSONObjectID = BSONObjectID.generate(), name: String, age: Int)
+  final case class Card(@Key("_id") id: BSONObjectID = BSONObjectID.generate(), title: String, personId: BSONObjectID)
 
   class PersonService(implicit
       val ec: ExecutionContext,

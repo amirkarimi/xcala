@@ -42,7 +42,7 @@ trait WithTestDb extends Around with LangImplicits {
     ev.asResult {
       val result = t
       databaseConfig.databaseFuture.map { db =>
-        db.drop().awaitReady
+        db.drop().awaitReady()
       }
 
       result
