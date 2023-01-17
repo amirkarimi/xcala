@@ -2,7 +2,7 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.14.0-SNAPSHOT"
+version := "0.14.1-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -49,7 +49,7 @@ libraryDependencies ++= Seq(
   specs2                   % Test
 )
 
-ThisBuild / scapegoatVersion := "2.0.0"
+ThisBuild / scapegoatVersion := "2.1.0"
 
 scapegoatIgnoredFiles := Seq(
   ".*/ReverseRoutes.scala",
