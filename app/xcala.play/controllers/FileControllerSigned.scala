@@ -1,7 +1,6 @@
 package xcala.play.controllers
 
 import xcala.play.models._
-import xcala.play.utils.SourceUtils
 
 import play.api.mvc._
 
@@ -9,6 +8,7 @@ import java.net.SocketTimeoutException
 import scala.concurrent.Future
 import scala.util.Failure
 import scala.util.Success
+import scala.util.Using
 
 import com.sksamuel.scrimage.ImmutableImage
 import io.sentry.Hint
@@ -89,27 +89,26 @@ trait FileControllerSigned extends FileControllerBase {
             cache
               .getOrElseUpdate(s"image$verifiedId${width.getOrElse("")}${height.getOrElse("")}") {
                 Future {
-                  SourceUtils
-                    .using(file.content) { stream =>
-                      val image: ImmutableImage = ImmutableImage.loader().fromStream(stream)
+                  Using(file.content) { stream =>
+                    val image: ImmutableImage = ImmutableImage.loader().fromStream(stream)
 
-                      val safeWidth =
-                        Seq(configuration.getOptional[Int]("file.image.maxResize.width"), width).flatten
-                          .reduceOption(_ min _)
-                      val safeHeight =
-                        Seq(configuration.getOptional[Int]("file.image.maxResize.height"), height).flatten
-                          .reduceOption(_ min _)
+                    val safeWidth =
+                      Seq(configuration.getOptional[Int]("file.image.maxResize.width"), width).flatten
+                        .reduceOption(_ min _)
+                    val safeHeight =
+                      Seq(configuration.getOptional[Int]("file.image.maxResize.height"), height).flatten
+                        .reduceOption(_ min _)
 
-                      val widthToHeightRatio: Double = image.width.toDouble / image.height
+                    val widthToHeightRatio: Double = image.width.toDouble / image.height
 
-                      renderImage(
-                        image,
-                        safeWidth,
-                        safeHeight,
-                        file.contentType.getOrElse(""),
-                        widthToHeightRatio
-                      )
-                    }
+                    renderImage(
+                      image,
+                      safeWidth,
+                      safeHeight,
+                      file.contentType.getOrElse(""),
+                      widthToHeightRatio
+                    )
+                  }
                 }.transformWith { x =>
                   closedInputStream = true
                   x.flatten match {
