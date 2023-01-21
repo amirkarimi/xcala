@@ -13,6 +13,7 @@ import java.nio.file.Files.readAllBytes
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
+import com.sksamuel.scrimage.ImmutableImage
 import io.sentry.Sentry
 import org.apache.commons.io.FilenameUtils
 import org.joda.time.DateTime
@@ -25,95 +26,172 @@ object WithFileUploader {
 trait WithFileUploader extends WithExecutionContext {
   import WithFileUploader._
 
+  type KeyValuePair = (String, String)
+
   protected val fileInfoService: FileInfoService
 
-  private def filePartFormatChecks(tempFile: MultipartFormData.FilePart[TemporaryFile]): Boolean = {
-    val contentAwareMimetype =
-      TikaMimeDetector.guessMimeBasedOnFileContentAndName(tempFile.ref.path.toFile, tempFile.filename)
-    tempFile.contentType.contains(contentAwareMimetype) &&
-    (tempFile.contentType.contains("application/pdf") ||
-    tempFile.contentType.exists(_.startsWith("image/")) ||
-    tempFile.contentType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-  }
-
-  private def filePartFileLengthChecks(f: MultipartFormData.FilePart[TemporaryFile], maxLength: Option[Long]): Boolean =
-    !maxLength.exists(_ < f.ref.path.toFile.length)
-
-  private def filePartNameChecks(f: MultipartFormData.FilePart[TemporaryFile]): Boolean =
+  private def isAutoUpload(f: MultipartFormData.FilePart[TemporaryFile]): Boolean =
     f.key.endsWith("." + AutoUploadSuffix)
 
-  def bindWithFiles[A](form: Form[A], maxLength: Option[Long] = None)(implicit
+  private def filePartFormatChecks(
+      tempFile: MultipartFormData.FilePart[TemporaryFile]
+  )(implicit message: Messages): Either[String, Seq[KeyValuePair]] = {
+    val contentAwareMimetype =
+      TikaMimeDetector.guessMimeBasedOnFileContentAndName(tempFile.ref.path.toFile, tempFile.filename)
+    if (
+      tempFile.contentType.contains(contentAwareMimetype) &&
+      (tempFile.contentType.contains("application/pdf") ||
+      tempFile.contentType.exists(_.startsWith("image/")) ||
+      tempFile.contentType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+    ) {
+      Right(Seq.empty)
+    } else {
+      Left(Messages("error.invalidFileFormat"))
+    }
+  }
+
+  private def filePartFileLengthChecks(
+      f: MultipartFormData.FilePart[TemporaryFile],
+      maxLength: Option[Long]
+  )(implicit message: Messages): Either[String, Seq[KeyValuePair]] = {
+    if (!maxLength.exists(_ < f.ref.path.toFile.length)) {
+      Right(Seq.empty)
+    } else {
+      Left(Messages("error.fileToLargeMB", maxLength.get / 1024.0 / 1024.0))
+    }
+  }
+
+  private def fileRatioCheck(
+      f: MultipartFormData.FilePart[TemporaryFile],
+      expectedRatio: Double
+  )(implicit message: Messages): Either[String, Seq[KeyValuePair]] = {
+    val image      = ImmutableImage.loader().fromFile(f.ref.path.toFile)
+    val imageRatio = image.ratio
+    if (imageRatio == expectedRatio) {
+      Right(Seq((f.key.dropRight(AutoUploadSuffix.length + 1) + "AspectRatio") -> imageRatio.toString))
+    } else {
+      Left(Messages("error.invalidImageRatio", imageRatio, expectedRatio))
+    }
+  }
+
+  def bindWithFiles[A](form: Form[A], maxLength: Option[Long] = None, maybeRatio: Option[Double] = None)(implicit
       messages: Messages,
       request: Request[MultipartFormData[TemporaryFile]]
   ): Future[Form[A]] = {
-    val validFiles = request.body.files.filter { f =>
-      filePartNameChecks(f) && filePartFileLengthChecks(f, maxLength) && filePartFormatChecks(f)
-    }
 
-    val formatErrors = request.body.files
-      .filter { f =>
-        filePartNameChecks(f) && !filePartFormatChecks(f)
-      }
-      .map { f =>
-        FormError(f.key.dropRight(AutoUploadSuffix.length + 1), Messages("error.invalidFileFormat"))
-      }
+    val fileChecks: Seq[(MultipartFormData.FilePart[TemporaryFile], Seq[FormError], Seq[KeyValuePair])] =
+      request.body.files
+        .filter { file =>
+          isAutoUpload(file)
+        }
+        .map { file: MultipartFormData.FilePart[TemporaryFile] =>
+          val checkResults: Seq[Either[String, Seq[KeyValuePair]]] =
+            Seq(filePartFormatChecks(file), filePartFileLengthChecks(file, maxLength)) ++ (maybeRatio
+              .map(ratio => fileRatioCheck(file, ratio)))
 
-    val lengthErrors = request.body.files
-      .filter { f =>
-        filePartNameChecks(f) && !filePartFileLengthChecks(f, maxLength)
-      }
-      .map { f =>
-        FormError(
-          f.key.dropRight(AutoUploadSuffix.length + 1),
-          Messages("error.fileToLargeMB", maxLength.get / 1024.0 / 1024.0)
+          val (formErrors: Seq[FormError], keyValues: Seq[KeyValuePair]) =
+            checkResults.foldLeft((Seq.empty[FormError], Seq.empty[KeyValuePair])) {
+              case ((prevFormErrors, prevKeyValues), checkResult) =>
+                checkResult match {
+                  case Left(errorMessage) =>
+                    (
+                      prevFormErrors :+ FormError(
+                        file.key.dropRight(AutoUploadSuffix.length + 1),
+                        errorMessage
+                      ),
+                      prevKeyValues
+                    )
+                  case Right(keyValues) =>
+                    (prevFormErrors, prevKeyValues ++ keyValues)
+                }
+            }
+          (file, formErrors, keyValues)
+        }
+
+    val (
+      validFiles: Seq[MultipartFormData.FilePart[TemporaryFile]],
+      formErrors: Seq[FormError],
+      additionalKeyValues: Seq[KeyValuePair]
+    ) =
+      fileChecks.foldLeft(
+        (
+          Seq.empty[MultipartFormData.FilePart[TemporaryFile]],
+          Seq.empty[FormError],
+          Seq.empty[KeyValuePair]
         )
+      ) {
+        case (
+              (
+                prevValidFiles: Seq[MultipartFormData.FilePart[TemporaryFile]],
+                prevFormErrors: Seq[FormError],
+                prevAdditionalKeyValuePairs: Seq[KeyValuePair]
+              ),
+              (
+                file: MultipartFormData.FilePart[TemporaryFile],
+                formErrors: Seq[FormError],
+                keyValues: Seq[KeyValuePair]
+              )
+            ) =>
+          val nextValidFiles: Seq[MultipartFormData.FilePart[TemporaryFile]] =
+            if (formErrors.isEmpty) prevValidFiles :+ file else prevValidFiles
+
+          val nextFormErrors: Seq[FormError] =
+            prevFormErrors ++ formErrors
+
+          val nextAdditionalKeyValues: Seq[KeyValuePair] =
+            prevAdditionalKeyValuePairs ++ keyValues
+
+          (
+            nextValidFiles,
+            nextFormErrors,
+            nextAdditionalKeyValues
+          )
       }
 
-    val errors = formatErrors ++ lengthErrors
+    val fileKeyValueFutures: Seq[Future[KeyValuePair]] = validFiles
+      .map { filePart =>
+        val fieldName = filePart.key.dropRight(AutoUploadSuffix.length + 1)
 
-    val fileKeyValueFutures = validFiles.map { filePart =>
-      val fieldName = filePart.key.dropRight(AutoUploadSuffix.length + 1)
+        val removeOldFileFuture = form.data.get(fieldName) match {
+          case Some(oldValue) =>
+            BSONObjectID.parse(oldValue) match {
+              case Failure(exception) =>
+                Sentry.captureException(exception)
+                Future.failed(exception)
+              case Success(value) =>
+                fileInfoService.removeFile(value).transformWith {
+                  case Failure(exception) =>
+                    Sentry.captureException(exception)
+                    Future.failed(exception)
+                  case Success(resultValue) =>
+                    resultValue match {
+                      case Left(errorMessage) =>
+                        val exception = new Throwable(errorMessage)
+                        Sentry.captureException(exception)
+                        Future.failed(exception)
+                      case Right(writeResult) =>
+                        Future.successful(Some(writeResult))
+                    }
+                }
+            }
+          case None =>
+            Future.successful(None)
+        }
 
-      val removeOldFileFuture = form.data.get(fieldName) match {
-        case Some(oldValue) =>
-          BSONObjectID.parse(oldValue) match {
-            case Failure(exception) =>
-              Sentry.captureException(exception)
-              Future.failed(exception)
-            case Success(value) =>
-              fileInfoService.removeFile(value).transformWith {
-                case Failure(exception) =>
-                  Sentry.captureException(exception)
-                  Future.failed(exception)
-                case Success(resultValue) =>
-                  resultValue match {
-                    case Left(errorMessage) =>
-                      val exception = new Throwable(errorMessage)
-                      Sentry.captureException(exception)
-                      Future.failed(exception)
-                    case Right(writeResult) =>
-                      Future.successful(Some(writeResult))
-                  }
-              }
+        removeOldFileFuture.flatMap { _ =>
+          saveFile(filePart).map {
+            case Some(fileId) => fieldName -> fileId.stringify
+            case None         => ""        -> ""
           }
-        case None =>
-          Future.successful(None)
-      }
-
-      removeOldFileFuture.flatMap { _ =>
-        saveFile(filePart).map {
-          case Some(fileId) => fieldName -> fileId.stringify
-          case None         => ""        -> ""
         }
       }
-    }
 
-    Future.sequence(fileKeyValueFutures).map { fileKeyValues =>
-      val newData = form.data ++ fileKeyValues.toMap
+    Future.sequence(fileKeyValueFutures).map { fileKeyValues: Seq[KeyValuePair] =>
+      val newData = form.data ++ fileKeyValues ++ additionalKeyValues
 
-      errors match {
+      formErrors match {
         case Nil => form.discardingErrors.bind(newData)
-        case _   => form.discardingErrors.bind(newData).withError(errors.head)
+        case _   => form.discardingErrors.bind(newData).withError(formErrors.head)
       }
     }
   }
