@@ -24,6 +24,20 @@ trait DataCudController[A]
 
   def defaultForm: Form[A]
 
+  @annotation.nowarn
+  def modelValidation(model: A): Future[Either[String, Unit]] = Future.successful(Right(model))
+
+  def postBindFormValidation(
+      f: A => Future[Result]
+  )(implicit requestHeader: RequestHeader): A => Future[Result] = { model =>
+    modelValidation(model).flatMap {
+      case Right(_) =>
+        f(model)
+      case Left(errorMessage) =>
+        Future.successful(failedResult(errorMessage))
+    }
+  }
+
   def createView(form: Form[A])(implicit request: RequestType[_]): Future[Result]
 
   def editView(form: Form[A], model: A)(implicit request: RequestType[_]): Future[Result]
@@ -40,7 +54,7 @@ trait DataCudController[A]
         formWithErrors => {
           createView(formWithErrors)
         },
-        model => {
+        postBindFormValidation { model =>
           cudService
             .insert(model)
             .map { _ =>
@@ -73,7 +87,7 @@ trait DataCudController[A]
             formWithErrors => {
               editView(formWithErrors, model)
             },
-            model =>
+            postBindFormValidation { model =>
               cudService
                 .save(model)
                 .map { _ =>
@@ -82,6 +96,7 @@ trait DataCudController[A]
                 .recoverWith { case throwable: Throwable =>
                   recoverSaveError(throwable, filledForm)
                 }
+            }
           )
         }
     }

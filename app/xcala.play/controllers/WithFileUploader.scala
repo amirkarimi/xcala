@@ -74,7 +74,32 @@ trait WithFileUploader extends WithExecutionContext {
     }
   }
 
-  def bindWithFiles[A](form: Form[A], maxLength: Option[Long] = None, maybeRatio: Option[Double] = None)(implicit
+  private def fileResolutionCheck(
+      f: MultipartFormData.FilePart[TemporaryFile],
+      expectedResolution: (Int, Int)
+  )(implicit message: Messages): Either[String, Seq[KeyValuePair]] = {
+    val image                                      = ImmutableImage.loader().fromFile(f.ref.path.toFile)
+    val imageResolution: (Int, Int)                = image.width -> image.height
+    def resolutionRenderer(resolution: (Int, Int)) = s"${resolution._1}x${resolution._2}"
+    if (imageResolution == expectedResolution) {
+      Right(Nil)
+    } else {
+      Left(
+        Messages(
+          "error.invalidImageResolution",
+          resolutionRenderer(imageResolution),
+          resolutionRenderer(expectedResolution)
+        )
+      )
+    }
+  }
+
+  def bindWithFiles[A](
+      form: Form[A],
+      maxLength: Option[Long] = None,
+      maybeRatio: Option[Double] = None,
+      maybeResolution: Option[(Int, Int)] = None
+  )(implicit
       messages: Messages,
       request: Request[MultipartFormData[TemporaryFile]]
   ): Future[Form[A]] = {
@@ -86,8 +111,11 @@ trait WithFileUploader extends WithExecutionContext {
         }
         .map { file: MultipartFormData.FilePart[TemporaryFile] =>
           val checkResults: Seq[Either[String, Seq[KeyValuePair]]] =
-            Seq(filePartFormatChecks(file), filePartFileLengthChecks(file, maxLength)) ++ (maybeRatio
-              .map(ratio => fileRatioCheck(file, ratio)))
+            Seq(filePartFormatChecks(file), filePartFileLengthChecks(file, maxLength)) ++
+              (maybeRatio
+                .map(ratio => fileRatioCheck(file, ratio))) ++
+              (maybeResolution
+                .map(resolution => fileResolutionCheck(file, resolution)))
 
           val (formErrors: Seq[FormError], keyValues: Seq[KeyValuePair]) =
             checkResults.foldLeft((Seq.empty[FormError], Seq.empty[KeyValuePair])) {
