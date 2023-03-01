@@ -16,6 +16,7 @@
 			class="form-control datetime-datepicker"
 			id="@(field.id)DatePicker"
 			name="@(field.name)DatePicker"
+		   	autocomplete="off"
 			@toHtmlArgs(htmlArgs)>
 	</div>
 	@if(hasTimePicker){
@@ -24,6 +25,7 @@
 			class="form-control datetime-timepicker"
 			id="@(field.id)TimePicker"
 			name="@(field.name)TimePicker"
+		    autocomplete="off"
 			@toHtmlArgs(htmlArgs)>
 	</div>
 	}
