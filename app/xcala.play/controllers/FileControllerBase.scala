@@ -102,7 +102,12 @@ private[controllers] trait FileControllerBase
     finalFolderId.flatMap(getList(_, fileType))
   }
 
-  def uploadResult(folderId: Option[BSONObjectID], body: MultipartFormData[Files.TemporaryFile]): Future[Result] = {
+  def publicImageUrl(fileId: BSONObjectID)(implicit request: RequestHeader): String
+  def publicFileUrl(fileId: BSONObjectID)(implicit request: RequestHeader): String
+
+  def uploadResult(folderId: Option[BSONObjectID], body: MultipartFormData[Files.TemporaryFile])(implicit
+      request: RequestHeader
+  ): Future[Result] = {
     val resultsFuture = Future.sequence(
       body.files.map { file =>
         val fileExtension = FilenameUtils.getExtension(file.filename)
@@ -121,7 +126,9 @@ private[controllers] trait FileControllerBase
 
         fileInfoService.upload(fileInfo, readAllBytes(file.ref.path)).map {
           case Right(fileId) =>
-            Ok(s"""{"id":"${fileId.stringify}", "label":"${fileInfo.name}"}""")
+            Ok(s"""{"id":"${fileId.stringify}", "label":"${fileInfo.name}", "url":"${if (fileInfo.isImage) {
+                publicImageUrl(fileId)
+              } else { publicFileUrl(fileId) }}"}""")
           case Left(e) =>
             Sentry.captureException(new Throwable(e))
             InternalServerError(e)
