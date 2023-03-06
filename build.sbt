@@ -2,7 +2,7 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.18.3"
+version := "0.19.0"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -41,7 +41,7 @@ libraryDependencies ++= Seq(
   "io.lemonlabs"          %% "scala-uri"                  % "4.0.3",
   "org.apache.tika"        % "tika-core"                  % "2.7.0",
   "ch.qos.logback"         % "logback-classic"            % "1.4.5",
-  "io.sentry"              % "sentry-logback"             % "6.14.0",
+  "io.sentry"              % "sentry-logback"             % "6.15.0",
   "io.minio"               % "minio"                      % "8.5.2",
   "commons-io"             % "commons-io"                 % "2.11.0",
   "com.sksamuel.scrimage" %% "scrimage-scala"             % "4.0.33",
@@ -49,7 +49,7 @@ libraryDependencies ++= Seq(
   specs2                   % Test
 )
 
-ThisBuild / scapegoatVersion := "2.1.0"
+ThisBuild / scapegoatVersion := "2.1.1"
 
 scapegoatIgnoredFiles := Seq(
   ".*/ReverseRoutes.scala",
