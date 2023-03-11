@@ -2,7 +2,7 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.20.4"
+version := "0.21.0"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -32,6 +32,7 @@ libraryDependencies ++= Seq(
   filters,
   jodaForms,
   "org.reactivemongo"     %% "reactivemongo"              % "1.0.10",
+  "com.nappin"            %% "play-recaptcha"             % "2.5",
   "com.typesafe.akka"     %% "akka-actor-typed"           % "2.7.0",
   "com.typesafe.akka"     %% "akka-testkit"               % "2.7.0" % "test",
   "com.typesafe.akka"     %% "akka-serialization-jackson" % "2.7.0",
