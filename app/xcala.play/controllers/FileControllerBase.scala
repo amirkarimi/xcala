@@ -2,6 +2,7 @@ package xcala.play.controllers
 
 import xcala.play.models._
 import xcala.play.services._
+import xcala.play.utils.BaseStorageUrls
 import xcala.play.utils.WithExecutionContext
 
 import akka.actor.ActorSystem
@@ -54,6 +55,7 @@ private[controllers] trait FileControllerBase
   implicit val messagesProvider: Messages
   val fileInfoService: FileInfoService
   val folderService: FolderService
+  val publicStorageUrls: BaseStorageUrls.PublicStorageUrls
   val cache: AsyncCacheApi
   val actorSystem: ActorSystem
   implicit val configuration: Configuration
@@ -102,11 +104,8 @@ private[controllers] trait FileControllerBase
     finalFolderId.flatMap(getList(_, fileType))
   }
 
-  def publicImageUrl(fileId: BSONObjectID)(implicit request: RequestHeader): String
-  def publicFileUrl(fileId: BSONObjectID)(implicit request: RequestHeader): String
-
   def uploadResult(folderId: Option[BSONObjectID], body: MultipartFormData[Files.TemporaryFile])(implicit
-      request: RequestHeader
+      requestHeader: RequestHeader
   ): Future[Result] = {
     val resultsFuture = Future.sequence(
       body.files.map { file =>
@@ -127,8 +126,10 @@ private[controllers] trait FileControllerBase
         fileInfoService.upload(fileInfo, readAllBytes(file.ref.path)).map {
           case Right(fileId) =>
             Ok(s"""{"id":"${fileId.stringify}", "label":"${fileInfo.name}", "url":"${if (fileInfo.isImage) {
-                publicImageUrl(fileId)
-              } else { publicFileUrl(fileId) }}"}""")
+                publicStorageUrls.publicImageUrl(fileId).absoluteURL()
+              } else {
+                publicStorageUrls.publicFileUrl(fileId).absoluteURL()
+              }}"}""")
           case Left(e) =>
             Sentry.captureException(new Throwable(e))
             InternalServerError(e)
