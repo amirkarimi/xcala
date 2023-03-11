@@ -1,0 +1,34 @@
+@import com.nappin.play.recaptcha.WidgetHelper
+@this(widgetHelper: WidgetHelper)
+
+@****************************************************************************************
+ * Renders a Google Recaptcha enabled button.
+ *
+ * @param formId            The HTML id of the form the button is within
+ * @param text              The text of the button
+ * @param args              HTML attributes for the button (optional)
+ * @param messagesProvider  (Implicit) The current I18n messages provider
+ * @param request           (Implicit) The current request
+ ****************************************************************************************@
+@(formId: String, text: String, args: (Symbol, String)*)(implicit messagesProvider: MessagesProvider,
+    request: Request[AnyContent])
+
+<script @Html(widgetHelper.outputNonce()) type="text/javascript" src="@Html(widgetHelper.widgetScriptUrl())&onload=onRecaptchaReady"
+    async defer></script>
+<script @Html(widgetHelper.outputNonce())>
+
+var isRecaptchaReady = false;
+
+function onRecaptchaReady() {
+    isRecaptchaReady = true;
+};
+
+function onRecaptchaSubmit(token) {
+    if(isRecaptchaReady){
+        document.querySelector("[data-callback='onRecaptchaSubmit']").disabled = true;
+        document.getElementById("@formId").submit();
+    }
+}
+</script>
+<button disabled style="cursor: pointer" class="@Html(widgetHelper.formatClass("g-recaptcha", args: _*))" @Html(widgetHelper.formatOtherAttributes(args: _*))
+  data-sitekey="@Html(widgetHelper.publicKey)" data-callback="onRecaptchaSubmit">@text</button>
