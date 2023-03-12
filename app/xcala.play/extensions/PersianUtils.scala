@@ -12,17 +12,50 @@ object PersianUtils {
 
   implicit class PersianDateConverter(val dateTime: DateTime) extends AnyVal {
 
-    def toGlobalDateTimeString(implicit messages: Messages, addTime: Boolean = true): String = {
+    def toGlobalDateTimeString(
+        addTime: Boolean = true,
+        reversed: Boolean = false,
+        faSeparator: String = "-",
+        nonFaSeparator: String = " "
+    )(implicit
+        messages: Messages
+    ): String = {
       if (messages.lang.code == "fa") {
         val gDate = SimpleDate(dateTime.year.get, dateTime.monthOfYear.get, dateTime.dayOfMonth.get)
         val pDate = gregorianToPersian(gDate)
-        (if (addTime) { dateTime.toString("HH:mm") + " " }
-         else { "" }) +
-        s"${pDate.year}/${pDate.month.toString.reverse.padTo(2, '0').reverse.mkString}/${pDate.day.toString.reverse.padTo(2, '0').reverse.mkString}"
+        val parts: Seq[String] =
+          Seq(
+            s"${pDate.year}/${pDate.month.toString.reverse.padTo(2, '0').reverse.mkString}/${pDate.day.toString.reverse.padTo(2, '0').reverse.mkString}"
+          ) ++ {
+            if (addTime) {
+              dateTime.toString(
+                "HH:mm"
+              ) :: Nil
+            } else {
+              Nil
+            }
+          }
+        {
+          if (reversed) {
+            parts.reverse
+          } else {
+            parts
+          }
+        }.mkString(faSeparator)
 
       } else {
-        dateTime.toString("yyyy-MM-dd" + (if (addTime) { " HH:mm" }
-                                          else { "" }))
+        val parts: Seq[String] =
+          Seq("yyyy-MM-dd", "HH:mm")
+
+        dateTime.toString(
+          {
+            if (reversed) {
+              parts.reverse
+            } else {
+              parts
+            }
+          }.mkString(nonFaSeparator)
+        )
       }
     }
 
@@ -52,7 +85,7 @@ object PersianUtils {
       }
     }
 
-    def toGlobalDateString(implicit messages: Messages): String = toGlobalDateTimeString(messages, addTime = false)
+    def toGlobalDateString(implicit messages: Messages): String = toGlobalDateTimeString(addTime = false)(messages)
 
     def toGlobalLongDateString(implicit messages: Messages): String =
       toGlobalLongDateTimeString(messages, addTime = false)
