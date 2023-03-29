@@ -8,5 +8,5 @@ xcala_play_build:
   image: docker:20.10
   script:
     - docker build . --build-arg NEXUS_KEY
+  retry: 2
   stage: build
-
