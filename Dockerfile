@@ -6,6 +6,12 @@ FROM hub.hamdocker.ir/sbtscala/scala-sbt:${JVM}_${SBT_VERSION}_${SCALA_VERSION} 
 
 ARG NEXUS_KEY
 
+# Install NodeJS for faster stage output from SBT
+RUN apt update --allow-releaseinfo-change \
+    && apt install -y nodejs npm \
+    && apt install -y webp \
+    && rm -rf /var/lib/apt/lists/*
+
 # Cache sbt build definition, this layer rarely changes.
 WORKDIR /opt
 ADD project /opt/project
