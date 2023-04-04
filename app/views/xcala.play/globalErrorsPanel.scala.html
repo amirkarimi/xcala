@@ -3,7 +3,7 @@
 	@alert("danger") {
 		<ul>
 		@form.globalErrors.map { error =>
-			<li>@Messages(error.message)</li>
+			<li>@Html(Messages(error.message))</li>
 		}
 		</ul>
 	}
