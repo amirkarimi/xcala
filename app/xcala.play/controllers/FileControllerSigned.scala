@@ -68,6 +68,8 @@ trait FileControllerSigned extends FileControllerBase {
     }
   }
 
+  def protectedAction: ActionBuilder[Request, AnyContent]
+
   private def getImage(
       unverifiedId: BSONObjectID,
       signature: String,
@@ -77,7 +79,7 @@ trait FileControllerSigned extends FileControllerBase {
       expireTime: Option[DateTime]
   ): Action[AnyContent] =
     imageProtectionCheck(protectedAccess, signature, expireTime)(unverifiedId) { verifiedId =>
-      (if (protectedAccess) action else Action).async {
+      (if (protectedAccess) protectedAction else Action).async {
         fileInfoService.findObjectById(verifiedId).transformWith {
           case Success(file) if !file.isImage =>
             Future.successful(renderFile(file, CONTENT_DISPOSITION_INLINE))
@@ -159,7 +161,7 @@ trait FileControllerSigned extends FileControllerBase {
       expireTime: Option[DateTime]
   ): Action[AnyContent] =
     fileProtectionCheck(protectedAccess, signature, expireTime)(unverifiedId) { verifiedId =>
-      (if (protectedAccess) action else Action).async {
+      (if (protectedAccess) protectedAction else Action).async {
         renderFile(verifiedId, CONTENT_DISPOSITION_ATTACHMENT)
       }
     }
