@@ -1,4 +1,4 @@
-FROM hub.hamdocker.ir/ketab/sbt:main as builder
+FROM registry.hamdocker.ir/ketab/sbt:main as builder
 
 ARG NEXUS_KEY
 
