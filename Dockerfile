@@ -11,7 +11,7 @@ RUN sbt clean update updateClassifiers
 # Prepare build
 ADD app     /opt/app
 ADD conf    /opt/conf
-ADD conf    /opt/test
+ADD test    /opt/test
 
 # Actual building
 RUN sbt test publish
