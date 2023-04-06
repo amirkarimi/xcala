@@ -3,7 +3,7 @@ FROM registry.hamdocker.ir/ketab/sbt:main as builder
 ARG NEXUS_KEY
 
 # Cache sbt build definition, this layer rarely changes.
-WORKDIR /opt
+WORKDIR         /opt
 ADD project     /opt/project
 ADD build.sbt   /opt/
 RUN sbt clean update updateClassifiers
@@ -14,4 +14,5 @@ ADD conf    /opt/conf
 ADD test    /opt/test
 
 # Actual building
+# test
 RUN sbt publish
