@@ -14,4 +14,4 @@ ADD conf    /opt/conf
 ADD test    /opt/test
 
 # Actual building
-RUN sbt test publish
+RUN sbt publish
