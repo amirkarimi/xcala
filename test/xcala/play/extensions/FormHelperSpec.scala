@@ -3,14 +3,39 @@ package xcala.play.extensions
 import FormHelper._
 import xcala.play.services.WithTestDb
 
+import play.api
+import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats._
 import play.api.i18n._
 
+import java.io.File
+
+import com.typesafe.config.ConfigFactory
+import org.specs2.main.CommandLine
 import org.specs2.mutable._
 
-class FormHelperSpec extends Specification {
+class FormHelperSpec(cmd: CommandLine) extends Specification {
+
+  val configFilePath =
+    cmd.arguments.find(_.startsWith("-Dtest.config")).map(_.split("=")(1)).getOrElse("./conf/local-test.conf")
+
+  val configuration: Configuration =
+    Configuration {
+
+      ConfigFactory
+        .parseFile(new File(configFilePath))
+        .withFallback(
+          Configuration
+            .load(api.Environment.simple(new File("."), api.Mode.Test))
+            .underlying
+        )
+        .resolve()
+
+    }
+
+  val hostName = configuration.get[String]("mongodbHost")
 
   val form: Form[(String, String)] = Form(
     tuple(
@@ -20,7 +45,7 @@ class FormHelperSpec extends Specification {
   )
 
   "FixedLanguageForm" should {
-    "return correct persian words on arabic inputs" >> new WithTestDb {
+    "return correct persian words on arabic inputs" >> new WithTestDb(hostName) {
 
       implicit override val lang: Lang = Lang("fa")
 

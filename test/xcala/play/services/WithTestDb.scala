@@ -19,7 +19,7 @@ import org.specs2.execute.AsResult
 import org.specs2.execute.Result
 import org.specs2.mutable.Around
 
-trait WithTestDb extends Around with LangImplicits {
+class WithTestDb(hostName: String) extends Around with LangImplicits {
 
   val application: Application                         = GuiceApplicationBuilder().build()
   implicit lazy val implicitInjector: Injector         = instanceOf[Injector]
@@ -29,7 +29,7 @@ trait WithTestDb extends Around with LangImplicits {
 
   implicit val databaseConfig: DatabaseConfig = new DatabaseConfig {
     implicit val ec: ExecutionContext = executionContext
-    override def mongoUri: String     = s"mongodb://localhost/xcala-test-${Math.abs(Random.nextInt())}"
+    override def mongoUri: String     = s"mongodb://$hostName/xcala-test-${Math.abs(Random.nextInt())}"
   }
 
   def instanceOf[T: ClassTag]: T = application.injector.instanceOf[T]

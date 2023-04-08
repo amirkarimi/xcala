@@ -13,6 +13,3 @@ ADD app     /opt/app
 ADD conf    /opt/conf
 ADD test    /opt/test
 
-# Actual building
-# test
-RUN sbt publish
