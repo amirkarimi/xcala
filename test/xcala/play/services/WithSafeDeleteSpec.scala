@@ -1,9 +1,13 @@
 package xcala.play.services
 
+import play.api
 import play.api.Configuration
 
+import java.io.File
 import scala.concurrent.ExecutionContext
 
+import com.typesafe.config.ConfigFactory
+import org.specs2.main.CommandLine
 import org.specs2.mutable.Specification
 import reactivemongo.api.bson.BSONDocument
 import reactivemongo.api.bson.BSONDocumentHandler
@@ -11,13 +15,32 @@ import reactivemongo.api.bson.BSONObjectID
 import reactivemongo.api.bson.Macros
 import reactivemongo.api.bson.Macros.Annotations.Key
 
-class WithSafeDeleteSpec extends Specification {
+class WithSafeDeleteSpec(cmd: CommandLine) extends Specification {
+
+  val configFilePath =
+    cmd.arguments.find(_.startsWith("-Dtest.config")).map(_.split("=")(1)).getOrElse("./conf/local-test.conf")
+
+  val configuration: Configuration =
+    Configuration {
+
+      ConfigFactory
+        .parseFile(new File(configFilePath))
+        .withFallback(
+          Configuration
+            .load(api.Environment.simple(new File("."), api.Mode.Test))
+            .underlying
+        )
+        .resolve()
+
+    }
+
+  val hostName = configuration.get[String]("mongodbHost")
 
   import WithSafeDeleteSpecHelpers._
   import xcala.play.helpers.FutureHelpers._
 
   "Service with WithSafeDelete" should {
-    "allow delete when no related data found for remove by id" >> new WithTestDb {
+    "allow delete when no related data found for remove by id" >> new WithTestDb(hostName) {
       val personService  = new PersonService()
       val cardService    = new CardService()
       val person: Person = Person(name = "test", age = 10)
@@ -30,7 +53,7 @@ class WithSafeDeleteSpec extends Specification {
       personService.findById(person.id).awaitResult must beNone
     }
 
-    "allow delete when no related data found for remove by query" >> new WithTestDb {
+    "allow delete when no related data found for remove by query" >> new WithTestDb(hostName) {
       val personService   = new PersonService()
       val cardService     = new CardService()
       val person1: Person = Person(name = "test", age = 10)
@@ -46,7 +69,7 @@ class WithSafeDeleteSpec extends Specification {
       personService.findById(person2.id).awaitResult must beSome(person2)
     }
 
-    "not allow delete when there is related data for remove by id" >> new WithTestDb {
+    "not allow delete when there is related data for remove by id" >> new WithTestDb(hostName) {
       val personService  = new PersonService()
       val cardService    = new CardService()
       val person: Person = Person(name = "test", age = 10)
@@ -58,7 +81,7 @@ class WithSafeDeleteSpec extends Specification {
       personService.findById(person.id).awaitResult must beSome(person)
     }
 
-    "not allow delete when there is related data for remove by query" >> new WithTestDb {
+    "not allow delete when there is related data for remove by query" >> new WithTestDb(hostName) {
       val personService   = new PersonService()
       val cardService     = new CardService()
       val person1: Person = Person(name = "test", age = 10)

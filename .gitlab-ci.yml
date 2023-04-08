@@ -1,5 +1,7 @@
 stages:
   - build
+  - test
+  - publish
 
 variables:
   IMAGE_USER: ketab
@@ -8,6 +10,29 @@ xcala_play_build:
   image: docker:20.10
   script:
     - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" $REGISTRY
-    - docker build . --build-arg NEXUS_KEY
+    - docker build --build-arg NEXUS_KEY .
+    - export IMAGE="registry.hamdocker.ir/ketab/xcala-play-test"
+    - docker build --build-arg NEXUS_KEY -t $IMAGE:$CI_COMMIT_SHORT_SHA  -t $IMAGE:$CI_COMMIT_REF_SLUG --target builder .
+    - docker push $IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $IMAGE:$CI_COMMIT_REF_SLUG
   retry: 2
   stage: build
+
+xcala_play_test:
+  image: registry.hamdocker.ir/ketab/xcala-play-test:$CI_COMMIT_SHORT_SHA
+  services:
+    - name: mongo:4.4.19
+      alias: mongo
+  script:
+    - cd /opt
+    - sbt "testOnly * -- -Dtest.config=/opt/conf/docker-test.conf"
+  retry: 2
+  stage: test
+
+xcala_play_publish:
+  image: registry.hamdocker.ir/ketab/xcala-play-test:$CI_COMMIT_SHORT_SHA
+  script:
+    - cd /opt
+    - sbt publish
+  retry: 2
+  stage: publish
