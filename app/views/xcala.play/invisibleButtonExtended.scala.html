@@ -1,5 +1,5 @@
 @import com.nappin.play.recaptcha.WidgetHelper
-@this(widgetHelper: WidgetHelper)
+@this(widgetHelper: WidgetHelper, recaptchaService: services.RecaptchaService)
 
 @****************************************************************************************
  * Renders a Google Recaptcha enabled button.
@@ -13,22 +13,27 @@
 @(formId: String, text: String, args: (Symbol, String)*)(implicit messagesProvider: MessagesProvider,
     request: Request[AnyContent])
 
-<script @Html(widgetHelper.outputNonce()) type="text/javascript" src="@Html(widgetHelper.widgetScriptUrl())&onload=onRecaptchaReady"
+@if(recaptchaService.isRecaptchaEnabled){
+    <script @Html(widgetHelper.outputNonce()) type="text/javascript" src="@Html(widgetHelper.widgetScriptUrl())&onload=onRecaptchaReady"
     async defer></script>
-<script @Html(widgetHelper.outputNonce())>
+    <script @Html(widgetHelper.outputNonce())>
 
-var isRecaptchaReady = false;
+    var isRecaptchaReady = false;
 
-function onRecaptchaReady() {
-    isRecaptchaReady = true;
-};
+    function onRecaptchaReady() {
+        isRecaptchaReady = true;
+    };
 
-function onRecaptchaSubmit(token) {
-    if(isRecaptchaReady){
-        document.querySelector("[data-callback='onRecaptchaSubmit']").disabled = true;
-        document.getElementById("@formId").submit();
+    function onRecaptchaSubmit(token) {
+        if(isRecaptchaReady){
+            document.querySelector("[data-callback='onRecaptchaSubmit']").disabled = true;
+            document.getElementById("@formId").submit();
+        }
     }
+    </script>
+    <button disabled style="cursor: pointer" class="@Html(widgetHelper.formatClass("g-recaptcha", args: _*))" @Html(widgetHelper.formatOtherAttributes(args: _*))
+    data-sitekey="@Html(widgetHelper.publicKey)" data-callback="onRecaptchaSubmit">@text</button>
+}else{
+    <button style="cursor: pointer" class="@Html(widgetHelper.formatClass("g-recaptcha", args: _*))" @Html(widgetHelper.formatOtherAttributes(args: _*))>@text</button>
 }
-</script>
-<button disabled style="cursor: pointer" class="@Html(widgetHelper.formatClass("g-recaptcha", args: _*))" @Html(widgetHelper.formatOtherAttributes(args: _*))
-  data-sitekey="@Html(widgetHelper.publicKey)" data-callback="onRecaptchaSubmit">@text</button>
+
