@@ -1,6 +1,9 @@
 FROM registry.hamdocker.ir/ketab/sbt:main as builder
 
 ARG NEXUS_KEY
+ENV NEXUS_USER=ci
+
+RUN update_credentials
 
 # Cache sbt build definition, this layer rarely changes.
 WORKDIR         /opt
