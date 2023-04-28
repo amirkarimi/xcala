@@ -91,3 +91,4 @@ local.properties
 .metals
 .vscode
 metals.sbt
+credentials.sbt
