@@ -2,6 +2,8 @@ package xcala.play.extensions
 
 import play.api.i18n.Messages
 
+import scala.util.Try
+
 import com.bahmanm.persianutils.DateConverter._
 import org.joda.time.DateTime
 
@@ -59,6 +61,22 @@ object PersianUtils {
       }
     }
 
+    def toGlobalDateTimeStringOption(
+        addTime: Boolean = true,
+        reversed: Boolean = false,
+        faSeparator: String = "-",
+        nonFaSeparator: String = " "
+    )(implicit
+        messages: Messages
+    ): Option[String] = Try {
+      toGlobalDateTimeString(
+        addTime = addTime,
+        reversed = reversed,
+        faSeparator = faSeparator,
+        nonFaSeparator = nonFaSeparator
+      )
+    }.toOption
+
     /** Format => yyyy-MM-dd HH:mm
       * @param addTime
       *   if true return with time
@@ -85,7 +103,11 @@ object PersianUtils {
       }
     }
 
-    def toGlobalDateString(implicit messages: Messages): String = toGlobalDateTimeString(addTime = false)(messages)
+    def toGlobalDateStringOption(implicit messages: Messages): Option[String] =
+      toGlobalDateTimeStringOption(addTime = false)(messages)
+
+    def toGlobalDateString(implicit messages: Messages): String =
+      toGlobalDateTimeString(addTime = false)(messages)
 
     def toGlobalLongDateString(implicit messages: Messages): String =
       toGlobalLongDateTimeString(messages, addTime = false)
