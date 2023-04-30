@@ -107,7 +107,7 @@ private[controllers] trait FileControllerBase
   def uploadResult(folderId: Option[BSONObjectID], body: MultipartFormData[Files.TemporaryFile])(implicit
       requestHeader: RequestHeader
   ): Future[Result] = {
-    val resultsFuture = Future.sequence(
+    val resultsFuture: Future[Seq[String]] = Future.sequence(
       body.files.map { file =>
         val fileExtension = FilenameUtils.getExtension(file.filename)
         val id            = BSONObjectID.generate()
@@ -123,26 +123,31 @@ private[controllers] trait FileControllerBase
           isHidden = false
         )
 
-        fileInfoService.upload(fileInfo, readAllBytes(file.ref.path)).map {
+        fileInfoService.upload(fileInfo, readAllBytes(file.ref.path)).flatMap {
           case Right(fileId) =>
-            Ok(s"""{"id":"${fileId.stringify}", "label":"${fileInfo.name}", "url":"${if (fileInfo.isImage) {
+            Future.successful(s"""{"id":"${fileId.stringify}", "label":"${fileInfo.name}", "url":"${if (
+                fileInfo.isImage
+              ) {
                 publicStorageUrls.publicImageUrl(fileId).absoluteURL()
               } else {
                 publicStorageUrls.publicFileUrl(fileId).absoluteURL()
               }}"}""")
-          case Left(e) =>
-            Sentry.captureException(new Throwable(e))
-            InternalServerError(e)
+
+          case Left(errorMessage) =>
+            val exception = new Throwable(errorMessage)
+            Sentry.captureException(exception)
+            Future.failed(exception)
         }
       }
     )
 
-    resultsFuture.map { results =>
-      results.headOption match {
-        case Some(result) => result
-        case None         => BadRequest
+    resultsFuture
+      .map { results =>
+        Ok(results.mkString("[", ",", "]"))
       }
-    }
+      .recover { case _ =>
+        BadRequest
+      }
   }
 
   def upload(folderId: Option[BSONObjectID]): Action[MultipartFormData[Files.TemporaryFile]]
