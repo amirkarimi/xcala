@@ -46,7 +46,7 @@ trait DataCudController[A]
     createView(defaultForm.bindFromRequest().discardingErrors)
   }
 
-  def createPost: Action[AnyContent] = action.async { implicit request =>
+  def createPost: EssentialAction = action.async { implicit request =>
     val filledFormFuture = bindForm(defaultForm)
 
     filledFormFuture.flatMap { filledForm =>
@@ -75,7 +75,7 @@ trait DataCudController[A]
     }
   }
 
-  def editPost(id: BSONObjectID): Action[AnyContent] = action.async { implicit request =>
+  def editPost(id: BSONObjectID): EssentialAction = action.async { implicit request =>
     cudService.findById(id).flatMap {
       case None => Future.successful(NotFound)
       case Some(model) =>

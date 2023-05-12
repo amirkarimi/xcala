@@ -1,0 +1,13 @@
+@(field: Field, args: (Symbol, Any)*)(implicit fieldConstructor: views.html.helper.FieldConstructor, messages: Messages)
+@import _root_.xcala.play.controllers.WithFileUploader
+@helper.input(field, (args :+ (Symbol("_ignoreFormControlClass") -> true)):_*) { (_, _, _, args) =>
+	<div class="row">
+		<div class="col-xs-8">
+			@defining(field(WithFileUploader.AutoUploadSuffix)) { fileUploadField =>
+				<input multiple type="file" name="@fileUploadField.name" id="@fileUploadField.id" @toHtmlArgs(args)>
+			}
+			@xcala.play.inputHidden(field)
+		</div>
+		
+	</div>
+}

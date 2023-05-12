@@ -26,7 +26,7 @@ object WithFileUploader {
 trait WithFileUploader extends WithExecutionContext {
   import WithFileUploader._
 
-  type KeyValuePair = (String, String)
+  type KeyValuesPair = (String, Seq[String])
 
   protected val fileInfoService: FileInfoService
 
@@ -35,7 +35,7 @@ trait WithFileUploader extends WithExecutionContext {
 
   private def filePartFormatChecks(
       tempFile: MultipartFormData.FilePart[TemporaryFile]
-  )(implicit message: Messages): Either[String, Seq[KeyValuePair]] = {
+  )(implicit message: Messages): Either[String, Seq[KeyValuesPair]] = {
     val contentAwareMimetype =
       TikaMimeDetector.guessMimeBasedOnFileContentAndName(tempFile.ref.path.toFile, tempFile.filename)
     if (
@@ -53,7 +53,7 @@ trait WithFileUploader extends WithExecutionContext {
   private def filePartFileLengthChecks(
       f: MultipartFormData.FilePart[TemporaryFile],
       maxLength: Option[Long]
-  )(implicit message: Messages): Either[String, Seq[KeyValuePair]] = {
+  )(implicit message: Messages): Either[String, Seq[KeyValuesPair]] = {
     if (!maxLength.exists(_ < f.ref.path.toFile.length)) {
       Right(Seq.empty)
     } else {
@@ -64,11 +64,11 @@ trait WithFileUploader extends WithExecutionContext {
   private def fileRatioCheck(
       f: MultipartFormData.FilePart[TemporaryFile],
       expectedRatio: Double
-  )(implicit message: Messages): Either[String, Seq[KeyValuePair]] = {
+  )(implicit message: Messages): Either[String, Seq[KeyValuesPair]] = {
     val image      = ImmutableImage.loader().fromFile(f.ref.path.toFile)
     val imageRatio = image.ratio
     if (imageRatio == expectedRatio) {
-      Right(Seq((f.key.dropRight(AutoUploadSuffix.length + 1) + "AspectRatio") -> imageRatio.toString))
+      Right(Seq((f.key.dropRight(AutoUploadSuffix.length + 1) + "AspectRatio") -> Seq(imageRatio.toString)))
     } else {
       Left(Messages("error.invalidImageRatio", imageRatio, expectedRatio))
     }
@@ -77,7 +77,7 @@ trait WithFileUploader extends WithExecutionContext {
   private def fileResolutionCheck(
       f: MultipartFormData.FilePart[TemporaryFile],
       expectedResolution: (Int, Int)
-  )(implicit message: Messages): Either[String, Seq[KeyValuePair]] = {
+  )(implicit message: Messages): Either[String, Seq[KeyValuesPair]] = {
     val image                                      = ImmutableImage.loader().fromFile(f.ref.path.toFile)
     val imageResolution: (Int, Int)                = image.width -> image.height
     def resolutionRenderer(resolution: (Int, Int)) = s"${resolution._1}x${resolution._2}"
@@ -104,21 +104,21 @@ trait WithFileUploader extends WithExecutionContext {
       request: Request[MultipartFormData[TemporaryFile]]
   ): Future[Form[A]] = {
 
-    val fileChecks: Seq[(MultipartFormData.FilePart[TemporaryFile], Seq[FormError], Seq[KeyValuePair])] =
+    val fileChecks: Seq[(MultipartFormData.FilePart[TemporaryFile], Seq[FormError], Seq[KeyValuesPair])] =
       request.body.files
         .filter { file =>
           isAutoUpload(file)
         }
         .map { file: MultipartFormData.FilePart[TemporaryFile] =>
-          val checkResults: Seq[Either[String, Seq[KeyValuePair]]] =
+          val checkResults: Seq[Either[String, Seq[KeyValuesPair]]] =
             Seq(filePartFormatChecks(file), filePartFileLengthChecks(file, maxLength)) ++
               (maybeRatio
                 .map(ratio => fileRatioCheck(file, ratio))) ++
               (maybeResolution
                 .map(resolution => fileResolutionCheck(file, resolution)))
 
-          val (formErrors: Seq[FormError], keyValues: Seq[KeyValuePair]) =
-            checkResults.foldLeft((Seq.empty[FormError], Seq.empty[KeyValuePair])) {
+          val (formErrors: Seq[FormError], keyValues: Seq[KeyValuesPair]) =
+            checkResults.foldLeft((Seq.empty[FormError], Seq.empty[KeyValuesPair])) {
               case ((prevFormErrors, prevKeyValues), checkResult) =>
                 checkResult match {
                   case Left(errorMessage) =>
@@ -139,25 +139,25 @@ trait WithFileUploader extends WithExecutionContext {
     val (
       validFiles: Seq[MultipartFormData.FilePart[TemporaryFile]],
       formErrors: Seq[FormError],
-      additionalKeyValues: Seq[KeyValuePair]
+      additionalKeyValues: Seq[KeyValuesPair]
     ) =
       fileChecks.foldLeft(
         (
           Seq.empty[MultipartFormData.FilePart[TemporaryFile]],
           Seq.empty[FormError],
-          Seq.empty[KeyValuePair]
+          Seq.empty[KeyValuesPair]
         )
       ) {
         case (
               (
                 prevValidFiles: Seq[MultipartFormData.FilePart[TemporaryFile]],
                 prevFormErrors: Seq[FormError],
-                prevAdditionalKeyValuePairs: Seq[KeyValuePair]
+                prevAdditionalKeyValuePairs: Seq[KeyValuesPair]
               ),
               (
                 file: MultipartFormData.FilePart[TemporaryFile],
                 formErrors: Seq[FormError],
-                keyValues: Seq[KeyValuePair]
+                keyValues: Seq[KeyValuesPair]
               )
             ) =>
           val nextValidFiles: Seq[MultipartFormData.FilePart[TemporaryFile]] =
@@ -166,7 +166,7 @@ trait WithFileUploader extends WithExecutionContext {
           val nextFormErrors: Seq[FormError] =
             prevFormErrors ++ formErrors
 
-          val nextAdditionalKeyValues: Seq[KeyValuePair] =
+          val nextAdditionalKeyValues: Seq[KeyValuesPair] =
             prevAdditionalKeyValuePairs ++ keyValues
 
           (
@@ -176,7 +176,7 @@ trait WithFileUploader extends WithExecutionContext {
           )
       }
 
-    val fileKeyValueFutures: Seq[Future[KeyValuePair]] = validFiles
+    val fileKeyValueFutures: Seq[Future[KeyValuesPair]] = validFiles
       .map { filePart =>
         val fieldName = filePart.key.dropRight(AutoUploadSuffix.length + 1)
 
@@ -208,14 +208,25 @@ trait WithFileUploader extends WithExecutionContext {
 
         removeOldFileFuture.flatMap { _ =>
           saveFile(filePart).map {
-            case Some(fileId) => fieldName -> fileId.stringify
-            case None         => ""        -> ""
+            case Some(fileId) => fieldName -> Seq(fileId.stringify)
+            case None         => ""        -> Seq("")
           }
         }
       }
 
-    Future.sequence(fileKeyValueFutures).map { fileKeyValues: Seq[KeyValuePair] =>
-      val newData = form.data ++ fileKeyValues ++ additionalKeyValues
+    Future.sequence(fileKeyValueFutures).map { fileKeyValues: Seq[KeyValuesPair] =>
+      val flattenedKeyValues =
+        (fileKeyValues ++ additionalKeyValues).groupBy(_._1).view.mapValues(x => x.map(_._2).flatten).flatMap {
+          case (key, values) =>
+            if (values.size != 1 || key.endsWith("[]")) {
+              values.zipWithIndex.map { case (value, index) =>
+                s"${key.replace("[]", "")}[$index]" -> value
+              }
+            } else {
+              Seq(key -> values.head)
+            }
+        }
+      val newData = form.data ++ flattenedKeyValues
 
       formErrors match {
         case Nil => form.discardingErrors.bind(newData)
