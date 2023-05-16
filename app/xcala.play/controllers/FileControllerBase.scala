@@ -108,7 +108,7 @@ private[controllers] trait FileControllerBase
       requestHeader: RequestHeader
   ): Future[Result] = {
     val resultsFuture: Future[Seq[String]] = Future.sequence(
-      body.files.map { file =>
+      body.files.sortBy(_.filename).map { file =>
         val fileExtension = FilenameUtils.getExtension(file.filename)
         val id            = BSONObjectID.generate()
 
@@ -125,13 +125,13 @@ private[controllers] trait FileControllerBase
 
         fileInfoService.upload(fileInfo, readAllBytes(file.ref.path)).flatMap {
           case Right(fileId) =>
-            Future.successful(s"""{"id":"${fileId.stringify}", "label":"${fileInfo.name}", "url":"${if (
-                fileInfo.isImage
-              ) {
-                publicStorageUrls.publicImageUrl(fileId).absoluteURL()
-              } else {
-                publicStorageUrls.publicFileUrl(fileId).absoluteURL()
-              }}"}""")
+            Future.successful(
+              s"""{"id":"${fileId.stringify}", "label":"${fileInfo.name}", "url":"${if (fileInfo.isImage) {
+                  publicStorageUrls.publicImageUrl(fileId).absoluteURL()
+                } else {
+                  publicStorageUrls.publicFileUrl(fileId).absoluteURL()
+                }}"}"""
+            )
 
           case Left(errorMessage) =>
             val exception = new Throwable(errorMessage)
