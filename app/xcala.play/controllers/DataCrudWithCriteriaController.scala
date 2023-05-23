@@ -4,7 +4,7 @@ import xcala.play.services._
 
 import play.api.mvc.InjectedController
 
-trait DataCrudWithCriteriaController[A, B] extends DataCrudController[A] with WithCriteria[A, B] {
+trait DataCrudWithCriteriaController[A, B, BodyType] extends DataCrudController[A, BodyType] with WithCriteria[A, B] {
   self: InjectedController =>
 
   protected val defaultService: DataReadService[A]

@@ -5,7 +5,7 @@ import xcala.play.services._
 
 import play.api.mvc.InjectedController
 
-trait DataCrudController[A] extends DataReadController[A] with DataCudController[A] {
+trait DataCrudController[A, BodyType] extends DataReadController[A] with DataCudController[A, BodyType] {
   self: InjectedController =>
 
   protected def defaultService: DataReadService[A] with DataRemoveService with DataSaveService[A]
