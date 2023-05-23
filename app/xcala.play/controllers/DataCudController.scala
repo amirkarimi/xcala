@@ -13,7 +13,7 @@ import scala.concurrent.Future
 import reactivemongo.api.bson.BSONObjectID
 import reactivemongo.api.commands.WriteResult
 
-trait DataCudController[A]
+trait DataCudController[A, BodyType]
     extends InjectedController
     with WithMainPageResults
     with WithFormBinding
@@ -21,6 +21,8 @@ trait DataCudController[A]
     with WithExecutionContext
     with I18nSupport {
   protected def cudService: DataReadService[A] with DataSaveService[A] with DataRemoveService
+
+  val bodyParser: BodyParser[BodyType]
 
   def defaultForm: Form[A]
 
@@ -46,7 +48,7 @@ trait DataCudController[A]
     createView(defaultForm.bindFromRequest().discardingErrors)
   }
 
-  def createPost: EssentialAction = action.async { implicit request =>
+  def createPost: Action[BodyType] = action.async(bodyParser) { implicit request: RequestType[_] =>
     val filledFormFuture = bindForm(defaultForm)
 
     filledFormFuture.flatMap { filledForm =>
@@ -75,7 +77,7 @@ trait DataCudController[A]
     }
   }
 
-  def editPost(id: BSONObjectID): EssentialAction = action.async { implicit request =>
+  def editPost(id: BSONObjectID): Action[BodyType] = action.async(bodyParser) { implicit request: RequestType[_] =>
     cudService.findById(id).flatMap {
       case None => Future.successful(NotFound)
       case Some(model) =>
