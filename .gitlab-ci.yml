@@ -7,7 +7,7 @@ variables:
   IMAGE_USER: ketab
 
 xcala_play_build:
-  image: docker:20.10
+  image: hub.hamdocker.ir/library/docker:20.10
   script:
     - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" $REGISTRY
     - docker build --build-arg NEXUS_KEY .
