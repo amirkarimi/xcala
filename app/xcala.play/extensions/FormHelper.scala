@@ -2,7 +2,6 @@ package xcala.play.extensions
 
 import xcala.play.utils.KeywordExtractor
 
-import play.api.data.FieldMapping
 import play.api.data.Form
 import play.api.data.FormError
 import play.api.data.Forms
@@ -10,15 +9,16 @@ import play.api.data.Mapping
 import play.api.data.format.Formatter
 import play.api.i18n.Messages
 
+import org.joda.time.DateTime
 import org.joda.time.LocalDate
 
 object FormHelper {
 
-  def jodaLocalDateFormatterWithYearRestriction(minYear: Int, maxYear: Int): Formatter[LocalDate] =
+  def jodaLocalDateFormatterWithYearRestriction(minYear: Int, maxYear: Int, pattern: String): Formatter[LocalDate] =
     new Formatter[LocalDate] {
 
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] =
-        play.api.data.format.JodaFormats.jodaLocalDateFormat.bind(key, data) match {
+        play.api.data.format.JodaFormats.jodaLocalDateFormat(pattern).bind(key, data) match {
           case Left(formErrors) => Left(formErrors)
           case Right(value) =>
             val year = value.getYear()
@@ -34,17 +34,62 @@ object FormHelper {
         if (year < minYear || year > maxYear) {
           Map.empty[String, String]
         } else {
-          play.api.data.format.JodaFormats.jodaLocalDateFormat.unbind(key, value)
+          play.api.data.format.JodaFormats.jodaLocalDateFormat(pattern).unbind(key, value)
         }
       }
 
     }
 
-  def jodaLocalDateMappingWithYearRestriction(minYear: Int = 1900, maxYear: Int = 2500): FieldMapping[LocalDate] =
+  def jodaDateTimeFormatterWithYearRestriction(minYear: Int, maxYear: Int, pattern: String): Formatter[DateTime] =
+    new Formatter[DateTime] {
+
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], DateTime] =
+        play.api.data.format.JodaFormats.jodaDateTimeFormat(pattern).bind(key, data) match {
+          case Left(formErrors) =>
+            Left(formErrors)
+          case Right(value) =>
+            val year = value.getYear()
+            if (year < minYear || year > maxYear) {
+              Left(Seq(FormError(key, "error.invalidFormat")))
+            } else {
+              Right(value)
+            }
+        }
+
+      override def unbind(key: String, value: DateTime): Map[String, String] = {
+        val year = value.getYear()
+        if (year < minYear || year > maxYear) {
+          Map.empty[String, String]
+        } else {
+          play.api.data.format.JodaFormats.jodaDateTimeFormat(pattern).unbind(key, value)
+        }
+      }
+
+    }
+
+  def jodaLocalDateMappingWithYearRestriction(
+      pattern: String = "yyyy-MM-dd",
+      minYear: Int = 1900,
+      maxYear: Int = 2500
+  ): Mapping[org.joda.time.LocalDate] =
     Forms.of(
       jodaLocalDateFormatterWithYearRestriction(
         minYear = minYear,
-        maxYear = maxYear
+        maxYear = maxYear,
+        pattern = pattern
+      )
+    )
+
+  def jodaDateTimeMappingWithYearRestriction(
+      pattern: String,
+      minYear: Int = 1900,
+      maxYear: Int = 2500
+  ): Mapping[org.joda.time.DateTime] =
+    Forms.of(
+      jodaDateTimeFormatterWithYearRestriction(
+        minYear = minYear,
+        maxYear = maxYear,
+        pattern = pattern
       )
     )
 
