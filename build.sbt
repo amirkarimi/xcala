@@ -2,11 +2,11 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.24.6"
+version := "0.25.0"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.11"
 
 resolvers ++= Seq(
 )
@@ -28,23 +28,24 @@ libraryDependencies ++= Seq(
   ehcache,
   filters,
   jodaForms,
-  "org.reactivemongo"     %% "reactivemongo"              % "1.0.10",
-  "com.nappin"            %% "play-recaptcha"             % "2.5",
-  "com.typesafe.akka"     %% "akka-actor-typed"           % "2.8.2",
-  "com.typesafe.akka"     %% "akka-testkit"               % "2.8.2" % "test",
-  "com.typesafe.akka"     %% "akka-serialization-jackson" % "2.8.2",
-  "com.typesafe.akka"     %% "akka-stream"                % "2.8.2",
-  "com.typesafe.akka"     %% "akka-slf4j"                 % "2.8.2",
-  "com.bahmanm"           %% "persianutils"               % "4.0",
-  "io.lemonlabs"          %% "scala-uri"                  % "4.0.3",
-  "org.apache.tika"        % "tika-core"                  % "2.8.0",
-  "ch.qos.logback"         % "logback-classic"            % "1.4.8",
-  "io.sentry"              % "sentry-logback"             % "6.23.0",
-  "io.minio"               % "minio"                      % "8.5.3",
-  "commons-io"             % "commons-io"                 % "2.11.0",
-  "com.sksamuel.scrimage" %% "scrimage-scala"             % "4.0.36",
-  "com.sksamuel.scrimage"  % "scrimage-webp"              % "4.0.36",
-  specs2                   % Test
+  "org.reactivemongo"            %% "reactivemongo"              % "1.0.10",
+  "com.nappin"                   %% "play-recaptcha"             % "2.5",
+  "com.typesafe.akka"            %% "akka-actor-typed"           % "2.8.3",
+  "com.typesafe.akka"            %% "akka-testkit"               % "2.8.3" % "test",
+  "com.typesafe.akka"            %% "akka-serialization-jackson" % "2.8.3",
+  "com.typesafe.akka"            %% "akka-stream"                % "2.8.3",
+  "com.typesafe.akka"            %% "akka-slf4j"                 % "2.8.3",
+  "com.bahmanm"                  %% "persianutils"               % "4.0",
+  "io.lemonlabs"                 %% "scala-uri"                  % "4.0.3",
+  "org.apache.tika"               % "tika-core"                  % "2.8.0",
+  "ch.qos.logback"                % "logback-classic"            % "1.4.8",
+  "io.sentry"                     % "sentry-logback"             % "6.26.0",
+  "io.minio"                      % "minio"                      % "8.5.4",
+  "commons-io"                    % "commons-io"                 % "2.13.0",
+  "com.sksamuel.scrimage"        %% "scrimage-scala"             % "4.0.38",
+  "com.sksamuel.scrimage"         % "scrimage-webp"              % "4.0.38",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala"       % "2.15.2",
+  specs2                          % Test
 )
 
 ThisBuild / scapegoatVersion := "2.1.2"
