@@ -7,7 +7,6 @@ import okhttp3.Protocol
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.lang
 import java.util.Arrays
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -15,19 +14,17 @@ import javax.inject.Singleton
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.jdk.CollectionConverters._
+import scala.jdk.FutureConverters._
 import scala.util.Failure
 import scala.util.Success
-import scala.util.Try
 
 import io.minio.BucketExistsArgs
 import io.minio.GetObjectArgs
 import io.minio.ListObjectsArgs
 import io.minio.MakeBucketArgs
-import io.minio.MinioClient
+import io.minio.MinioAsyncClient
 import io.minio.RemoveObjectArgs
-import io.minio.Result
 import io.minio.UploadObjectArgs
-import io.minio.messages.Item
 import io.sentry.Hint
 import io.sentry.Sentry
 
@@ -76,34 +73,34 @@ class FileStorageService @Inject() (
       contentType: String,
       originalName: String,
       path: Option[String] = None
-  ): Future[Boolean] = Future {
-    Try {
+  ): Future[Boolean] = {
+    val userMetaData = Map("name" -> originalName).asJava
+    val cleanPath    = getCleanPath(path)
+    val f            = File.createTempFile(objectName, "")
+    val fos          = new FileOutputStream(f)
+    fos.write(content)
+    fos.close()
 
-      val userMetaData = Map("name" -> originalName).asJava
-      val cleanPath    = getCleanPath(path)
-      val f            = File.createTempFile(objectName, "")
-      val fos          = new FileOutputStream(f)
-      fos.write(content)
+    getClient
+      .uploadObject(
+        UploadObjectArgs.builder
+          .bucket(defaultBucketName)
+          .`object`(cleanPath.concat(objectName))
+          .filename(f.getAbsolutePath)
+          .userMetadata(userMetaData)
+          .contentType(contentType)
+          .build
+      )
+      .asScala
 
-      getClient
-        .uploadObject(
-          UploadObjectArgs.builder
-            .bucket(defaultBucketName)
-            .`object`(cleanPath.concat(objectName))
-            .filename(f.getAbsolutePath)
-            .userMetadata(userMetaData)
-            .contentType(contentType)
-            .build
-        )
+  }.transformWith {
+    case Success(_) => Future.successful(true)
+    case Failure(e) =>
+      val hint = new Hint
+      hint.set("objectName", objectName)
+      Sentry.captureException(e, hint)
+      Future.successful(false)
 
-    } match {
-      case Success(_) => true
-      case Failure(e) =>
-        val hint = new Hint
-        hint.set("objectName", objectName)
-        Sentry.captureException(e, hint)
-        false
-    }
   }
 
   /** Read file from s3
@@ -114,39 +111,41 @@ class FileStorageService @Inject() (
     *   String, directory of the file. Ex: first/second/thirdFolder/
     * @return
     */
-  def findByObjectName(objectName: String, path: Option[String] = None): Future[FileS3Object] =
-    Future {
-      val cleanPath = getCleanPath(path)
-      val stream = getClient.getObject(
-        GetObjectArgs.builder
-          .bucket(defaultBucketName)
-          .`object`(cleanPath.concat(objectName))
-          .build
-      )
+  def findByObjectName(objectName: String, path: Option[String] = None): Future[FileS3Object] = {
+    val cleanPath = getCleanPath(path)
 
-      val contentType   = Option(stream.headers().get("Content-Type"))
-      val originalName  = Option(stream.headers().get("x-amz-meta-name")).getOrElse(objectName)
-      val contentLength = Option(stream.headers().get("Content-Length")).map(_.toLong)
+    for {
+      objectResponse <- getClient
+        .getObject(
+          GetObjectArgs.builder
+            .bucket(defaultBucketName)
+            .`object`(cleanPath.concat(objectName))
+            .build
+        )
+        .asScala
 
-      FileS3Object(
-        objectName = objectName,
-        originalName = originalName,
-        content = stream,
-        contentType = contentType,
-        contentLength = contentLength,
-        path = path
-      )
+      contentType   = Option(objectResponse.headers().get("Content-Type"))
+      originalName  = Option(objectResponse.headers().get("x-amz-meta-name")).getOrElse(objectName)
+      contentLength = Option(objectResponse.headers().get("Content-Length")).map(_.toLong)
 
-    }
-      .transformWith {
-        case Success(value) =>
-          Future.successful(value)
-        case Failure(e) =>
-          val hint = new Hint
-          hint.set("objectName", objectName)
-          Sentry.captureException(e, hint)
-          Future.failed(e)
-      }
+    } yield FileS3Object(
+      objectName = objectName,
+      originalName = originalName,
+      content = objectResponse,
+      contentType = contentType,
+      contentLength = contentLength,
+      path = path
+    )
+
+  }.transformWith {
+    case Success(value) =>
+      Future.successful(value)
+    case Failure(e) =>
+      val hint = new Hint
+      hint.set("objectName", objectName)
+      Sentry.captureException(e, hint)
+      Future.failed(e)
+  }
 
   /** Delete file by name and path
     *
@@ -156,26 +155,25 @@ class FileStorageService @Inject() (
     *   String Ex: folder1/folder2/
     * @return
     */
-  def deleteByObjectName(objectName: String, path: Option[String] = None): Future[Boolean] =
-    Future {
-      Try {
-        val cleanPath = getCleanPath(path)
-        getClient.removeObject(
-          RemoveObjectArgs
-            .builder()
-            .bucket(defaultBucketName)
-            .`object`(cleanPath.concat(objectName))
-            .build()
-        )
-      } match {
-        case Success(_) => true
-        case Failure(e) =>
-          val hint = new Hint
-          hint.set("objectName", objectName)
-          Sentry.captureException(e, hint)
-          false
-      }
-    }
+  def deleteByObjectName(objectName: String, path: Option[String] = None): Future[Boolean] = {
+    val cleanPath = getCleanPath(path)
+    getClient
+      .removeObject(
+        RemoveObjectArgs
+          .builder()
+          .bucket(defaultBucketName)
+          .`object`(cleanPath.concat(objectName))
+          .build()
+      )
+      .asScala
+  }.transformWith {
+    case Success(_) => Future.successful(true)
+    case Failure(e) =>
+      val hint = new Hint
+      hint.set("objectName", objectName)
+      Sentry.captureException(e, hint)
+      Future.successful(false)
+  }
 
   /** Return all files name in the given path
     *
@@ -183,53 +181,50 @@ class FileStorageService @Inject() (
     *   String, Ex: folder1/folder2/
     * @return
     */
-  def getList(path: Option[String] = None): Future[List[String]] = Future {
-    Try {
+  def getList(path: Option[String] = None): Future[List[String]] =
+    Future {
       val cleanPath = getCleanPath(path)
-      val res: lang.Iterable[Result[Item]] = getClient.listObjects(
-        ListObjectsArgs
-          .builder()
-          .bucket(defaultBucketName)
-          .prefix(cleanPath)
-          .recursive(true)
-          .build()
-      )
+      val res = getClient
+        .listObjects(
+          ListObjectsArgs
+            .builder()
+            .bucket(defaultBucketName)
+            .prefix(cleanPath)
+            .recursive(true)
+            .build()
+        )
+        .asScala
 
       res
-        .iterator()
-        .asScala
-        .toList
         .map(x => Option(x.get()))
         .collect { case Some(item) =>
           item.objectName().replace(cleanPath, "")
         }
-    } match {
-      case Success(res) => res
-      case Failure(e) =>
-        Sentry.captureException(e)
-        List.empty[String]
+        .toList
+    }.recoverWith { case (e: Throwable) =>
+      Sentry.captureException(e)
+      Future.successful(List.empty[String])
     }
-  }
 
   /** It makes the default bucket if it doesn't exists
     *
     * @return
     */
-  def createDefaultBucket(): Future[Boolean] = Future {
-    Try {
-      val found =
-        getClient.bucketExists(BucketExistsArgs.builder().bucket(defaultBucketName).build())
-
-      if (!found) {
-        getClient.makeBucket(MakeBucketArgs.builder.bucket(defaultBucketName).build)
+  def createDefaultBucket(): Future[Boolean] = {
+    for {
+      found <- getClient.bucketExists(BucketExistsArgs.builder().bucket(defaultBucketName).build()).asScala
+      _ <- {
+        if (!found) {
+          getClient.makeBucket(MakeBucketArgs.builder.bucket(defaultBucketName).build).asScala
+        } else {
+          Future.successful(())
+        }
       }
-    } match {
-      case Success(_) => true
-      case Failure(e) =>
-        Sentry.captureException(e)
-        false
-    }
 
+    } yield true
+  }.recover { case e: Throwable =>
+    Sentry.captureException(e)
+    false
   }
 
   val okHttpClient = new OkHttpClient()
@@ -245,10 +240,10 @@ class FileStorageService @Inject() (
     *
     * @return
     */
-  private def getClient: MinioClient = {
+  private def getClient: MinioAsyncClient = {
     val accessKey = config.get[String]("fileStorage.s3.accessKey")
     val secretKey = config.get[String]("fileStorage.s3.secretKey")
-    MinioClient.builder
+    MinioAsyncClient.builder
       .endpoint(baseURL)
       .httpClient(okHttpClient)
       .credentials(accessKey, secretKey)
