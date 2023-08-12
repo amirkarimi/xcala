@@ -24,4 +24,15 @@ object TikaMimeDetector {
 
   }
 
+  def guessMimeBasedOnFileContent(byteArray: Array[Byte]): String = {
+
+    val helpingMeta = new Metadata()
+
+    tika
+      .getDetector()
+      .detect(TikaInputStream.get(byteArray), helpingMeta)
+      .toString
+
+  }
+
 }
