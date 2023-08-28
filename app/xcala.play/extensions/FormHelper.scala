@@ -20,7 +20,7 @@ object FormHelper {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] =
         play.api.data.format.JodaFormats.jodaLocalDateFormat(pattern).bind(key, data) match {
           case Left(formErrors) => Left(formErrors)
-          case Right(value) =>
+          case Right(value)     =>
             val year = value.getYear()
             if (year < minYear || year > maxYear) {
               Left(Seq(FormError(key, "error.invalidFormat")))
@@ -47,7 +47,7 @@ object FormHelper {
         play.api.data.format.JodaFormats.jodaDateTimeFormat(pattern).bind(key, data) match {
           case Left(formErrors) =>
             Left(formErrors)
-          case Right(value) =>
+          case Right(value)     =>
             val year = value.getYear()
             if (year < minYear || year > maxYear) {
               Left(Seq(FormError(key, "error.invalidFormat")))
@@ -105,7 +105,7 @@ object FormHelper {
 
     def withErrorIf(hasError: Boolean, key: String, error: String, args: Any*): Form[A] = {
       if (hasError) {
-        form.withError(key, error, args)
+        form.withError(key = key, message = error, args = args)
       } else {
         form
       }

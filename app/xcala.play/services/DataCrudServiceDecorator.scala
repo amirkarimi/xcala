@@ -30,7 +30,7 @@ trait DataCrudServiceDecorator[A, B]
           case Some(originalModel) => copyBackModel(model, originalModel).flatMap(service.save)
           case None                => Future.failed(new Throwable("Save error: Model ID not found to be updated."))
         }
-      case _ =>
+      case _        =>
         mapBackModel(model).flatMap(service.save)
     }
   }

@@ -8,10 +8,10 @@ abstract class LinkBase(
 )
 
 final case class Link(override val title: String, override val url: Option[String] = None)
-    extends LinkBase(title, url, true, true)
+    extends LinkBase(title = title, url = url, showInTitle = true, showInBreadcrumb = true)
 
 final case class BreadcrumbLink(override val title: String, override val url: Option[String] = None)
-    extends LinkBase(title, url, false, true)
+    extends LinkBase(title = title, url = url, showInTitle = false, showInBreadcrumb = true)
 
 final case class TitleLink(override val title: String, override val url: Option[String] = None)
-    extends LinkBase(title, url, true, false)
+    extends LinkBase(title = title, url = url, showInTitle = true, showInBreadcrumb = false)

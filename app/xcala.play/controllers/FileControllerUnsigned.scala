@@ -23,11 +23,11 @@ trait FileControllerUnsigned extends FileControllerBase {
     BSONObjectID.parse(id.split('.').headOption.getOrElse(id)) match {
       case Success(bsonObjectId) =>
         fileInfoService.findObjectById(bsonObjectId).transformWith {
-          case Success(file) if !file.isImage =>
+          case Success(file) if !file.isImage                                   =>
             Future.successful(renderFile(file, CONTENT_DISPOSITION_INLINE))
           case Success(file) if file.isImage && width.isEmpty && height.isEmpty =>
             Future.successful(renderFile(file, CONTENT_DISPOSITION_INLINE))
-          case Success(file) if file.isImage =>
+          case Success(file) if file.isImage                                    =>
             var closedInputStream = false
             cache
               .getOrElseUpdate(s"image$id${width.getOrElse("")}${height.getOrElse("")}") {
@@ -35,7 +35,7 @@ trait FileControllerUnsigned extends FileControllerBase {
                   Using(file.content) { stream =>
                     val image: ImmutableImage = ImmutableImage.loader().fromStream(stream)
 
-                    val safeWidth =
+                    val safeWidth  =
                       Seq(configuration.getOptional[Int]("file.image.maxResize.width"), width).flatten
                         .reduceOption(_ min _)
                     val safeHeight =
@@ -45,11 +45,11 @@ trait FileControllerUnsigned extends FileControllerBase {
                     val widthToHeightRatio: Double = image.width.toDouble / image.height
 
                     renderImage(
-                      image,
-                      safeWidth,
-                      safeHeight,
-                      file.contentType.getOrElse(""),
-                      widthToHeightRatio
+                      image = image,
+                      width = safeWidth,
+                      height = safeHeight,
+                      contentType = file.contentType.getOrElse(""),
+                      widthToHeightRatio = widthToHeightRatio
                     )
                   }
                 }.transformWith { x =>
@@ -68,7 +68,7 @@ trait FileControllerUnsigned extends FileControllerBase {
                     file.content.close()
                   }
                   Future.successful(result)
-                case Failure(e) =>
+                case Failure(e)      =>
                   if (!closedInputStream) {
                     file.content.close()
                   }
@@ -77,7 +77,7 @@ trait FileControllerUnsigned extends FileControllerBase {
                   Sentry.captureException(e, hint)
                   Future.successful(InternalServerError)
               }
-          case Failure(e) =>
+          case Failure(e)                                                       =>
             e match {
               case _: SocketTimeoutException =>
                 Future.successful(InternalServerError)
@@ -93,7 +93,7 @@ trait FileControllerUnsigned extends FileControllerBase {
           case _ => ???
 
         }
-      case Failure(exception) =>
+      case Failure(exception)    =>
         val hint = new Hint
         hint.set("id", id)
         Sentry.captureException(exception)

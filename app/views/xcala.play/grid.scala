@@ -11,7 +11,7 @@ object grid {
   def apply[A](paginated: Paginated[A], updateTarget: String = "")(
       columns: Col[A]*
   )(implicit messages: Messages): HtmlFormat.Appendable = {
-    renderGrid(paginated, updateTarget, columns, messages)
+    renderGrid(paginated = paginated, updateTarget = updateTarget, columns = columns, messages = messages)
   }
 
   def renderGrid[A](
@@ -32,7 +32,7 @@ object gridWithPager {
       columns: Col[A]*
   )(implicit messages: Messages): HtmlFormat.Appendable = {
     Html(
-      grid.renderGrid(paginated, updateTarget, columns, messages).body +
+      grid.renderGrid(paginated = paginated, updateTarget = updateTarget, columns = columns, messages = messages).body +
       (if (!renderSinglePagePager && paginated.pageCount <= 1) {
          ""
        } else {
@@ -51,7 +51,7 @@ object gridHeader {
     val colLabel = messages(name)
 
     sortExpression match {
-      case "" => Html(s"$colLabel")
+      case ""   => Html(s"$colLabel")
       case sort =>
         val url = paginated.sort(Some(sort)).toQueryString
 

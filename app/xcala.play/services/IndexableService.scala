@@ -28,7 +28,7 @@ trait IndexableService[A <: Indexable]
     collectionFuture.map(
       _.indexesManager.ensure(
         Index(
-          Seq(
+          key = Seq(
             "itemType" -> IndexType.Ascending,
             "lang"     -> IndexType.Ascending,
             "title"    -> IndexType.Ascending,
@@ -58,7 +58,7 @@ trait IndexableService[A <: Indexable]
   }
 
   private def saveItem(id: BSONObjectID, model: Indexable): Future[WriteResult] = {
-    val existingItem =
+    val existingItem      =
       indexedItemCollection.flatMap(_.find(BSONDocument("itemId" -> id, "itemType" -> model.itemType)).one[IndexedItem])
     val indexedItemFuture = existingItem.map(updateOrNewIndexedItem(_, id, model))
     indexedItemFuture.flatMap { indexedItem =>

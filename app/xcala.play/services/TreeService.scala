@@ -16,7 +16,7 @@ trait TreeService[A, B <: TreeModelBase[B]]
   def getModel(entity: A, children: List[B]): B
 
   def find(lang: Option[Lang], initialDocument: BSONDocument = BSONDocument()): Future[List[B]] = {
-    findItemsUnder(initialDocument, None, lang)
+    findItemsUnder(initialDocument = initialDocument, parentId = None, lang = lang)
   }
 
   private def findItemsUnder(
@@ -30,7 +30,7 @@ trait TreeService[A, B <: TreeModelBase[B]]
 
       case (Some(id), None) =>
         initialDocument ++ BSONDocument("parentId" -> id)
-      case _ => throw new IllegalArgumentException
+      case _                => throw new IllegalArgumentException
     }
 
     findItemsUnder(query, initialDocument)
@@ -44,7 +44,7 @@ trait TreeService[A, B <: TreeModelBase[B]]
     itemsFuture.flatMap { items =>
       val itemModels = items.map { doc =>
         val id = doc.getAsOpt[BSONObjectID]("_id")
-        findItemsUnder(initialDocument, id).map { childMenus =>
+        findItemsUnder(initialDocument = initialDocument, parentId = id).map { childMenus =>
           getModel(documentHandler.readOpt(doc).get, childMenus)
         }
       }
@@ -66,12 +66,16 @@ trait TreeService[A, B <: TreeModelBase[B]]
 
       filteredMenus.flatMap { item =>
         val itemTitle = parentTitle.map(_ + " » ").mkString + item.generalTitle
-        (item.id.get.stringify, itemTitle) +: getOptions(item.children, exclude, Some(itemTitle))
+        (item.id.get.stringify, itemTitle) +: getOptions(
+          items = item.children,
+          exclude = exclude,
+          parentTitle = Some(itemTitle)
+        )
       }
     }
 
     find(lang).map { items =>
-      getOptions(items, exclude)
+      getOptions(items = items, exclude = exclude)
     }
   }
 

@@ -33,7 +33,7 @@ trait DataCudController[A, BodyType]
       f: A => Future[Result]
   )(implicit requestHeader: RequestHeader): A => Future[Result] = { model =>
     modelValidation(model).flatMap {
-      case Right(_) =>
+      case Right(_)           =>
         f(model)
       case Left(errorMessage) =>
         Future.successful(failedResult(errorMessage))
@@ -79,7 +79,7 @@ trait DataCudController[A, BodyType]
 
   def editPost(id: BSONObjectID): Action[BodyType] = action.async(bodyParser) { implicit request: RequestType[_] =>
     cudService.findById(id).flatMap {
-      case None => Future.successful(NotFound)
+      case None        => Future.successful(NotFound)
       case Some(model) =>
         val boundForm        = defaultForm.fill(model)
         val filledFormFuture = bindForm(boundForm)

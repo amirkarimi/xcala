@@ -33,11 +33,11 @@ class InputParserSpec extends Specification {
     }
 
     "adds class to multiline inputs" in {
-      val rawInput = """<select name="test" id="test">
+      val rawInput       = """<select name="test" id="test">
             <option value="1">1</option>
           </select>
         """
-      val result   = InputParser.addClass(rawInput, className)
+      val result         = InputParser.addClass(rawInput, className)
       val inputWithClass = s"""<select name="test" id="test" class="$className">
             <option value="1">1</option>
           </select>

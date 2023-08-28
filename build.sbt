@@ -121,3 +121,13 @@ publishConfiguration      := publishConfiguration.value.withOverwrite(true)
 publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true)
 
 Test / javaOptions ++= Seq("--add-opens=java.base/java.lang=ALL-UNNAMED")
+
+ThisBuild / scalafixScalaBinaryVersion :=
+  CrossVersion.binaryScalaVersion(scalaVersion.value)
+
+addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.8.8" cross CrossVersion.full)
+
+scalacOptions ++= List(
+  "-Yrangepos",
+  "-P:semanticdb:synthetics:on"
+)

@@ -129,7 +129,7 @@ trait WithFileUploader extends WithExecutionContext {
                       ),
                       prevKeyValues
                     )
-                  case Right(keyValues) =>
+                  case Right(keyValues)   =>
                     (prevFormErrors, prevKeyValues ++ keyValues)
                 }
             }
@@ -186,9 +186,9 @@ trait WithFileUploader extends WithExecutionContext {
               case Failure(exception) =>
                 Sentry.captureException(exception)
                 Future.failed(exception)
-              case Success(value) =>
+              case Success(value)     =>
                 fileInfoService.removeFile(value).transformWith {
-                  case Failure(exception) =>
+                  case Failure(exception)   =>
                     Sentry.captureException(exception)
                     Future.failed(exception)
                   case Success(resultValue) =>
@@ -202,7 +202,7 @@ trait WithFileUploader extends WithExecutionContext {
                     }
                 }
             }
-          case None =>
+          case None           =>
             Future.successful(None)
         }
 
@@ -226,7 +226,7 @@ trait WithFileUploader extends WithExecutionContext {
               Seq(key -> values.head)
             }
         }
-      val newData = form.data ++ flattenedKeyValues
+      val newData            = form.data ++ flattenedKeyValues
 
       formErrors match {
         case Nil => form.discardingErrors.bind(newData)
