@@ -57,6 +57,11 @@ trait IndexableService[A <: Indexable]
     }
   }
 
+  abstract override def remove(id: BSONObjectID): Future[WriteResult] =
+    super.remove(id).flatMap { _ =>
+      removeItem(itemId = id)
+    }
+
   private def saveItem(id: BSONObjectID, model: Indexable): Future[WriteResult] = {
     val existingItem =
       indexedItemCollection.flatMap(_.find(BSONDocument("itemId" -> id, "itemType" -> model.itemType)).one[IndexedItem])
@@ -65,6 +70,12 @@ trait IndexableService[A <: Indexable]
       indexedItemCollection.flatMap(_.update.one(BSONDocument("_id" -> indexedItem.id), indexedItem, upsert = true))
     }
   }
+
+  protected def removeItem(itemId: BSONObjectID): Future[WriteResult] =
+    indexedItemCollection
+      .flatMap { collection =>
+        collection.delete.one(BSONDocument("itemId" -> itemId))
+      }
 
   private def updateOrNewIndexedItem(indexedItem: Option[IndexedItem], id: BSONObjectID, model: Indexable) = {
     IndexedItem(
