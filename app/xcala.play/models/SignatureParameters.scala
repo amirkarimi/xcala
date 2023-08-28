@@ -44,15 +44,15 @@ sealed abstract class FileSignatureParameters(id: BSONObjectID, isProtected: Boo
 }
 
 final case class PublicImageSignatureParameters(id: BSONObjectID)(implicit configuration: Configuration)
-    extends ImageSignatureParameters(id, false, None)
+    extends ImageSignatureParameters(id = id, isProtected = false, expiryTime = None)
 
 final case class PublicFileSignatureParameters(id: BSONObjectID)(implicit configuration: Configuration)
-    extends FileSignatureParameters(id, false, None)
+    extends FileSignatureParameters(id = id, isProtected = false, expiryTime = None)
 
 final case class ProtectedImageSignatureParameters(id: BSONObjectID, expireTime: DateTime)(implicit
     configuration: Configuration
-) extends ImageSignatureParameters(id, true, Some(expireTime))
+) extends ImageSignatureParameters(id = id, isProtected = true, expiryTime = Some(expireTime))
 
 final case class ProtectedFileSignatureParameters(id: BSONObjectID, expireTime: DateTime)(implicit
     configuration: Configuration
-) extends FileSignatureParameters(id, true, Some(expireTime))
+) extends FileSignatureParameters(id = id, isProtected = true, expiryTime = Some(expireTime))

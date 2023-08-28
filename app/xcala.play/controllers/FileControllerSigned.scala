@@ -78,14 +78,16 @@ trait FileControllerSigned extends FileControllerBase {
       protectedAccess: Boolean,
       expireTime: Option[DateTime]
   ): Action[AnyContent] =
-    imageProtectionCheck(protectedAccess, signature, expireTime)(unverifiedId) { verifiedId =>
+    imageProtectionCheck(expectedToBeProtected = protectedAccess, signature = signature, expireTime = expireTime)(
+      unverifiedId
+    ) { verifiedId =>
       (if (protectedAccess) protectedAction else Action).async {
         fileInfoService.findObjectById(verifiedId).transformWith {
-          case Success(file) if !file.isImage =>
+          case Success(file) if !file.isImage                                   =>
             Future.successful(renderFile(file, CONTENT_DISPOSITION_INLINE))
           case Success(file) if file.isImage && width.isEmpty && height.isEmpty =>
             Future.successful(renderFile(file, CONTENT_DISPOSITION_INLINE))
-          case Success(file) if file.isImage =>
+          case Success(file) if file.isImage                                    =>
             var closedInputStream = false
 
             cache
@@ -94,7 +96,7 @@ trait FileControllerSigned extends FileControllerBase {
                   Using(file.content) { stream =>
                     val image: ImmutableImage = ImmutableImage.loader().fromStream(stream)
 
-                    val safeWidth =
+                    val safeWidth  =
                       Seq(configuration.getOptional[Int]("file.image.maxResize.width"), width).flatten
                         .reduceOption(_ min _)
                     val safeHeight =
@@ -104,11 +106,11 @@ trait FileControllerSigned extends FileControllerBase {
                     val widthToHeightRatio: Double = image.width.toDouble / image.height
 
                     renderImage(
-                      image,
-                      safeWidth,
-                      safeHeight,
-                      file.contentType.getOrElse(""),
-                      widthToHeightRatio
+                      image = image,
+                      width = safeWidth,
+                      height = safeHeight,
+                      contentType = file.contentType.getOrElse(""),
+                      widthToHeightRatio = widthToHeightRatio
                     )
                   }
                 }.transformWith { x =>
@@ -127,7 +129,7 @@ trait FileControllerSigned extends FileControllerBase {
                     file.content.close()
                   }
                   Future.successful(result)
-                case Failure(e) =>
+                case Failure(e)      =>
                   if (!closedInputStream) {
                     file.content.close()
                   }
@@ -136,7 +138,7 @@ trait FileControllerSigned extends FileControllerBase {
                   Sentry.captureException(e, hint)
                   Future.successful(InternalServerError)
               }
-          case Failure(e) =>
+          case Failure(e)                                                       =>
             e match {
               case _: SocketTimeoutException =>
                 Future.successful(InternalServerError)
@@ -160,7 +162,9 @@ trait FileControllerSigned extends FileControllerBase {
       protectedAccess: Boolean,
       expireTime: Option[DateTime]
   ): Action[AnyContent] =
-    fileProtectionCheck(protectedAccess, signature, expireTime)(unverifiedId) { verifiedId =>
+    fileProtectionCheck(expectedToBeProtected = protectedAccess, signature = signature, expireTime = expireTime)(
+      unverifiedId
+    ) { verifiedId =>
       (if (protectedAccess) protectedAction else Action).async {
         renderFile(verifiedId, CONTENT_DISPOSITION_ATTACHMENT)
       }
@@ -173,14 +177,26 @@ trait FileControllerSigned extends FileControllerBase {
       height: Option[Int],
       expireTime: Long
   ): Action[AnyContent] =
-    getImage(id, signature, width, height, protectedAccess = true, Some(new DateTime(expireTime)))
+    getImage(
+      unverifiedId = id,
+      signature = signature,
+      width = width,
+      height = height,
+      protectedAccess = true,
+      expireTime = Some(new DateTime(expireTime))
+    )
 
   def getProtectedFile(
       id: BSONObjectID,
       signature: String,
       expireTime: Long
   ): Action[AnyContent] =
-    getFile(id, signature, protectedAccess = true, Some(new DateTime(expireTime)))
+    getFile(
+      unverifiedId = id,
+      signature = signature,
+      protectedAccess = true,
+      expireTime = Some(new DateTime(expireTime))
+    )
 
   def getPublicImage(
       id: String,
@@ -191,7 +207,14 @@ trait FileControllerSigned extends FileControllerBase {
   ): Action[AnyContent] = {
     BSONObjectID.parse(id) match {
       case Success(preProcessedUnverifiedId) =>
-        getImage(preProcessedUnverifiedId, signature, width, height, protectedAccess = false, None)
+        getImage(
+          unverifiedId = preProcessedUnverifiedId,
+          signature = signature,
+          width = width,
+          height = height,
+          protectedAccess = false,
+          expireTime = None
+        )
 
       case Failure(exception) =>
         val hint = new Hint
@@ -209,12 +232,19 @@ trait FileControllerSigned extends FileControllerBase {
       width: Option[Int],
       height: Option[Int]
   ): Action[AnyContent] =
-    getImage(id, signature, width, height, protectedAccess = false, None)
+    getImage(
+      unverifiedId = id,
+      signature = signature,
+      width = width,
+      height = height,
+      protectedAccess = false,
+      expireTime = None
+    )
 
   def getPublicFile(
       id: BSONObjectID,
       signature: String
   ): Action[AnyContent] =
-    getFile(id, signature, protectedAccess = false, None)
+    getFile(unverifiedId = id, signature = signature, protectedAccess = false, expireTime = None)
 
 }

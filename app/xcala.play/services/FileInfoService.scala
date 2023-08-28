@@ -58,7 +58,8 @@ class FileInfoService @Inject() (
   }
 
   def renameFile(id: BSONObjectID, newName: String): Future[Some[WriteResult]] = {
-    update(BSONDocument("_id" -> id), BSONDocument("$set" -> BSONDocument("fileName" -> newName))).map(Some(_))
+    update(selector = BSONDocument("_id" -> id), update = BSONDocument("$set" -> BSONDocument("fileName" -> newName)))
+      .map(Some(_))
   }
 
   def removeFile(id: BSONObjectID): Future[Either[String, WriteResult]] = {
@@ -78,7 +79,7 @@ class FileInfoService @Inject() (
         originalName = fileInfo.name
       )
       .flatMap {
-        case true =>
+        case true  =>
           insert(fileInfo.copy(id = Some(id))).map(Right.apply)
         case false =>
           Future(Left("Storage problem"))
@@ -87,7 +88,7 @@ class FileInfoService @Inject() (
 
   def findObjectById(id: BSONObjectID): Future[FileObject] = {
     fileStorageService.findByObjectName(id.stringify).transform {
-      case Success(value) =>
+      case Success(value)     =>
         toFileObject(value)
       case Failure(exception) =>
         Failure(exception)

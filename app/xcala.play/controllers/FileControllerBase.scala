@@ -85,9 +85,9 @@ private[controllers] trait FileControllerBase
       folders          <- folderService.getFoldersUnderFolder(folderId)
       folderAndParents <- folderService.getFolderAndParents(folderId)
 
-      realFolderAndParents = Folder(None, Messages("root"), None) :: folderAndParents
+      realFolderAndParents = Folder(id = None, name = Messages("root"), parent = None) :: folderAndParents
     } yield {
-      getListView(files, folders, realFolderAndParents)
+      getListView(files = files, folders = folders, realFolderAndParents = realFolderAndParents)
     }
   }
 
@@ -127,7 +127,7 @@ private[controllers] trait FileControllerBase
           case Right(fileId) =>
             Future.successful(
               s"""{"id":"${fileId.stringify}", "label":"${fileInfo.name}", "url":"${if (fileInfo.isImage) {
-                  publicStorageUrls.publicImageUrl(fileId).absoluteURL()
+                  publicStorageUrls.publicImageUrl(id = fileId).absoluteURL()
                 } else {
                   publicStorageUrls.publicFileUrl(fileId).absoluteURL()
                 }}"}"""
@@ -143,7 +143,7 @@ private[controllers] trait FileControllerBase
 
     resultsFuture
       .map { results =>
-        Ok(results.mkString("[", ",", "]"))
+        Ok(results.mkString(start = "[", sep = ",", end = "]"))
       }
       .recover { case _ =>
         BadRequest
@@ -158,7 +158,8 @@ private[controllers] trait FileControllerBase
     val currentFolderIDOpt = (json \ "currentFolderId").asOpt[String].flatMap(BSONObjectID.parse(_).toOption)
 
     folderNameOpt match {
-      case Some(folderName) => folderService.insert(Folder(None, folderName, currentFolderIDOpt)).map(_ => Ok("OK"))
+      case Some(folderName) =>
+        folderService.insert(Folder(id = None, name = folderName, parent = currentFolderIDOpt)).map(_ => Ok("OK"))
       case _                => Future.successful(BadRequest)
     }
   }
@@ -169,7 +170,7 @@ private[controllers] trait FileControllerBase
     idOpt
       .map { id =>
         fileInfoService.findById(id).map {
-          case None => Ok("{}")
+          case None       => Ok("{}")
           case Some(file) =>
             Ok(
               Json.obj(
@@ -188,7 +189,7 @@ private[controllers] trait FileControllerBase
     val future = itemType match {
       case "folder" =>
         folderService.renameFolder(id, newName)
-      case "file" =>
+      case "file"   =>
         fileInfoService.renameFile(id, newName)
     }
 
@@ -201,13 +202,13 @@ private[controllers] trait FileControllerBase
     val future = itemType match {
       case "folder" =>
         folderService.removeFolder(id)
-      case "file" =>
+      case "file"   =>
         fileInfoService.removeFile(id).flatMap {
           case Left(errorMessage) =>
             val exception = new Throwable(errorMessage)
             Sentry.captureException(exception)
             Future.failed(exception)
-          case Right(value) =>
+          case Right(value)       =>
             Future.successful(Some(value))
         }
     }
@@ -262,13 +263,17 @@ private[controllers] trait FileControllerBase
 
     val withCleanupRes = res.via(lazyFlow)
 
-    val body = HttpEntity.Streamed.apply(withCleanupRes, file.contentLength, file.contentType)
+    val body = HttpEntity.Streamed.apply(
+      data = withCleanupRes,
+      contentLength = file.contentLength,
+      contentType = file.contentType
+    )
 
     Result(
-      header = ResponseHeader(OK),
+      header = ResponseHeader(status = OK),
       body = body
     ).withHeaders(
-      CONTENT_LENGTH -> file.contentLength.map(_.toString).getOrElse(""),
+      CONTENT_LENGTH      -> file.contentLength.map(_.toString).getOrElse(""),
       CONTENT_DISPOSITION -> (s"""$dispositionMode; filename="${java.net.URLEncoder
           .encode(file.name, "UTF-8")
           .replace("+", "%20")}"; filename*=UTF-8''""" + java.net.URLEncoder
@@ -316,11 +321,11 @@ private[controllers] trait FileControllerBase
             } else {
               image.cover(width, height)
             }
-          case (Some(width), None) =>
+          case (Some(width), None)         =>
             image.scaleToWidth(width)
-          case (None, Some(height)) =>
+          case (None, Some(height))        =>
             image.scaleToHeight(height)
-          case _ =>
+          case _                           =>
             throw new IllegalArgumentException()
         }
 
@@ -333,7 +338,7 @@ private[controllers] trait FileControllerBase
           ByteString(bos.toByteArray),
           Some(MediaTypes.`image/webp`.value)
         )
-        Result(header = ResponseHeader(200), body)
+        Result(header = ResponseHeader(status = 200), body = body)
       }
     }
 

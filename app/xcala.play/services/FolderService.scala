@@ -67,11 +67,11 @@ class FolderService @Inject() (
   def getFolderAndParents(folderId: Option[BSONObjectID]): Future[List[Folder]] = {
     def getFoldersAndParents(folderId: Option[BSONObjectID], folders: List[Folder]): Future[List[Folder]] = {
       folderId match {
-        case None => Future.successful(folders)
+        case None           => Future.successful(folders)
         case Some(folderId) =>
           val folderFuture = findById(folderId)
           folderFuture.flatMap {
-            case None => Future.successful(folders)
+            case None         => Future.successful(folders)
             case Some(folder) =>
               val newFolders = folder :: folders
 
@@ -87,7 +87,7 @@ class FolderService @Inject() (
   }
 
   def renameFolder(id: BSONObjectID, newName: String): Future[WriteResult] = {
-    update(BSONDocument("_id" -> id), BSONDocument("$set" -> BSONDocument("name" -> newName)))
+    update(selector = BSONDocument("_id" -> id), update = BSONDocument("$set" -> BSONDocument("name" -> newName)))
   }
 
   private def removeFolderUnderFolder(folderId: BSONObjectID) = {

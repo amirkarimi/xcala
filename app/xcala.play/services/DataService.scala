@@ -108,7 +108,7 @@ trait DataReadServiceImpl[A] extends DataCollectionService with DataDocumentHand
 
   def findOne(query: BSONDocument): Future[Option[A]] = collectionFuture.flatMap(_.find(query).one[A])
 
-  def count(query: BSONDocument): Future[Long] = collectionFuture.flatMap(_.count(Some(query)))
+  def count(query: BSONDocument): Future[Long] = collectionFuture.flatMap(_.count(selector = Some(query)))
 
   def find(query: BSONDocument, queryOptions: QueryOptions): Future[DataWithTotalCount[A]] = {
     val sortDocs = applyDefaultSort(queryOptions.sortInfos).map { sortInfo =>
@@ -194,7 +194,7 @@ trait DataCrudService[A]
   ): Future[WriteResult] = {
     val finalUpdateDoc = setUpdateTime match {
       case false => update
-      case true =>
+      case true  =>
         val updateTime = DateTime.now
         update ++ BSONDocument(
           "$set" -> BSONDocument(DataCrudService.UpdateTimeField -> BSONDateTime(updateTime.getMillis))
@@ -208,7 +208,7 @@ trait DataCrudService[A]
     val fieldName = "_id"
     val doc       = documentHandler.writeOpt(model).get
     val objectId  = doc.getAsOpt[BSONObjectID](fieldName).getOrElse(BSONObjectID.generate())
-    val newDoc = BSONDocument(
+    val newDoc    = BSONDocument(
       doc.elements.filter(_.name != fieldName).map(e => (e.name, e.value)) :+ (fieldName -> objectId)
     )
     (newDoc, objectId)
@@ -216,7 +216,7 @@ trait DataCrudService[A]
 
   private def setCreateAndUpdateTime(doc: BSONDocument) = {
     // Set create time if it wasn't available
-    val createTime = doc.getAsOpt[DateTime](DataCrudService.CreateTimeField).getOrElse(DateTime.now)
+    val createTime        = doc.getAsOpt[DateTime](DataCrudService.CreateTimeField).getOrElse(DateTime.now)
     val docWithCreateTime = BSONDocument(
       doc.elements.filter(_.name != DataCrudService.CreateTimeField).map(e => (e.name, e.value)) :+
         (DataCrudService.CreateTimeField -> BSONDateTime(createTime.getMillis))

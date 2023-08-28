@@ -22,14 +22,14 @@ object Formats {
   ): Either[Seq[FormError], T] = {
     stringFormat.bind(key, data).flatMap { s =>
       parse(s).toEither.left
-        .map(_ => Seq(FormError(key, errMsg, errArgs)))
+        .map(_ => Seq(FormError(key = key, message = errMsg, args = errArgs)))
     }
   }
 
   implicit val bsonObjectIDFormatter: Formatter[BSONObjectID] = new Formatter[BSONObjectID] {
 
     def bind(key: String, data: Map[String, String]): Either[Seq[FormError], BSONObjectID] = {
-      parsing(BSONObjectID.parse(_), "error.objectId", Nil)(key, data)
+      parsing(parse = BSONObjectID.parse(_), errMsg = "error.objectId", errArgs = Nil)(key, data)
     }
 
     def unbind(key: String, value: BSONObjectID): Map[String, String] = Map(key -> value.stringify)
@@ -43,7 +43,7 @@ object Formats {
           case Success(d) => JsSuccess(d)
           case Failure(_) => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId.format"))))
         }
-      case _ => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId"))))
+      case _           => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId"))))
     }
 
     def writes(o: BSONObjectID): JsValue = JsString(o.stringify)

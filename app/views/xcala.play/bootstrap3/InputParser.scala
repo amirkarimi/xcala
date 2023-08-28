@@ -20,7 +20,7 @@ object InputParser {
 
   private def getInputInfo(input: String) = {
     "(?s)<(input|textarea|select)(.*?)>(.*)".r.findFirstMatchIn(input).map { a =>
-      InputInfo(a.group(1), a.group(2), a.group(3))
+      InputInfo(tag = a.group(1), args = a.group(2), body = a.group(3))
     }
   }
 

@@ -19,7 +19,7 @@ trait MultilangDataReadController[A <: WithLang]
 
   override def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_]): Future[Paginated[A]] = {
     readService.find(BSONDocument("lang" -> request2Messages.lang.code), queryOptions).map { dataWithTotalCount =>
-      Paginated(dataWithTotalCount.data, dataWithTotalCount.totalCount, queryOptions)
+      Paginated(data = dataWithTotalCount.data, totalCount = dataWithTotalCount.totalCount, queryOptions = queryOptions)
     }
   }
 

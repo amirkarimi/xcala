@@ -45,7 +45,7 @@ final case class Paginated[A](
 object Paginated {
 
   def apply[A](dataWithTotalCount: DataWithTotalCount[A], queryOptions: QueryOptions): Paginated[A] = {
-    apply(dataWithTotalCount.data, dataWithTotalCount.totalCount, queryOptions)
+    apply(data = dataWithTotalCount.data, totalCount = dataWithTotalCount.totalCount, queryOptions = queryOptions)
   }
 
   def apply[A, B](
@@ -57,7 +57,12 @@ object Paginated {
     // Form data contains all request data but we just need criteria data
     val criteriaArgs = criteria.map(c => criteriaForm.fill(c).data).getOrElse(Map.empty)
 
-    apply(dataWithTotalCount.data, dataWithTotalCount.totalCount, queryOptions, criteriaArgs)
+    apply(
+      data = dataWithTotalCount.data,
+      totalCount = dataWithTotalCount.totalCount,
+      queryOptions = queryOptions,
+      args = criteriaArgs
+    )
   }
 
 }

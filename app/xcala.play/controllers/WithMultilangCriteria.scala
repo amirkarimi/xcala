@@ -23,7 +23,12 @@ trait WithMultilangCriteria[A <: WithLang, B]
     val criteriaOpt         = criteriaForm.bind(modifiedData.toMap).value
 
     readService.find(criteriaOpt, queryOptions).map { dataWithTotalCount =>
-      Paginated(dataWithTotalCount, queryOptions, criteriaOpt, criteriaForm)
+      Paginated(
+        dataWithTotalCount = dataWithTotalCount,
+        queryOptions = queryOptions,
+        criteria = criteriaOpt,
+        criteriaForm = criteriaForm
+      )
     }
   }
 

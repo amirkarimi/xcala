@@ -9,8 +9,8 @@ object IbanValidator {
   def isValidIranianIban(iban: String): Boolean = {
     iban match {
       case IbanPattern(country, check, account) if country == "IR" && iban.length == 26 =>
-        isValid(country, check, account)
-      case _ =>
+        isValid(country = country, check = check, account = account)
+      case _                                                                            =>
         false
     }
   }

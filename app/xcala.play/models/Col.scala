@@ -14,8 +14,8 @@ object Col {
 
   def command[A](commands: (A => RowCommand)*)(implicit messages: Messages): Col[A] = {
     Col[A](
-      "",
-      (field: A) =>
+      name = "",
+      fieldMapper = (field: A) =>
         "<div class='btn-group'>" +
         commands
           .map(_(field))
@@ -28,8 +28,8 @@ object Col {
           }
           .mkString +
         "</div>",
-      "",
-      _ => Some("command-column")
+      sortExpression = "",
+      cssClass = _ => Some("command-column")
     )
   }
 

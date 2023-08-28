@@ -22,16 +22,16 @@ object BSONDocumentQuery {
     }
 
     def filterByQueryWithType(field: String, queryWithType: QueryWithType): BSONDocument = queryWithType.query match {
-      case None => doc
+      case None                              => doc
       case Some(query) if query.trim() != "" =>
         queryWithType.searchType match {
-          case SearchType.Exact =>
+          case SearchType.Exact    =>
             doc ++ BSONDocument(field -> query)
           case SearchType.Contains =>
             doc ++ BSONDocument("keywords." + field -> BSONDocument("$all" -> getQueryParts(query)))
-          case _ => ???
+          case _                   => ???
         }
-      case _ => ???
+      case _                                 => ???
     }
 
     private def getQueryParts(query: String): List[String] = {

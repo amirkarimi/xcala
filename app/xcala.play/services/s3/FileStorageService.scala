@@ -1,9 +1,5 @@
 package xcala.play.services.s3
 
-import okhttp3.ConnectionPool
-import okhttp3.OkHttpClient
-import okhttp3.Protocol
-
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -27,6 +23,9 @@ import io.minio.RemoveObjectArgs
 import io.minio.UploadObjectArgs
 import io.sentry.Hint
 import io.sentry.Sentry
+import okhttp3.ConnectionPool
+import okhttp3.OkHttpClient
+import okhttp3.Protocol
 
 object FileStorageService {
 
@@ -140,7 +139,7 @@ class FileStorageService @Inject() (
   }.transformWith {
     case Success(value) =>
       Future.successful(value)
-    case Failure(e) =>
+    case Failure(e)     =>
       val hint = new Hint
       hint.set("objectName", objectName)
       Sentry.captureException(e, hint)
@@ -184,7 +183,7 @@ class FileStorageService @Inject() (
   def getList(path: Option[String] = None): Future[List[String]] =
     Future {
       val cleanPath = getCleanPath(path)
-      val res = getClient
+      val res       = getClient
         .listObjects(
           ListObjectsArgs
             .builder()
@@ -213,7 +212,7 @@ class FileStorageService @Inject() (
   def createDefaultBucket(): Future[Boolean] = {
     for {
       found <- getClient.bucketExists(BucketExistsArgs.builder().bucket(defaultBucketName).build()).asScala
-      _ <- {
+      _     <- {
         if (!found) {
           getClient.makeBucket(MakeBucketArgs.builder.bucket(defaultBucketName).build).asScala
         } else {
