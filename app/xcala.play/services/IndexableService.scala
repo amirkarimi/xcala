@@ -8,7 +8,6 @@ import scala.concurrent.Future
 import scala.util.Failure
 import scala.util.Success
 
-import org.joda.time.DateTime
 import reactivemongo.api.bson._
 import reactivemongo.api.bson.Macros
 import reactivemongo.api.bson.collection.BSONCollection
@@ -47,11 +46,12 @@ trait IndexableService[A <: Indexable]
       case Success(_) =>
         val result = super.save(model)
 
-        result.map { objectId =>
-          saveItem(objectId, model)
+        result.flatMap { case objectId =>
+          saveItem(objectId, model).map { _ =>
+            objectId
+          }
         }
 
-        result
       case Failure(e) =>
         Future.failed(e)
     }
@@ -62,13 +62,20 @@ trait IndexableService[A <: Indexable]
       removeItem(itemId = id)
     }
 
-  private def saveItem(id: BSONObjectID, model: Indexable): Future[WriteResult] = {
-    val existingItem      =
-      indexedItemCollection.flatMap(_.find(BSONDocument("itemId" -> id, "itemType" -> model.itemType)).one[IndexedItem])
-    val indexedItemFuture = existingItem.map(updateOrNewIndexedItem(_, id, model))
-    indexedItemFuture.flatMap { indexedItem =>
-      indexedItemCollection.flatMap(_.update.one(BSONDocument("_id" -> indexedItem.id), indexedItem, upsert = true))
-    }
+  private def saveItem(id: BSONObjectID, model: A): Future[WriteResult] = {
+    val existingItem: Future[Option[IndexedItem]] =
+      indexedItemCollection
+        .flatMap(
+          _.find(BSONDocument("itemId" -> id, "itemType" -> model.itemType)).one[IndexedItem]
+        )
+
+    existingItem
+      .map { case existingItem: Option[IndexedItem] =>
+        updateOrNewIndexedItem(existingItem, id, model)
+      }
+      .flatMap { indexedItem: IndexedItem =>
+        indexedItemCollection.flatMap(_.update.one(BSONDocument("_id" -> indexedItem.id), indexedItem, upsert = true))
+      }
   }
 
   protected def removeItem(itemId: BSONObjectID): Future[WriteResult] =
@@ -77,16 +84,18 @@ trait IndexableService[A <: Indexable]
         collection.delete.one(BSONDocument("itemId" -> itemId))
       }
 
-  private def updateOrNewIndexedItem(indexedItem: Option[IndexedItem], id: BSONObjectID, model: Indexable) = {
-    IndexedItem(
-      id = indexedItem.flatMap(_.id),
-      itemType = model.itemType,
-      itemId = id,
-      lang = model.lang,
-      title = model.title,
-      content = model.content,
-      updateTime = DateTime.now
-    )
-  }
+  private def updateOrNewIndexedItem(
+      indexedItem: Option[IndexedItem],
+      id: BSONObjectID,
+      model: A
+  ) = IndexedItem(
+    id = indexedItem.flatMap(_.id),
+    itemType = model.itemType,
+    itemId = id,
+    lang = model.lang,
+    title = model.title,
+    content = model.content,
+    updateTime = model.lastUpdateTime
+  )
 
 }
