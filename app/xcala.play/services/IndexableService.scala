@@ -88,7 +88,7 @@ trait IndexableService[A <: Indexable]
       indexedItem: Option[IndexedItem],
       id: BSONObjectID,
       model: A
-  ) = IndexedItem(
+  ): IndexedItem = IndexedItem(
     id = indexedItem.flatMap(_.id),
     itemType = model.itemType,
     itemId = id,

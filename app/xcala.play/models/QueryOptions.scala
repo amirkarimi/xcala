@@ -20,7 +20,7 @@ final case class QueryOptions(
 }
 
 object QueryOptions {
-  val defaultPageSize = 10
+  val defaultPageSize: Int = 10
 
   val form: Form[QueryOptions] = Form(
     mapping(

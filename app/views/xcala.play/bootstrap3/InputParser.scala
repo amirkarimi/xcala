@@ -18,18 +18,18 @@ object InputParser {
       }
   }
 
-  private def getInputInfo(input: String) = {
+  private def getInputInfo(input: String): Option[InputInfo] = {
     "(?s)<(input|textarea|select)(.*?)>(.*)".r.findFirstMatchIn(input).map { a =>
       InputInfo(tag = a.group(1), args = a.group(2), body = a.group(3))
     }
   }
 
-  private def isValidInput(args: String) = {
+  private def isValidInput(args: String): Boolean = {
     val found = """type(\s*?)?=(\s*?)?(["']?)(checkbox|radio)(["']?)""".r.findFirstMatchIn(args)
     found.isEmpty
   }
 
-  private def addClassToArgs(args: String, className: String) = {
+  private def addClassToArgs(args: String, className: String): String = {
     if (args.matches("""(.*)class=["'](.*)""")) {
       args.replaceFirst("(.*)(class=[\"'])(.*)", "$1$2" + className + " $3")
     } else {

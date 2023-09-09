@@ -40,7 +40,7 @@ class FileInfoService @Inject() (
     implicit val ec: ExecutionContext
 ) extends DataCrudService[FileInfo] {
 
-  val collectionName                                 = "files"
+  val collectionName: String                         = "files"
   val documentHandler: BSONDocumentHandler[FileInfo] = Macros.handler[FileInfo]
 
   def getFilesUnderFolder(folderId: Option[BSONObjectID], fileType: Option[String] = None): Future[Seq[FileInfo]] = {

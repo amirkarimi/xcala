@@ -30,7 +30,7 @@ object PaginatedPersistor {
       call.copy(url = url)
     }
 
-    private def attachQueryString(source: String, queryString: String) = {
+    private def attachQueryString(source: String, queryString: String): String = {
       val separator = if (source.contains("?")) "&" else "?"
       source + separator + queryString
     }

@@ -10,7 +10,7 @@ import org.apache.tika.metadata.TikaCoreProperties
 
 object TikaMimeDetector {
 
-  private val tika = new TikaConfig()
+  private val tika: TikaConfig = new TikaConfig()
 
   def guessMimeBasedOnFileContentAndName(file: File, fileName: String): String = {
     // It is important to mix both fileName and content to guess the mime type

@@ -3,8 +3,8 @@ package xcala.play.utils
 import scala.util.matching.Regex
 
 object IbanValidator {
-  val IranianIbanLength  = 26
-  val IbanPattern: Regex = """([A-Z]{2})(\d{2})([A-Z0-9]{12,27})""".r
+  val IranianIbanLength: Int = 26
+  val IbanPattern: Regex     = """([A-Z]{2})(\d{2})([A-Z0-9]{12,27})""".r
 
   def isValidIranianIban(iban: String): Boolean = {
     iban match {
