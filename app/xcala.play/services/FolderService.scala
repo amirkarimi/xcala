@@ -17,7 +17,7 @@ class FolderService @Inject() (
     val databaseConfig: DefaultDatabaseConfig,
     implicit val ec: ExecutionContext
 ) extends DataCrudService[Folder] {
-  val collectionName                               = "folders"
+  val collectionName: String                       = "folders"
   val documentHandler: BSONDocumentHandler[Folder] = Macros.handler[Folder]
 
   def getFoldersUnderFolder(folderId: Option[BSONObjectID]): Future[Seq[Folder]] = {
@@ -90,7 +90,7 @@ class FolderService @Inject() (
     update(selector = BSONDocument("_id" -> id), update = BSONDocument("$set" -> BSONDocument("name" -> newName)))
   }
 
-  private def removeFolderUnderFolder(folderId: BSONObjectID) = {
+  private def removeFolderUnderFolder(folderId: BSONObjectID): Future[Seq[WriteResult]] = {
     getFoldersUnderFolderRecursive(folderId).flatMap { folders =>
       Future.sequence(
         folders.map { folder =>

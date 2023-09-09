@@ -204,7 +204,7 @@ trait DataCrudService[A]
     collectionFuture.flatMap(_.update.one(selector, finalUpdateDoc, upsert = upsert, multi = multi))
   }
 
-  private def getDocWithId(model: A) = {
+  private def getDocWithId(model: A): (BSONDocument, BSONObjectID) = {
     val fieldName = "_id"
     val doc       = documentHandler.writeOpt(model).get
     val objectId  = doc.getAsOpt[BSONObjectID](fieldName).getOrElse(BSONObjectID.generate())
@@ -214,7 +214,7 @@ trait DataCrudService[A]
     (newDoc, objectId)
   }
 
-  private def setCreateAndUpdateTime(doc: BSONDocument) = {
+  private def setCreateAndUpdateTime(doc: BSONDocument): BSONDocument = {
     // Set create time if it wasn't available
     val createTime        = doc.getAsOpt[DateTime](DataCrudService.CreateTimeField).getOrElse(DateTime.now)
     val docWithCreateTime = BSONDocument(
@@ -226,7 +226,7 @@ trait DataCrudService[A]
     setUpdateTime(docWithCreateTime)
   }
 
-  private def setUpdateTime(doc: BSONDocument) = {
+  private def setUpdateTime(doc: BSONDocument): BSONDocument = {
     val updateTime = DateTime.now
     BSONDocument(
       doc.elements
@@ -238,6 +238,6 @@ trait DataCrudService[A]
 }
 
 object DataCrudService {
-  val UpdateTimeField = "updateTime"
-  val CreateTimeField = "createTime"
+  val UpdateTimeField: String = "updateTime"
+  val CreateTimeField: String = "createTime"
 }

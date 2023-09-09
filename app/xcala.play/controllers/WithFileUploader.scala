@@ -20,7 +20,7 @@ import org.joda.time.DateTime
 import reactivemongo.api.bson.BSONObjectID
 
 object WithFileUploader {
-  val AutoUploadSuffix = "_autoupload"
+  val AutoUploadSuffix: String = "_autoupload"
 }
 
 trait WithFileUploader extends WithExecutionContext {

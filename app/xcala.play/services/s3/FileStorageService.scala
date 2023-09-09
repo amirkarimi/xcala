@@ -226,7 +226,7 @@ class FileStorageService @Inject() (
     false
   }
 
-  val okHttpClient = new OkHttpClient()
+  val okHttpClient: OkHttpClient = new OkHttpClient()
     .newBuilder()
     .connectTimeout(TimeUnit.SECONDS.toMillis(60), TimeUnit.MILLISECONDS)
     .writeTimeout(TimeUnit.SECONDS.toMillis(60), TimeUnit.MILLISECONDS)

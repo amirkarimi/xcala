@@ -63,8 +63,8 @@ private[controllers] trait FileControllerBase
 
   def defaultInternalServerError(implicit adminRequest: RequestType[_]): Result
 
-  protected val CONTENT_DISPOSITION_ATTACHMENT = "attachment"
-  protected val CONTENT_DISPOSITION_INLINE     = "inline"
+  protected val CONTENT_DISPOSITION_ATTACHMENT: String = "attachment"
+  protected val CONTENT_DISPOSITION_INLINE: String     = "inline"
 
   def selector: Action[AnyContent]
 
