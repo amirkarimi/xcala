@@ -14,6 +14,22 @@ import reactivemongo.api.bson._
 
 object BSONHandlers {
 
+  def bigIntBSONHandler(scale: Int, roundingType: BigDecimal.RoundingMode.Value): BSONHandler[BigInt] =
+    new BSONHandler[BigInt] {
+
+      val bigDecimalBSONHandler: BSONHandler[BigDecimal] =
+        implicitly[BSONHandler[BigDecimal]]
+
+      def readTry(v: BSONValue): Try[BigInt] =
+        bigDecimalBSONHandler
+          .readTry(v)
+          .map(_.setScale(scale, roundingType).toBigInt)
+
+      def writeTry(bigInt: BigInt): Try[BSONValue] =
+        bigDecimalBSONHandler.writeTry(BigDecimal(bigInt))
+
+    }
+
   implicit object BSONLocalDateHandler extends BSONHandler[LocalDate] {
 
     def readTry(v: BSONValue): Try[LocalDate] = v match {

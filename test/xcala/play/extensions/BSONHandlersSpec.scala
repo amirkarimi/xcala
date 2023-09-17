@@ -11,6 +11,22 @@ import reactivemongo.api.bson._
 @RunWith(classOf[JUnitRunner])
 class BSONHandlersSpec extends Specification {
 
+  "BigInt handler" should {
+    val handler = BSONHandlers.bigIntBSONHandler(0, BigDecimal.RoundingMode.CEILING)
+
+    "write correctly" in {
+      val model     = BigInt(12)
+      val bsonValue = handler.writeOpt(model).flatMap(_.asOpt[Int]).get
+      bsonValue === 12
+    }
+
+    "read correctly" in {
+      val model  = implicitly[BSONWriter[BigDecimal]].writeOpt(BigDecimal(13.567)).get
+      val bigInt = handler.readOpt(model).get
+      bigInt === BigInt(14)
+    }
+  }
+
   "Optional range handler" should {
     val handler = BSONHandlers.optionalRangeHandler[Int]
 
