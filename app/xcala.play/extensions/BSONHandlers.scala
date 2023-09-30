@@ -47,7 +47,7 @@ object BSONHandlers {
 
     def readTry(bson: BSONValue): Try[DateTime] = bson match {
       case time: BSONDateTime => Success(new DateTime(time.value))
-      case _                  => Failure(new IllegalArgumentException())
+      case _ => Failure(new IllegalArgumentException())
     }
 
   }
@@ -138,7 +138,7 @@ object BSONHandlers {
           case (Some(lang: String), value: Option[BSONValue]) =>
             Success(
               MultilangModel(
-                lang = lang,
+                lang  = lang,
                 value = value.collect { case x: A => x }
               ) // implicit classTag defined above helps with erasure bug here
             )

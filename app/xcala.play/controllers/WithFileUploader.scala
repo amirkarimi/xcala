@@ -51,7 +51,7 @@ trait WithFileUploader extends WithExecutionContext {
   }
 
   private def filePartFileLengthChecks(
-      f: MultipartFormData.FilePart[TemporaryFile],
+      f        : MultipartFormData.FilePart[TemporaryFile],
       maxLength: Option[Long]
   )(implicit message: Messages): Either[String, Seq[KeyValuesPair]] = {
     if (!maxLength.exists(_ < f.ref.path.toFile.length)) {
@@ -62,7 +62,7 @@ trait WithFileUploader extends WithExecutionContext {
   }
 
   private def fileRatioCheck(
-      f: MultipartFormData.FilePart[TemporaryFile],
+      f            : MultipartFormData.FilePart[TemporaryFile],
       expectedRatio: Double
   )(implicit message: Messages): Either[String, Seq[KeyValuesPair]] = {
     val image      = ImmutableImage.loader().fromFile(f.ref.path.toFile)
@@ -75,11 +75,11 @@ trait WithFileUploader extends WithExecutionContext {
   }
 
   private def fileResolutionCheck(
-      f: MultipartFormData.FilePart[TemporaryFile],
+      f                 : MultipartFormData.FilePart[TemporaryFile],
       expectedResolution: (Int, Int)
   )(implicit message: Messages): Either[String, Seq[KeyValuesPair]] = {
-    val image                                      = ImmutableImage.loader().fromFile(f.ref.path.toFile)
-    val imageResolution: (Int, Int)                = image.width -> image.height
+    val image = ImmutableImage.loader().fromFile(f.ref.path.toFile)
+    val imageResolution: (Int, Int) = image.width -> image.height
     def resolutionRenderer(resolution: (Int, Int)) = s"${resolution._1}x${resolution._2}"
     if (imageResolution == expectedResolution) {
       Right(Nil)
@@ -95,13 +95,13 @@ trait WithFileUploader extends WithExecutionContext {
   }
 
   def bindWithFiles[A](
-      form: Form[A],
-      maxLength: Option[Long] = None,
-      maybeRatio: Option[Double] = None,
+      form           : Form[A],
+      maxLength      : Option[Long]       = None,
+      maybeRatio     : Option[Double]     = None,
       maybeResolution: Option[(Int, Int)] = None
   )(implicit
-      messages: Messages,
-      request: Request[MultipartFormData[TemporaryFile]]
+      messages       : Messages,
+      request        : Request[MultipartFormData[TemporaryFile]]
   ): Future[Form[A]] = {
 
     val fileChecks: Seq[(MultipartFormData.FilePart[TemporaryFile], Seq[FormError], Seq[KeyValuesPair])] =
@@ -137,8 +137,8 @@ trait WithFileUploader extends WithExecutionContext {
         }
 
     val (
-      validFiles: Seq[MultipartFormData.FilePart[TemporaryFile]],
-      formErrors: Seq[FormError],
+      validFiles         : Seq[MultipartFormData.FilePart[TemporaryFile]],
+      formErrors         : Seq[FormError],
       additionalKeyValues: Seq[KeyValuesPair]
     ) =
       fileChecks.foldLeft(
@@ -150,14 +150,14 @@ trait WithFileUploader extends WithExecutionContext {
       ) {
         case (
               (
-                prevValidFiles: Seq[MultipartFormData.FilePart[TemporaryFile]],
-                prevFormErrors: Seq[FormError],
+                prevValidFiles             : Seq[MultipartFormData.FilePart[TemporaryFile]],
+                prevFormErrors             : Seq[FormError],
                 prevAdditionalKeyValuePairs: Seq[KeyValuesPair]
               ),
               (
-                file: MultipartFormData.FilePart[TemporaryFile],
-                formErrors: Seq[FormError],
-                keyValues: Seq[KeyValuesPair]
+                file                       : MultipartFormData.FilePart[TemporaryFile],
+                formErrors                 : Seq[FormError],
+                keyValues                  : Seq[KeyValuesPair]
               )
             ) =>
           val nextValidFiles: Seq[MultipartFormData.FilePart[TemporaryFile]] =
@@ -239,13 +239,13 @@ trait WithFileUploader extends WithExecutionContext {
     val fileExtension = FilenameUtils.getExtension(filePart.filename)
 
     val fileInfo = FileInfo(
-      name = filePart.filename,
-      extension = fileExtension,
+      name        = filePart.filename,
+      extension   = fileExtension,
       contentType = filePart.contentType.getOrElse("unknown"),
-      length = filePart.ref.path.toFile.length,
-      createTime = DateTime.now,
-      folderId = None,
-      isHidden = true
+      length      = filePart.ref.path.toFile.length,
+      createTime  = DateTime.now,
+      folderId    = None,
+      isHidden    = true
     )
 
     fileInfoService.upload(fileInfo, readAllBytes(filePart.ref.path)).map {

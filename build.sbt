@@ -2,11 +2,11 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.28.0"
+version := "0.28.2"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.13.11"
+scalaVersion := "2.13.12"
 
 resolvers ++= Seq(
 )
@@ -30,25 +30,25 @@ libraryDependencies ++= Seq(
   jodaForms,
   "org.reactivemongo"            %% "reactivemongo"              % "1.0.10",
   "com.nappin"                   %% "play-recaptcha"             % "2.5",
-  "com.typesafe.akka"            %% "akka-actor-typed"           % "2.8.3",
-  "com.typesafe.akka"            %% "akka-testkit"               % "2.8.3" % "test",
-  "com.typesafe.akka"            %% "akka-serialization-jackson" % "2.8.3",
-  "com.typesafe.akka"            %% "akka-stream"                % "2.8.3",
-  "com.typesafe.akka"            %% "akka-slf4j"                 % "2.8.3",
+  "com.typesafe.akka"            %% "akka-actor-typed"           % "2.8.5",
+  "com.typesafe.akka"            %% "akka-testkit"               % "2.8.5" % "test",
+  "com.typesafe.akka"            %% "akka-serialization-jackson" % "2.8.5",
+  "com.typesafe.akka"            %% "akka-stream"                % "2.8.5",
+  "com.typesafe.akka"            %% "akka-slf4j"                 % "2.8.5",
   "com.bahmanm"                  %% "persianutils"               % "4.0",
   "io.lemonlabs"                 %% "scala-uri"                  % "4.0.3",
-  "org.apache.tika"               % "tika-core"                  % "2.8.0",
-  "ch.qos.logback"                % "logback-classic"            % "1.4.8",
-  "io.sentry"                     % "sentry-logback"             % "6.26.0",
-  "io.minio"                      % "minio"                      % "8.5.4",
+  "org.apache.tika"               % "tika-core"                  % "2.9.0",
+  "ch.qos.logback"                % "logback-classic"            % "1.4.8", // watchout for 1.4.9+ changes
+  "io.sentry"                     % "sentry-logback"             % "6.29.0",
+  "io.minio"                      % "minio"                      % "8.5.6",
   "commons-io"                    % "commons-io"                 % "2.13.0",
-  "com.sksamuel.scrimage"        %% "scrimage-scala"             % "4.0.38",
-  "com.sksamuel.scrimage"         % "scrimage-webp"              % "4.0.38",
+  "com.sksamuel.scrimage"        %% "scrimage-scala"             % "4.1.0",
+  "com.sksamuel.scrimage"         % "scrimage-webp"              % "4.1.0",
   "com.fasterxml.jackson.module" %% "jackson-module-scala"       % "2.15.2",
   specs2                          % Test
 )
 
-ThisBuild / scapegoatVersion := "2.1.2"
+ThisBuild / scapegoatVersion := "2.1.3"
 
 scapegoatIgnoredFiles := Seq(
   ".*/ReverseRoutes.scala",
@@ -71,22 +71,6 @@ scapegoatDisabledInspections := Seq(
   "AsInstanceOf",
   "ClassNames"
 )
-
-(Compile / compile) := Def.taskDyn {
-  val c = (Compile / compile).value
-  Def.task {
-    (Compile / scapegoat).toTask.value
-    c
-  }
-}.value
-
-(Test / compile) := Def.taskDyn {
-  val c = (Test / compile).value
-  Def.task {
-    (Test / scapegoat).toTask.value
-    c
-  }
-}.value
 
 Assets / LessKeys.less / includeFilter := "*.less"
 Assets / LessKeys.less / excludeFilter := "_*.less"
@@ -125,7 +109,7 @@ Test / javaOptions ++= Seq("--add-opens=java.base/java.lang=ALL-UNNAMED")
 ThisBuild / scalafixScalaBinaryVersion :=
   CrossVersion.binaryScalaVersion(scalaVersion.value)
 
-addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.8.8" cross CrossVersion.full)
+addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.8.10" cross CrossVersion.full)
 
 scalacOptions ++= List(
   "-Yrangepos",

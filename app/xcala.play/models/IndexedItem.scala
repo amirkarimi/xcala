@@ -6,12 +6,12 @@ import reactivemongo.api.bson.Macros.Annotations.Key
 
 final case class IndexedItem(
     @Key("_id") id: Option[BSONObjectID],
-    itemType: String,
-    itemId: BSONObjectID,
-    lang: String,
-    title: String,
-    content: String,
-    updateTime: DateTime
+    itemType      : String,
+    itemId        : BSONObjectID,
+    lang          : String,
+    title         : String,
+    content       : String,
+    updateTime    : DateTime
 ) extends WithLang
 
 final case class IndexedItemCriteria(lang: Option[String], query: Option[String])

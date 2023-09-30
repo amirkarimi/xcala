@@ -15,17 +15,17 @@ object PersianUtils {
   implicit class PersianDateConverter(val dateTime: DateTime) extends AnyVal {
 
     def toGlobalDateTimeString(
-        addTime: Boolean = true,
-        reversed: Boolean = false,
-        faSeparator: String = "-",
-        nonFaSeparator: String = " "
+        addTime       : Boolean = true,
+        reversed      : Boolean = false,
+        faSeparator   : String  = "-",
+        nonFaSeparator: String  = " "
     )(implicit
-        messages: Messages
+        messages      : Messages
     ): String = {
       if (messages.lang.code == "fa") {
-        val gDate              =
+        val gDate =
           SimpleDate(year = dateTime.year.get, month = dateTime.monthOfYear.get, day = dateTime.dayOfMonth.get)
-        val pDate              = gregorianToPersian(gDate)
+        val pDate = gregorianToPersian(gDate)
         val parts: Seq[String] =
           Seq(
             s"${pDate.year}/${pDate.month.toString.reverse.padTo(2, '0').reverse.mkString}/${pDate.day.toString.reverse.padTo(2, '0').reverse.mkString}"
@@ -63,17 +63,17 @@ object PersianUtils {
     }
 
     def toGlobalDateTimeStringOption(
-        addTime: Boolean = true,
-        reversed: Boolean = false,
-        faSeparator: String = "-",
-        nonFaSeparator: String = " "
+        addTime       : Boolean = true,
+        reversed      : Boolean = false,
+        faSeparator   : String  = "-",
+        nonFaSeparator: String  = " "
     )(implicit
-        messages: Messages
+        messages      : Messages
     ): Option[String] = Try {
       toGlobalDateTimeString(
-        addTime = addTime,
-        reversed = reversed,
-        faSeparator = faSeparator,
+        addTime        = addTime,
+        reversed       = reversed,
+        faSeparator    = faSeparator,
         nonFaSeparator = nonFaSeparator
       )
     }.toOption

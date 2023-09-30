@@ -18,8 +18,8 @@ object BaseStorageUrls {
   sealed trait ProtectedStorageUrls extends BaseStorageUrls {
 
     def protectedImageUrl(
-        id: BSONObjectID,
-        width: Option[Int] = None,
+        id    : BSONObjectID,
+        width : Option[Int] = None,
         height: Option[Int] = None
     ): Call
 
@@ -38,33 +38,33 @@ object BaseStorageUrls {
   trait ProtectedStorageSignedUrls extends ProtectedStorageUrls with StorageSignedUrls {
 
     protected def protectedImageUrl(
-        id: BSONObjectID,
-        signature: String,
-        width: Option[Int],
-        height: Option[Int],
+        id        : BSONObjectID,
+        signature : String,
+        width     : Option[Int],
+        height    : Option[Int],
         expireTime: Long
     ): Call
 
     def protectedImageUrl(
-        id: BSONObjectID,
-        width: Option[Int] = None,
+        id    : BSONObjectID,
+        width : Option[Int] = None,
         height: Option[Int] = None
     ): Call = {
       val minutesToBeExpiredAfter = configuration.get[Int]("fileStorage.s3.timeLimitedUrl.urlToBeExpiredAfterMinutes")
       val expireTime              = DateTime.now().plusMinutes(minutesToBeExpiredAfter)
-      val signature: String       = ProtectedImageSignatureParameters(id, expireTime).signature
+      val signature: String = ProtectedImageSignatureParameters(id, expireTime).signature
       protectedImageUrl(
-        id = id,
-        signature = signature,
-        width = width,
-        height = height,
+        id         = id,
+        signature  = signature,
+        width      = width,
+        height     = height,
         expireTime = expireTime.getMillis
       )
     }
 
     protected def protectedFileUrl(
-        id: BSONObjectID,
-        signature: String,
+        id        : BSONObjectID,
+        signature : String,
         expireTime: Long
     ): Call
 
@@ -73,7 +73,7 @@ object BaseStorageUrls {
     ): Call = {
       val minutesToBeExpiredAfter = configuration.get[Int]("fileStorage.s3.timeLimitedUrl.urlToBeExpiredAfterMinutes")
       val expireTime              = DateTime.now().plusMinutes(minutesToBeExpiredAfter)
-      val signature: String       = ProtectedFileSignatureParameters(id, expireTime).signature
+      val signature: String = ProtectedFileSignatureParameters(id, expireTime).signature
       protectedFileUrl(id = id, signature = signature, expireTime = expireTime.getMillis)
     }
 
@@ -82,9 +82,9 @@ object BaseStorageUrls {
   sealed trait PublicStorageUrls extends BaseStorageUrls {
 
     def publicImageUrl(
-        id: BSONObjectID,
-        width: Option[Int] = None,
-        height: Option[Int] = None,
+        id       : BSONObjectID,
+        width    : Option[Int]    = None,
+        height   : Option[Int]    = None,
         extension: Option[String] = None
     ): Call
 
@@ -99,17 +99,17 @@ object BaseStorageUrls {
   trait PublicStorageSignedUrls extends PublicStorageUrls with StorageSignedUrls {
 
     protected def publicImageUrl(
-        id: BSONObjectID,
+        id       : BSONObjectID,
         signature: String,
-        width: Option[Int],
-        height: Option[Int],
+        width    : Option[Int],
+        height   : Option[Int],
         extension: Option[String]
     ): Call
 
     def publicImageUrl(
-        id: BSONObjectID,
-        width: Option[Int] = None,
-        height: Option[Int] = None,
+        id       : BSONObjectID,
+        width    : Option[Int]    = None,
+        height   : Option[Int]    = None,
         extension: Option[String] = None
     ): Call = {
       val signature: String = PublicImageSignatureParameters(id).signature
@@ -117,7 +117,7 @@ object BaseStorageUrls {
     }
 
     protected def publicFileUrl(
-        id: BSONObjectID,
+        id       : BSONObjectID,
         signature: String
     ): Call
 

@@ -23,9 +23,9 @@ trait WithCriteria[A, B] extends DataReadController[A] with WithFormBinding with
       readCriteriaService.find(criteriaOpt, queryOptions).map { dataWithTotalCount =>
         Paginated(
           dataWithTotalCount = dataWithTotalCount,
-          queryOptions = queryOptions,
-          criteria = criteriaOpt,
-          criteriaForm = criteriaForm
+          queryOptions       = queryOptions,
+          criteria           = criteriaOpt,
+          criteriaForm       = criteriaForm
         )
       }
     }

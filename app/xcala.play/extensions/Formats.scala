@@ -17,7 +17,7 @@ object Formats {
    * Copied from Play framework repository.
    */
   private def parsing[T](parse: String => Try[T], errMsg: String, errArgs: Seq[Any])(
-      key: String,
+      key : String,
       data: Map[String, String]
   ): Either[Seq[FormError], T] = {
     stringFormat.bind(key, data).flatMap { s =>

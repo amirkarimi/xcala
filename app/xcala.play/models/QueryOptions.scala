@@ -5,12 +5,12 @@ import play.api.data.Forms._
 import play.api.mvc.Request
 
 final case class QueryOptions(
-    page: Int = 1,
-    pageSizeOpt: Option[Int] = None,
+    page                       : Int            = 1,
+    pageSizeOpt                : Option[Int]    = None,
     override val sortExpression: Option[String] = None
 ) extends SortOptionsBase[QueryOptions](sortExpression) {
-  lazy val pageIndex: Int     = page - 1
-  lazy val pageSize: Int      = pageSizeOpt.getOrElse(QueryOptions.defaultPageSize)
+  lazy val pageIndex    : Int = page - 1
+  lazy val pageSize     : Int = pageSizeOpt.getOrElse(QueryOptions.defaultPageSize)
   lazy val startRowIndex: Int = pageIndex * pageSize
 
   lazy val nextPage: QueryOptions = copy(page = page + 1)

@@ -9,7 +9,7 @@ trait DataCrudController[A, BodyType] extends DataReadController[A] with DataCud
   self: InjectedController =>
 
   protected def defaultService: DataReadService[A] with DataRemoveService with DataSaveService[A]
-  protected def permissions: List[Permission] = List()
+  protected def permissions   : List[Permission] = List()
 
   protected def readService: DataReadService[A] with DataRemoveService with DataSaveService[A] = defaultService
 

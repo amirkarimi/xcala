@@ -4,7 +4,7 @@ object MessageType {
   type Type = String
 
   val Success: String = "success"
-  val Info: String    = "info"
+  val Info   : String = "info"
   val Warning: String = "warning"
-  val Danger: String  = "danger"
+  val Danger : String = "danger"
 }

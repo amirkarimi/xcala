@@ -54,7 +54,7 @@ class FormHelperSpec(cmd: CommandLine) extends Specification {
         "field2" -> "فارسي"
       )
 
-      val boundForm: Form[(String, String)]     = form.bind(data)
+      val boundForm    : Form[(String, String)] = form.bind(data)
       val correctedForm: Form[(String, String)] = boundForm.fixLanguageChars
 
       val expectedData: (String, String) = ("کتاب", "فارسی")

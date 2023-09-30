@@ -21,8 +21,8 @@ trait TreeService[A, B <: TreeModelBase[B]]
 
   private def findItemsUnder(
       initialDocument: BSONDocument,
-      parentId: Option[BSONObjectID],
-      lang: Option[Lang] = None
+      parentId       : Option[BSONObjectID],
+      lang           : Option[Lang] = None
   ): Future[List[B]] = {
     val query = (parentId, lang) match {
       case (None, lang) =>
@@ -55,8 +55,8 @@ trait TreeService[A, B <: TreeModelBase[B]]
 
   def getAllOptions(lang: Option[Lang], exclude: Option[BSONObjectID] = None): Future[List[(String, String)]] = {
     def getOptions(
-        items: List[B],
-        exclude: Option[BSONObjectID],
+        items      : List[B],
+        exclude    : Option[BSONObjectID],
         parentTitle: Option[String] = None
     ): List[(String, String)] = {
       val filteredMenus = exclude match {
@@ -67,8 +67,8 @@ trait TreeService[A, B <: TreeModelBase[B]]
       filteredMenus.flatMap { item =>
         val itemTitle = parentTitle.map(_ + " » ").mkString + item.generalTitle
         (item.id.get.stringify, itemTitle) +: getOptions(
-          items = item.children,
-          exclude = exclude,
+          items       = item.children,
+          exclude     = exclude,
           parentTitle = Some(itemTitle)
         )
       }

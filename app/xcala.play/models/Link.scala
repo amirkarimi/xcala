@@ -1,9 +1,9 @@
 package xcala.play.models
 
 abstract class LinkBase(
-    val title: String,
-    val url: Option[String],
-    val showInTitle: Boolean,
+    val title           : String,
+    val url             : Option[String],
+    val showInTitle     : Boolean,
     val showInBreadcrumb: Boolean
 )
 

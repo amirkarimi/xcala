@@ -25,9 +25,9 @@ trait WithMultilangCriteria[A <: WithLang, B]
     readService.find(criteriaOpt, queryOptions).map { dataWithTotalCount =>
       Paginated(
         dataWithTotalCount = dataWithTotalCount,
-        queryOptions = queryOptions,
-        criteria = criteriaOpt,
-        criteriaForm = criteriaForm
+        queryOptions       = queryOptions,
+        criteria           = criteriaOpt,
+        criteriaForm       = criteriaForm
       )
     }
   }

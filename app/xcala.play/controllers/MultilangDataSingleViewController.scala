@@ -18,7 +18,7 @@ trait MultilangDataSingleViewController[A <: WithLang]
     with WithComposableActions
     with WithExecutionContext
     with I18nSupport {
-  implicit val messagesApi: MessagesApi
+  implicit val messagesApi : MessagesApi
   protected val readService: DataReadService[A]
 
   def singleView(model: A)(implicit request: RequestType[_]): Future[Result]

@@ -20,12 +20,12 @@ trait FileControllerSigned extends FileControllerBase {
 
   def imageProtectionCheck(
       expectedToBeProtected: Boolean,
-      signature: String,
-      expireTime: Option[DateTime]
+      signature            : String,
+      expireTime           : Option[DateTime]
   )(
-      unverifiedId: BSONObjectID
+      unverifiedId         : BSONObjectID
   )(
-      protectedContent: BSONObjectID => Action[AnyContent]
+      protectedContent     : BSONObjectID => Action[AnyContent]
   ): Action[AnyContent] = {
     val imageSignatureParameters: ImageSignatureParameters =
       if (expectedToBeProtected) {
@@ -45,12 +45,12 @@ trait FileControllerSigned extends FileControllerBase {
 
   def fileProtectionCheck(
       expectedToBeProtected: Boolean,
-      signature: String,
-      expireTime: Option[DateTime]
+      signature            : String,
+      expireTime           : Option[DateTime]
   )(
-      unverifiedId: BSONObjectID
+      unverifiedId         : BSONObjectID
   )(
-      protectedContent: BSONObjectID => Action[AnyContent]
+      protectedContent     : BSONObjectID => Action[AnyContent]
   ): Action[AnyContent] = {
     val fileSignatureParameters: FileSignatureParameters =
       if (expectedToBeProtected) {
@@ -71,12 +71,12 @@ trait FileControllerSigned extends FileControllerBase {
   def protectedAction: ActionBuilder[Request, AnyContent]
 
   private def getImage(
-      unverifiedId: BSONObjectID,
-      signature: String,
-      width: Option[Int],
-      height: Option[Int],
+      unverifiedId   : BSONObjectID,
+      signature      : String,
+      width          : Option[Int],
+      height         : Option[Int],
       protectedAccess: Boolean,
-      expireTime: Option[DateTime]
+      expireTime     : Option[DateTime]
   ): Action[AnyContent] =
     imageProtectionCheck(expectedToBeProtected = protectedAccess, signature = signature, expireTime = expireTime)(
       unverifiedId
@@ -106,10 +106,10 @@ trait FileControllerSigned extends FileControllerBase {
                     val widthToHeightRatio: Double = image.width.toDouble / image.height
 
                     renderImage(
-                      image = image,
-                      width = safeWidth,
-                      height = safeHeight,
-                      contentType = file.contentType.getOrElse(""),
+                      image              = image,
+                      width              = safeWidth,
+                      height             = safeHeight,
+                      contentType        = file.contentType.getOrElse(""),
                       widthToHeightRatio = widthToHeightRatio
                     )
                   }
@@ -157,10 +157,10 @@ trait FileControllerSigned extends FileControllerBase {
     }
 
   private def getFile(
-      unverifiedId: BSONObjectID,
-      signature: String,
+      unverifiedId   : BSONObjectID,
+      signature      : String,
       protectedAccess: Boolean,
-      expireTime: Option[DateTime]
+      expireTime     : Option[DateTime]
   ): Action[AnyContent] =
     fileProtectionCheck(expectedToBeProtected = protectedAccess, signature = signature, expireTime = expireTime)(
       unverifiedId
@@ -171,49 +171,49 @@ trait FileControllerSigned extends FileControllerBase {
     }
 
   def getProtectedImage(
-      id: BSONObjectID,
-      signature: String,
-      width: Option[Int],
-      height: Option[Int],
+      id        : BSONObjectID,
+      signature : String,
+      width     : Option[Int],
+      height    : Option[Int],
       expireTime: Long
   ): Action[AnyContent] =
     getImage(
-      unverifiedId = id,
-      signature = signature,
-      width = width,
-      height = height,
+      unverifiedId    = id,
+      signature       = signature,
+      width           = width,
+      height          = height,
       protectedAccess = true,
-      expireTime = Some(new DateTime(expireTime))
+      expireTime      = Some(new DateTime(expireTime))
     )
 
   def getProtectedFile(
-      id: BSONObjectID,
-      signature: String,
+      id        : BSONObjectID,
+      signature : String,
       expireTime: Long
   ): Action[AnyContent] =
     getFile(
-      unverifiedId = id,
-      signature = signature,
+      unverifiedId    = id,
+      signature       = signature,
       protectedAccess = true,
-      expireTime = Some(new DateTime(expireTime))
+      expireTime      = Some(new DateTime(expireTime))
     )
 
   def getPublicImage(
-      id: String,
-      signature: String,
-      width: Option[Int],
-      height: Option[Int],
+      id                          : String,
+      signature                   : String,
+      width                       : Option[Int],
+      height                      : Option[Int],
       @annotation.nowarn extension: Option[String]
   ): Action[AnyContent] = {
     BSONObjectID.parse(id) match {
       case Success(preProcessedUnverifiedId) =>
         getImage(
-          unverifiedId = preProcessedUnverifiedId,
-          signature = signature,
-          width = width,
-          height = height,
+          unverifiedId    = preProcessedUnverifiedId,
+          signature       = signature,
+          width           = width,
+          height          = height,
           protectedAccess = false,
-          expireTime = None
+          expireTime      = None
         )
 
       case Failure(exception) =>
@@ -227,22 +227,22 @@ trait FileControllerSigned extends FileControllerBase {
   }
 
   def getPublicImage(
-      id: BSONObjectID,
+      id       : BSONObjectID,
       signature: String,
-      width: Option[Int],
-      height: Option[Int]
+      width    : Option[Int],
+      height   : Option[Int]
   ): Action[AnyContent] =
     getImage(
-      unverifiedId = id,
-      signature = signature,
-      width = width,
-      height = height,
+      unverifiedId    = id,
+      signature       = signature,
+      width           = width,
+      height          = height,
       protectedAccess = false,
-      expireTime = None
+      expireTime      = None
     )
 
   def getPublicFile(
-      id: BSONObjectID,
+      id       : BSONObjectID,
       signature: String
   ): Action[AnyContent] =
     getFile(unverifiedId = id, signature = signature, protectedAccess = false, expireTime = None)

@@ -6,13 +6,13 @@ import reactivemongo.api.bson.Macros.Annotations.Key
 
 final case class FileInfo(
     @Key("_id") id: Option[BSONObjectID] = None,
-    name: String,
-    extension: String,
-    contentType: String,
-    length: Long,
-    createTime: DateTime,
-    folderId: Option[BSONObjectID],
-    isHidden: Boolean
+    name          : String,
+    extension     : String,
+    contentType   : String,
+    length        : Long,
+    createTime    : DateTime,
+    folderId      : Option[BSONObjectID],
+    isHidden      : Boolean
 ) {
   def isImage: Boolean = contentType.startsWith("image/")
 }

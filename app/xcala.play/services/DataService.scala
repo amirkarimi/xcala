@@ -18,7 +18,7 @@ import reactivemongo.api.commands._
   */
 trait DataService extends WithExecutionContext {
   private[services] def databaseConfig: DatabaseConfig
-  private[services] lazy val dbFuture: Future[DB] = databaseConfig.databaseFuture
+  private[services] lazy val dbFuture : Future[DB] = databaseConfig.databaseFuture
 }
 
 /** Represents the service which works with a collection
@@ -81,7 +81,7 @@ trait DataReadService[A] {
 /** Represents the remove functionality of the Crud service.
   */
 trait DataRemoveService {
-  def remove(id: BSONObjectID): Future[WriteResult] = remove(BSONDocument("_id" -> id))
+  def remove(id   : BSONObjectID): Future[WriteResult] = remove(BSONDocument("_id" -> id))
   def remove(query: BSONDocument): Future[WriteResult]
 }
 
@@ -89,7 +89,7 @@ trait DataRemoveService {
   */
 trait DataSaveService[A] {
   def insert(model: A): Future[BSONObjectID]
-  def save(model: A): Future[BSONObjectID]
+  def save(model  : A): Future[BSONObjectID]
 }
 
 /** Represents the Read service implementation
@@ -186,10 +186,10 @@ trait DataCrudService[A]
   }
 
   def update(
-      selector: BSONDocument,
-      update: BSONDocument,
-      upsert: Boolean = false,
-      multi: Boolean = false,
+      selector     : BSONDocument,
+      update       : BSONDocument,
+      upsert       : Boolean = false,
+      multi        : Boolean = false,
       setUpdateTime: Boolean = true
   ): Future[WriteResult] = {
     val finalUpdateDoc = setUpdateTime match {

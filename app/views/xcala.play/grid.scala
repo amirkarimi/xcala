@@ -15,10 +15,10 @@ object grid {
   }
 
   def renderGrid[A](
-      paginated: Paginated[A],
+      paginated   : Paginated[A],
       updateTarget: String,
-      columns: Seq[Col[A]],
-      messages: Messages
+      columns     : Seq[Col[A]],
+      messages    : Messages
   ): HtmlFormat.Appendable = {
     val rows = paginated.data.map(row => columns.map(c => (c, c.fieldMapper(row), c.cssClass(row))))
     views.html.xcala.play.gridView(columns, rows, paginated, updateTarget)(messages)
