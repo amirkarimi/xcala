@@ -14,7 +14,7 @@ import com.nappin.play.recaptcha.RecaptchaVerifier
 
 @Singleton
 class RecaptchaService @Inject() (
-    verifier: RecaptchaVerifier,
+    verifier     : RecaptchaVerifier,
     configuration: Configuration
 ) {
 
@@ -22,7 +22,7 @@ class RecaptchaService @Inject() (
 
   def bindActiveFormBinder[T](form: Form[T])(implicit
       request: Request[AnyContent],
-      ec: ExecutionContext,
+      ec     : ExecutionContext,
       binding: FormBinding
   ): Future[Form[T]] =
     isRecaptchaEnabled match {

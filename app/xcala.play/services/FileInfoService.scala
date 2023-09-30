@@ -21,10 +21,10 @@ import reactivemongo.api.commands.WriteResult
 object FileInfoService {
 
   final case class FileObject(
-      id: BSONObjectID,
-      name: String,
-      content: InputStream,
-      contentType: Option[String],
+      id           : BSONObjectID,
+      name         : String,
+      content      : InputStream,
+      contentType  : Option[String],
       contentLength: Option[Long]
   ) {
 
@@ -37,10 +37,10 @@ object FileInfoService {
 class FileInfoService @Inject() (
     fileStorageService: FileStorageService,
     val databaseConfig: DefaultDatabaseConfig,
-    implicit val ec: ExecutionContext
+    implicit val ec   : ExecutionContext
 ) extends DataCrudService[FileInfo] {
 
-  val collectionName: String                         = "files"
+  val collectionName : String                        = "files"
   val documentHandler: BSONDocumentHandler[FileInfo] = Macros.handler[FileInfo]
 
   def getFilesUnderFolder(folderId: Option[BSONObjectID], fileType: Option[String] = None): Future[Seq[FileInfo]] = {
@@ -73,9 +73,9 @@ class FileInfoService @Inject() (
     val id = BSONObjectID.generate()
     fileStorageService
       .upload(
-        objectName = id.stringify,
-        content = content,
-        contentType = fileInfo.contentType,
+        objectName   = id.stringify,
+        content      = content,
+        contentType  = fileInfo.contentType,
         originalName = fileInfo.name
       )
       .flatMap {
@@ -98,10 +98,10 @@ class FileInfoService @Inject() (
   private def toFileObject(fileS3Object: FileS3Object): Try[FileObject] =
     BSONObjectID.parse(fileS3Object.objectName).map { id =>
       FileObject(
-        id = id,
-        name = fileS3Object.originalName,
-        content = fileS3Object.content,
-        contentType = fileS3Object.contentType,
+        id            = id,
+        name          = fileS3Object.originalName,
+        content       = fileS3Object.content,
+        contentType   = fileS3Object.contentType,
         contentLength = fileS3Object.contentLength
       )
     }

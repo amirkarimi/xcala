@@ -16,8 +16,8 @@ import reactivemongo.api.bson.BSONObjectID
 trait FileControllerUnsigned extends FileControllerBase {
 
   def getImage(
-      id: String,
-      width: Option[Int],
+      id    : String,
+      width : Option[Int],
       height: Option[Int]
   ): Action[AnyContent] = Action.async {
     BSONObjectID.parse(id.split('.').headOption.getOrElse(id)) match {
@@ -45,10 +45,10 @@ trait FileControllerUnsigned extends FileControllerBase {
                     val widthToHeightRatio: Double = image.width.toDouble / image.height
 
                     renderImage(
-                      image = image,
-                      width = safeWidth,
-                      height = safeHeight,
-                      contentType = file.contentType.getOrElse(""),
+                      image              = image,
+                      width              = safeWidth,
+                      height             = safeHeight,
+                      contentType        = file.contentType.getOrElse(""),
                       widthToHeightRatio = widthToHeightRatio
                     )
                   }

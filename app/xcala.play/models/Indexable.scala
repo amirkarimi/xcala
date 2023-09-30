@@ -6,7 +6,7 @@ import reactivemongo.api.bson.BSONObjectID
 abstract class Indexable(val lastUpdateTime: DateTime) {
   val id: Option[BSONObjectID]
   def itemType: String
-  def lang: String
-  def title: String
-  def content: String
+  def lang    : String
+  def title   : String
+  def content : String
 }

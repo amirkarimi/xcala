@@ -21,22 +21,22 @@ import org.specs2.mutable.Around
 
 class WithTestDb(hostName: String) extends Around with LangImplicits {
 
-  val application: Application                         = GuiceApplicationBuilder().build()
+  val application                   : Application      = GuiceApplicationBuilder().build()
   implicit lazy val implicitInjector: Injector         = instanceOf[Injector]
   implicit lazy val executionContext: ExecutionContext = instanceOf[ExecutionContext]
-  implicit val configuration: Configuration            = application.configuration
-  implicit lazy val system: ActorSystem                = application.actorSystem
+  implicit val configuration        : Configuration    = application.configuration
+  implicit lazy val system          : ActorSystem      = application.actorSystem
 
   implicit val databaseConfig: DatabaseConfig = new DatabaseConfig {
-    implicit val ec: ExecutionContext = executionContext
-    override def mongoUri: String     = s"mongodb://$hostName/xcala-test-${Math.abs(Random.nextInt())}"
+    implicit val ec      : ExecutionContext = executionContext
+    override def mongoUri: String           = s"mongodb://$hostName/xcala-test-${Math.abs(Random.nextInt())}"
   }
 
   def instanceOf[T: ClassTag]: T = application.injector.instanceOf[T]
 
   override def messagesApi: MessagesApi = instanceOf[MessagesApi]
-  implicit val lang: Lang               = Lang("fa")
-  lazy val messages: Messages           = lang2Messages
+  implicit val lang       : Lang        = Lang("fa")
+  lazy val messages       : Messages    = lang2Messages
 
   def around[T](t: => T)(implicit ev: AsResult[T]): Result = {
     ev.asResult {

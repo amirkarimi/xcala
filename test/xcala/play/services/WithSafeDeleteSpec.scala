@@ -41,11 +41,11 @@ class WithSafeDeleteSpec(cmd: CommandLine) extends Specification {
 
   "Service with WithSafeDelete" should {
     "allow delete when no related data found for remove by id" >> new WithTestDb(hostName) {
-      val personService  = new PersonService()
-      val cardService    = new CardService()
+      val personService = new PersonService()
+      val cardService   = new CardService()
       val person: Person = Person(name = "test", age = 10)
       personService.insert(person).awaitResult
-      val card: Card     = Card(title = "test", personId = BSONObjectID.generate())
+      val card  : Card   = Card(title = "test", personId = BSONObjectID.generate())
       cardService.insert(card).awaitResult
 
       personService.remove(person.id).awaitReady()
@@ -54,13 +54,13 @@ class WithSafeDeleteSpec(cmd: CommandLine) extends Specification {
     }
 
     "allow delete when no related data found for remove by query" >> new WithTestDb(hostName) {
-      val personService   = new PersonService()
-      val cardService     = new CardService()
+      val personService = new PersonService()
+      val cardService   = new CardService()
       val person1: Person = Person(name = "test", age = 10)
       personService.insert(person1).awaitResult
       val person2: Person = Person(name = "test2", age = 12)
       personService.insert(person2).awaitResult
-      val card: Card      = Card(title = "test", personId = person2.id)
+      val card   : Card   = Card(title = "test", personId = person2.id)
       cardService.insert(card).awaitResult
 
       personService.remove(BSONDocument("name" -> "test")).awaitResult
@@ -70,11 +70,11 @@ class WithSafeDeleteSpec(cmd: CommandLine) extends Specification {
     }
 
     "not allow delete when there is related data for remove by id" >> new WithTestDb(hostName) {
-      val personService  = new PersonService()
-      val cardService    = new CardService()
+      val personService = new PersonService()
+      val cardService   = new CardService()
       val person: Person = Person(name = "test", age = 10)
       personService.insert(person).awaitResult
-      val card: Card     = Card(title = "test", personId = person.id)
+      val card  : Card   = Card(title = "test", personId = person.id)
       cardService.insert(card).awaitResult
 
       personService.remove(person.id).awaitResult must throwA[DeleteConstraintError]
@@ -82,13 +82,13 @@ class WithSafeDeleteSpec(cmd: CommandLine) extends Specification {
     }
 
     "not allow delete when there is related data for remove by query" >> new WithTestDb(hostName) {
-      val personService   = new PersonService()
-      val cardService     = new CardService()
+      val personService = new PersonService()
+      val cardService   = new CardService()
       val person1: Person = Person(name = "test", age = 10)
       personService.insert(person1).awaitResult
       val person2: Person = Person(name = "test2", age = 12)
       personService.insert(person2).awaitResult
-      val card: Card      = Card(title = "test", personId = person1.id)
+      val card   : Card   = Card(title = "test", personId = person1.id)
       cardService.insert(card).awaitResult
 
       personService.remove(BSONDocument("name" -> "test")).awaitResult must throwA[DeleteConstraintError]
@@ -104,13 +104,13 @@ object WithSafeDeleteSpecHelpers {
   final case class Card(@Key("_id") id: BSONObjectID = BSONObjectID.generate(), title: String, personId: BSONObjectID)
 
   class PersonService(implicit
-      val ec: ExecutionContext,
+      val ec            : ExecutionContext,
       val databaseConfig: DatabaseConfig,
-      val configuration: Configuration
+      val configuration : Configuration
   ) extends DataCrudService[Person]
       with WithSafeDelete {
     val documentHandler: BSONDocumentHandler[Person] = Macros.handler[Person]
-    val collectionName                               = "persons"
+    val collectionName = "persons"
 
     val checkOnDelete: Seq[(String, BSONObjectID => BSONDocument)] =
       Seq.apply[(String, BSONObjectID => BSONDocument)](
@@ -120,12 +120,12 @@ object WithSafeDeleteSpecHelpers {
   }
 
   class CardService(implicit
-      val ec: ExecutionContext,
+      val ec            : ExecutionContext,
       val databaseConfig: DatabaseConfig,
-      val configuration: Configuration
+      val configuration : Configuration
   ) extends DataCrudService[Card] {
     val documentHandler: BSONDocumentHandler[Card] = Macros.handler[Card]
-    val collectionName                             = "cards"
+    val collectionName = "cards"
   }
 
 }

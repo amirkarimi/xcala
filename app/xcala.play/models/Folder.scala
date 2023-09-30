@@ -5,6 +5,6 @@ import reactivemongo.api.bson.Macros.Annotations.Key
 
 final case class Folder(
     @Key("_id") id: Option[BSONObjectID],
-    name: String,
-    parent: Option[BSONObjectID]
+    name          : String,
+    parent        : Option[BSONObjectID]
 )

@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class DefaultDatabaseConfig @Inject() (
-    configuration: Configuration,
+    configuration  : Configuration,
     implicit val ec: ExecutionContext
 ) extends DatabaseConfig {
   override def mongoUri: String = configuration.get[String]("mongodb.uri")

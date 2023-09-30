@@ -14,6 +14,29 @@ import org.joda.time.LocalDate
 
 object FormHelper {
 
+  private val persianEnglishNumbersMapping: Map[Char, Char] = Map(
+    '۰' -> '0',
+    '۱' -> '1',
+    '۲' -> '2',
+    '۳' -> '3',
+    '۴' -> '4',
+    '۵' -> '5',
+    '۶' -> '6',
+    '۷' -> '7',
+    '۸' -> '8',
+    '۹' -> '9'
+  )
+
+  def convertStringOfPersianNumbersToEnglish(a: String): String = {
+    persianEnglishNumbersMapping.foldLeft(a) { case (str, (persian, english)) =>
+      str.replace(persian, english)
+    }
+  }
+
+  def convertPersianNumbersToEnglish(mapping: Mapping[String]): Mapping[String] = {
+    mapping.transform[String](a => convertStringOfPersianNumbersToEnglish(a.trim), a => a)
+  }
+
   def jodaLocalDateFormatterWithYearRestriction(minYear: Int, maxYear: Int, pattern: String): Formatter[LocalDate] =
     new Formatter[LocalDate] {
 
@@ -69,8 +92,8 @@ object FormHelper {
 
   def jodaLocalDateMappingWithYearRestriction(
       pattern: String = "yyyy-MM-dd",
-      minYear: Int = 1900,
-      maxYear: Int = 2500
+      minYear: Int    = 1900,
+      maxYear: Int    = 2500
   ): Mapping[org.joda.time.LocalDate] =
     Forms.of(
       jodaLocalDateFormatterWithYearRestriction(

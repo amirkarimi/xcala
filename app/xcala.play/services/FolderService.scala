@@ -13,11 +13,11 @@ import reactivemongo.api.commands.WriteResult
 
 @Singleton
 class FolderService @Inject() (
-    fileInfoService: FileInfoService,
+    fileInfoService   : FileInfoService,
     val databaseConfig: DefaultDatabaseConfig,
-    implicit val ec: ExecutionContext
+    implicit val ec   : ExecutionContext
 ) extends DataCrudService[Folder] {
-  val collectionName: String                       = "folders"
+  val collectionName : String                      = "folders"
   val documentHandler: BSONDocumentHandler[Folder] = Macros.handler[Folder]
 
   def getFoldersUnderFolder(folderId: Option[BSONObjectID]): Future[Seq[Folder]] = {

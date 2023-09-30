@@ -24,8 +24,8 @@ trait DataReadController[A] extends InjectedController with WithComposableAction
   )(implicit @annotation.nowarn request: RequestType[_]): Future[Paginated[A]] = {
     readService.find(BSONDocument(), queryOptions).map { dataWithTotalCount =>
       Paginated(
-        data = dataWithTotalCount.data,
-        totalCount = dataWithTotalCount.totalCount,
+        data         = dataWithTotalCount.data,
+        totalCount   = dataWithTotalCount.totalCount,
         queryOptions = queryOptions
       )
     }

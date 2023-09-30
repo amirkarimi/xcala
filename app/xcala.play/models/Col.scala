@@ -3,19 +3,19 @@ package xcala.play.models
 import play.api.i18n.Messages
 
 final case class Col[A](
-    name: String,
-    fieldMapper: A => String,
-    sortExpression: String = "",
-    cssClass: A => Option[String] = (_: A) => None,
-    headerCssClass: Option[String] = None
+    name          : String,
+    fieldMapper   : A => String,
+    sortExpression: String              = "",
+    cssClass      : A => Option[String] = (_: A) => None,
+    headerCssClass: Option[String]      = None
 )
 
 object Col {
 
   def command[A](commands: (A => RowCommand)*)(implicit messages: Messages): Col[A] = {
     Col[A](
-      name = "",
-      fieldMapper = (field: A) =>
+      name           = "",
+      fieldMapper    = (field: A) =>
         "<div class='btn-group'>" +
         commands
           .map(_(field))
@@ -29,7 +29,7 @@ object Col {
           .mkString +
         "</div>",
       sortExpression = "",
-      cssClass = _ => Some("command-column")
+      cssClass       = _ => Some("command-column")
     )
   }
 

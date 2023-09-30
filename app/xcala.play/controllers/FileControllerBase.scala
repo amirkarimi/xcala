@@ -53,26 +53,26 @@ private[controllers] trait FileControllerBase
     with I18nSupport {
 
   implicit val messagesProvider: Messages
-  val fileInfoService: FileInfoService
-  val folderService: FolderService
-  val publicStorageUrls: BaseStorageUrls.PublicStorageUrls
-  val cache: AsyncCacheApi
-  val actorSystem: ActorSystem
-  implicit val configuration: Configuration
-  implicit val mat: Materializer
+  val fileInfoService          : FileInfoService
+  val folderService            : FolderService
+  val publicStorageUrls        : BaseStorageUrls.PublicStorageUrls
+  val cache                    : AsyncCacheApi
+  val actorSystem              : ActorSystem
+  implicit val configuration   : Configuration
+  implicit val mat             : Materializer
 
   def defaultInternalServerError(implicit adminRequest: RequestType[_]): Result
 
   protected val CONTENT_DISPOSITION_ATTACHMENT: String = "attachment"
-  protected val CONTENT_DISPOSITION_INLINE: String     = "inline"
+  protected val CONTENT_DISPOSITION_INLINE    : String = "inline"
 
   def selector: Action[AnyContent]
 
   def browser(ckEditorFuncNum: Int, fileType: Option[String]): Action[AnyContent]
 
   protected def getListView(
-      files: Seq[FileInfo],
-      folders: Seq[Folder],
+      files               : Seq[FileInfo],
+      folders             : Seq[Folder],
       realFolderAndParents: List[Folder]
   )(implicit request: RequestType[_]): Result
 
@@ -93,7 +93,7 @@ private[controllers] trait FileControllerBase
 
   def getList(
       folderId: Option[BSONObjectID],
-      fileId: Option[BSONObjectID],
+      fileId  : Option[BSONObjectID],
       fileType: Option[String]
   ): Action[AnyContent] = action.async { implicit request =>
     val finalFolderId = fileId match {
@@ -113,14 +113,14 @@ private[controllers] trait FileControllerBase
         val id            = BSONObjectID.generate()
 
         val fileInfo = FileInfo(
-          id = Some(id),
-          name = file.filename,
-          extension = fileExtension,
+          id          = Some(id),
+          name        = file.filename,
+          extension   = fileExtension,
           contentType = file.contentType.getOrElse("unknown"),
-          length = file.ref.path.toFile.length,
-          createTime = DateTime.now,
-          folderId = folderId,
-          isHidden = false
+          length      = file.ref.path.toFile.length,
+          createTime  = DateTime.now,
+          folderId    = folderId,
+          isHidden    = false
         )
 
         fileInfoService.upload(fileInfo, readAllBytes(file.ref.path)).flatMap {
@@ -264,14 +264,14 @@ private[controllers] trait FileControllerBase
     val withCleanupRes = res.via(lazyFlow)
 
     val body = HttpEntity.Streamed.apply(
-      data = withCleanupRes,
+      data          = withCleanupRes,
       contentLength = file.contentLength,
-      contentType = file.contentType
+      contentType   = file.contentType
     )
 
     Result(
       header = ResponseHeader(status = OK),
-      body = body
+      body   = body
     ).withHeaders(
       CONTENT_LENGTH      -> file.contentLength.map(_.toString).getOrElse(""),
       CONTENT_DISPOSITION -> (s"""$dispositionMode; filename="${java.net.URLEncoder
@@ -304,10 +304,10 @@ private[controllers] trait FileControllerBase
   }
 
   protected def renderImage(
-      image: ImmutableImage,
-      width: Option[Int],
-      height: Option[Int],
-      contentType: String,
+      image             : ImmutableImage,
+      width             : Option[Int],
+      height            : Option[Int],
+      contentType       : String,
       widthToHeightRatio: Double
   ): Future[Result] =
     Future {

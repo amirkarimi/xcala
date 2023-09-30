@@ -27,7 +27,7 @@ trait IndexableService[A <: Indexable]
     collectionFuture.map(
       _.indexesManager.ensure(
         Index(
-          key = Seq(
+          key    = Seq(
             "itemType" -> IndexType.Ascending,
             "lang"     -> IndexType.Ascending,
             "title"    -> IndexType.Ascending,
@@ -86,15 +86,15 @@ trait IndexableService[A <: Indexable]
 
   private def updateOrNewIndexedItem(
       indexedItem: Option[IndexedItem],
-      id: BSONObjectID,
-      model: A
+      id         : BSONObjectID,
+      model      : A
   ): IndexedItem = IndexedItem(
-    id = indexedItem.flatMap(_.id),
-    itemType = model.itemType,
-    itemId = id,
-    lang = model.lang,
-    title = model.title,
-    content = model.content,
+    id         = indexedItem.flatMap(_.id),
+    itemType   = model.itemType,
+    itemId     = id,
+    lang       = model.lang,
+    title      = model.title,
+    content    = model.content,
     updateTime = model.lastUpdateTime
   )
 

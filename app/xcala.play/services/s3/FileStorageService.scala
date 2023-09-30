@@ -30,12 +30,12 @@ import okhttp3.Protocol
 object FileStorageService {
 
   final case class FileS3Object(
-      objectName: String,
-      originalName: String,
-      content: InputStream,
-      contentType: Option[String],
+      objectName   : String,
+      originalName : String,
+      content      : InputStream,
+      contentType  : Option[String],
       contentLength: Option[Long],
-      path: Option[String]
+      path         : Option[String]
   )
 
 }
@@ -47,7 +47,7 @@ class FileStorageService @Inject() (
 
   import FileStorageService._
 
-  private lazy val baseURL: String    = config.get[String]("fileStorage.s3.baseUrl")
+  private lazy val baseURL   : String = config.get[String]("fileStorage.s3.baseUrl")
   private lazy val bucketName: String = config.get[String]("fileStorage.s3.bucketName")
 
   lazy val fileStorageUrl: String = s"$baseURL/$bucketName"
@@ -67,11 +67,11 @@ class FileStorageService @Inject() (
     * @return
     */
   def upload(
-      objectName: String,
-      content: Array[Byte],
-      contentType: String,
+      objectName  : String,
+      content     : Array[Byte],
+      contentType : String,
       originalName: String,
-      path: Option[String] = None
+      path        : Option[String] = None
   ): Future[Boolean] = {
     val userMetaData = Map("name" -> originalName).asJava
     val cleanPath    = getCleanPath(path)
@@ -128,12 +128,12 @@ class FileStorageService @Inject() (
       contentLength = Option(objectResponse.headers().get("Content-Length")).map(_.toLong)
 
     } yield FileS3Object(
-      objectName = objectName,
-      originalName = originalName,
-      content = objectResponse,
-      contentType = contentType,
+      objectName    = objectName,
+      originalName  = originalName,
+      content       = objectResponse,
+      contentType   = contentType,
       contentLength = contentLength,
-      path = path
+      path          = path
     )
 
   }.transformWith {
