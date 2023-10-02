@@ -6,6 +6,8 @@ import play.api.i18n.Messages
 import play.twirl.api.Html
 import play.twirl.api.HtmlFormat
 
+import reactivemongo.api.bson.BSONObjectID
+
 object grid {
 
   def apply[A](paginated: Paginated[A], updateTarget: String = "")(
@@ -15,12 +17,18 @@ object grid {
   }
 
   def renderGrid[A](
-      paginated   : Paginated[A],
-      updateTarget: String,
-      columns     : Seq[Col[A]],
-      messages    : Messages
+      paginated    : Paginated[A],
+      updateTarget : String,
+      columns      : Seq[Col[A]],
+      messages     : Messages,
+      rowAttributes: Seq[A => (String, String)] = Nil
   ): HtmlFormat.Appendable = {
-    val rows = paginated.data.map(row => columns.map(c => (c, c.fieldMapper(row), c.cssClass(row))))
+    val rows =
+      paginated.data.map { row: A =>
+        columns.map { c =>
+          (c, c.fieldMapper(row), c.cssClass(row))
+        } -> rowAttributes.map(_(row))
+      }
     views.html.xcala.play.gridView(columns, rows, paginated, updateTarget)(messages)
   }
 
@@ -28,11 +36,24 @@ object grid {
 
 object gridWithPager {
 
-  def apply[A](paginated: Paginated[A], renderSinglePagePager: Boolean = true, updateTarget: String = "")(
-      columns: Col[A]*
+  def apply[A](
+      paginated            : Paginated[A],
+      renderSinglePagePager: Boolean                    = true,
+      updateTarget         : String                     = "",
+      rowAttributes        : Seq[A => (String, String)] = Nil
+  )(
+      columns              : Col[A]*
   )(implicit messages: Messages): HtmlFormat.Appendable = {
     Html(
-      grid.renderGrid(paginated = paginated, updateTarget = updateTarget, columns = columns, messages = messages).body +
+      grid
+        .renderGrid(
+          paginated     = paginated,
+          updateTarget  = updateTarget,
+          columns       = columns,
+          messages      = messages,
+          rowAttributes = rowAttributes
+        )
+        .body +
       (if (!renderSinglePagePager && paginated.pageCount <= 1) {
          ""
        } else {

@@ -1,4 +1,4 @@
-@(columns: Seq[Col[_]], rows: Seq[Seq[(Col[_], String, Option[String])]], paginated: Paginated[_], updateTarget: String)(implicit messages: Messages)
+@(columns: Seq[Col[_]], rows: Seq[(Seq[(Col[_], String, Option[String])], Seq[(String, String)])], paginated: Paginated[_], updateTarget: String)(implicit messages: Messages)
 
 <div class="pull-right">
 	<label>@Messages("foundResult"):</label>
@@ -13,8 +13,8 @@
 			</th>
 		}
 	</tr>
-	@rows.map { row =>
-		<tr>
+	@rows.map { case (row, attributes) =>
+		<tr @attributes.map{ case (k, v)=> @k=@{v}}>
 			@row.map { case (_, value, css) =>
 				<td@css.map(c => Html(s" class='${c}'"))>
 					@Html(value)
