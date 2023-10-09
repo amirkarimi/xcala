@@ -2,7 +2,7 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.29.2"
+version := "0.30.0"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -45,6 +45,11 @@ libraryDependencies ++= Seq(
   "com.sksamuel.scrimage"        %% "scrimage-scala"             % "4.1.0",
   "com.sksamuel.scrimage"         % "scrimage-webp"              % "4.1.0",
   "com.fasterxml.jackson.module" %% "jackson-module-scala"       % "2.15.2",
+  "org.postgresql"                % "postgresql"                 % "42.6.0",
+  "com.typesafe.play"            %% "play-slick"                 % "5.1.0",
+  "com.github.tototoshi"         %% "slick-joda-mapper"          % "2.8.0",
+  "com.github.tminglei"          %% "slick-pg"                   % "0.21.1",
+  "com.lightbend.akka"           %% "akka-stream-alpakka-slick"  % "6.0.1",
   specs2                          % Test
 )
 
