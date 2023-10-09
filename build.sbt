@@ -2,7 +2,7 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.30.0"
+version := "0.30.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -41,7 +41,7 @@ libraryDependencies ++= Seq(
   "ch.qos.logback"                % "logback-classic"            % "1.4.8", // watchout for 1.4.9+ changes
   "io.sentry"                     % "sentry-logback"             % "6.29.0",
   "io.minio"                      % "minio"                      % "8.5.6",
-  "commons-io"                    % "commons-io"                 % "2.13.0",
+  "commons-io"                    % "commons-io"                 % "2.14.0",
   "com.sksamuel.scrimage"        %% "scrimage-scala"             % "4.1.0",
   "com.sksamuel.scrimage"         % "scrimage-webp"              % "4.1.0",
   "com.fasterxml.jackson.module" %% "jackson-module-scala"       % "2.15.2",
