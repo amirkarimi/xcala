@@ -1,7 +1,7 @@
 package xcala.play.postgres.services
 
 import xcala.play.postgres.models._
-import xcala.play.postgres.utils.WithExecutionContext
+import xcala.play.utils.WithExecutionContext
 
 import scala.concurrent.Future
 
@@ -13,8 +13,8 @@ trait DataCrudServiceDecorator[A <: EntityWithId, B <: EntityWithId]
 
   val service: DataCrudService[A]
 
-  def mapModel(source: A): Future[B]
-  def mapBackModel(source: B): Future[A]
+  def mapModel(source     : A): Future[B]
+  def mapBackModel(source : B): Future[A]
   def copyBackModel(source: B, destination: A): Future[A]
 
   def findById(id: Long): Future[Option[B]] = {

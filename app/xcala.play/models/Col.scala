@@ -5,7 +5,7 @@ import play.api.i18n.Messages
 final case class Col[A](
     name          : String,
     fieldMapper   : A => String,
-    sortExpression: String              = "",
+    sortExpression: Any                 = "",
     cssClass      : A => Option[String] = (_: A) => None,
     headerCssClass: Option[String]      = None
 )

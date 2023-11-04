@@ -1,8 +1,9 @@
 package xcala.play.postgres.services
 
+import xcala.play.models.{DataWithTotalCount, QueryOptions}
 import xcala.play.postgres.entities.TableDefinition
-import xcala.play.postgres.models.{DataWithTotalCount, EntityWithId, QueryOptions}
-import xcala.play.postgres.utils.WithExecutionContext
+import xcala.play.postgres.models.EntityWithId
+import xcala.play.utils.WithExecutionContext
 
 import play.api.mvc.Request
 
@@ -26,11 +27,11 @@ trait DataReadCriteriaService[A, B] {
 /** Represents the CRUD functionality of the service.
   */
 trait DataCrudService[A <: EntityWithId] extends DataReadService[A] with WithExecutionContext {
-  def insert(entity: A): Future[Long]
-  def insertMany(entities: Seq[A]): Future[Int]
-  def updateOrInsert(entity: A): Future[Option[Long]]
-  def update(entity: A): Future[Int]
-  def delete(id: Long): Future[Int]
+  def insert(entity        : A)     : Future[Long]
+  def insertMany(entities  : Seq[A]): Future[Int]
+  def updateOrInsert(entity: A)     : Future[Option[Long]]
+  def update(entity        : A)     : Future[Int]
+  def delete(id            : Long)  : Future[Int]
 }
 
 /** Data driven service.
@@ -63,7 +64,7 @@ trait DataReadServiceImpl[A <: EntityWithId] extends DataReadService[A] with Dat
   }
 
   protected def filterQueryByRegex(
-      field: tableDefinition.profile.api.Table[A] => Rep[String],
+      field  : tableDefinition.profile.api.Table[A] => Rep[String],
       pattern: String
   ): Query[TableDef, A, Seq] = {
     tableQuery.filter { x =>
@@ -72,7 +73,7 @@ trait DataReadServiceImpl[A <: EntityWithId] extends DataReadService[A] with Dat
   }
 
   def findWithRegex(
-      field: tableDefinition.profile.api.Table[A] => Rep[String],
+      field  : tableDefinition.profile.api.Table[A] => Rep[String],
       pattern: String
   ): Future[Seq[A]] = {
     val action = filterQueryByRegex(field, pattern).result

@@ -9,7 +9,7 @@
 	<tr>
 		@columns.map { column => 
 			<th@column.headerCssClass.map(c => Html(s" class='${c}'"))>
-				@gridHeader(column.name, column.sortExpression, paginated, updateTarget)
+				@gridHeader(column.name, column.sortExpression.toString, paginated, updateTarget)
 			</th>
 		}
 	</tr>

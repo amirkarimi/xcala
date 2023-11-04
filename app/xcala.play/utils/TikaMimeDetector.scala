@@ -1,12 +1,10 @@
 package xcala.play.utils
 
-import java.io.File
-import java.io.FileInputStream
+import java.io.{File, FileInputStream}
 
 import org.apache.tika.config.TikaConfig
 import org.apache.tika.io.TikaInputStream
-import org.apache.tika.metadata.Metadata
-import org.apache.tika.metadata.TikaCoreProperties
+import org.apache.tika.metadata.{Metadata, TikaCoreProperties}
 
 object TikaMimeDetector {
 
@@ -14,13 +12,18 @@ object TikaMimeDetector {
 
   def guessMimeBasedOnFileContentAndName(file: File, fileName: String): String = {
     // It is important to mix both fileName and content to guess the mime type
-    // otherwise Tika might mix up some types like xml based files with each other
+    // otherwise Tika might mixup some types like xml based files with each other
     val helpingMeta = new Metadata()
     helpingMeta.set(TikaCoreProperties.RESOURCE_NAME_KEY, fileName)
+    val fis         = new FileInputStream(file)
+    val result      =
+      tika
+        .getDetector()
+        .detect(TikaInputStream.get(fis), helpingMeta)
+        .toString
 
-    tika.getDetector
-      .detect(TikaInputStream.get(new FileInputStream(file)), helpingMeta)
-      .toString
+    fis.close()
+    result
 
   }
 

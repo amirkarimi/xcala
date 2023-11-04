@@ -9,11 +9,11 @@ abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Opti
   lazy val sortInfos: Seq[SortInfo] =
     sortExpression.toSeq.flatMap(expr => expr.split(",").map(s => SortInfo.fromExpression(s)))
 
-  def resetSort(sortExpression: Option[String]): A
+  def resetSort(sortExpression: Option[String], resetPagination: Boolean): A
 
-  def sort(sortExpression: Option[String]): A = {
+  def sort(sortExpression: Option[String], resetPagination: Boolean = true): A = {
     sortExpression match {
-      case None       => resetSort(sortExpression = None)
+      case None       => resetSort(sortExpression = None, resetPagination)
       case Some(sort) =>
         val existingSortInfo = sortInfos.find(s => s.field == sort)
 
@@ -35,7 +35,14 @@ abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Opti
             sortInfos :+ SortInfo(sort)
         }
 
-        resetSort(sortExpression = Some(newSortInfos.mkString(",")))
+        resetSort(sortExpression = Some(newSortInfos.mkString(",")), resetPagination)
+    }
+  }
+
+  def withDefaultSort(sortExpression: String): A = {
+    sortInfos match {
+      case Nil => sort(Some(sortExpression), resetPagination = false)
+      case _   => this.asInstanceOf[A]
     }
   }
 
@@ -43,7 +50,10 @@ abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Opti
 
 final case class SortOptions(override val sortExpression: Option[String] = None)
     extends SortOptionsBase[SortOptions](sortExpression) {
-  def resetSort(sortExpression: Option[String]): SortOptions = copy(sortExpression = sortExpression)
+
+  def resetSort(sortExpression: Option[String], resetPagination: Boolean = true): SortOptions =
+    copy(sortExpression = sortExpression)
+
 }
 
 object SortOptions {

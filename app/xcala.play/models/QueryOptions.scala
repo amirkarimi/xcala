@@ -16,7 +16,9 @@ final case class QueryOptions(
   lazy val nextPage: QueryOptions = copy(page = page + 1)
   lazy val prevPage: QueryOptions = copy(page = page - 1)
 
-  def resetSort(sortExpression: Option[String]): QueryOptions = copy(sortExpression = sortExpression, page = 1)
+  def resetSort(sortExpression: Option[String], resetPagination: Boolean = true): QueryOptions =
+    copy(sortExpression = sortExpression, page = if (resetPagination) 1 else page)
+
 }
 
 object QueryOptions {

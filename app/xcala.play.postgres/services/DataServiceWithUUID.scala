@@ -1,8 +1,9 @@
 package xcala.play.postgres.services
 
+import xcala.play.models._
 import xcala.play.postgres.entities.TableDefinitionWithUUID
 import xcala.play.postgres.models._
-import xcala.play.postgres.utils.WithExecutionContext
+import xcala.play.utils.WithExecutionContext
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -23,10 +24,10 @@ trait DataReadCriteriaServiceWithUUID[A, B] {
 /** Represents the CRUD functionality of the service.
   */
 trait DataCrudServiceWithUUID[A <: EntityWithUUId] extends DataReadServiceWithUUID[A] with WithExecutionContext {
-  def insert(entity: A): Future[UUID]
-  def updateOrInsert(entity: A): Future[Option[UUID]]
-  def update(entity: A): Future[Int]
-  def delete(id: UUID): Future[Int]
+  def insert(entity        : A)   : Future[UUID]
+  def updateOrInsert(entity: A)   : Future[Option[UUID]]
+  def update(entity        : A)   : Future[Int]
+  def delete(id            : UUID): Future[Int]
 }
 
 /** Service query functionality.

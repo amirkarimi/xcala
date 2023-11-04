@@ -17,5 +17,5 @@ object SortInfo {
   }
 
   def removeDirectionMark(s: String): String = if (s.startsWith("-")) s.substring(1) else s
-  def getSortDirection(s: String): Int       = if (s.startsWith("-")) -1 else 1
+  def getSortDirection(s   : String): Int    = if (s.startsWith("-")) -1 else 1
 }

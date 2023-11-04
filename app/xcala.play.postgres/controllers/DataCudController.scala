@@ -2,7 +2,7 @@ package xcala.play.postgres.controllers
 
 import xcala.play.postgres.models.EntityWithId
 import xcala.play.postgres.services._
-import xcala.play.postgres.utils.WithExecutionContext
+import xcala.play.utils.WithExecutionContext
 
 import play.api.data.Form
 import play.api.i18n.I18nSupport
@@ -98,7 +98,7 @@ trait DataCudController[A <: EntityWithId]
     }
   }
 
-  def defaultNotFound(implicit request: RequestType[_]): Result
+  def defaultNotFound(implicit request           : RequestType[_]): Result
   def defaultInternalServerError(implicit request: RequestType[_]): Result
 
 }
