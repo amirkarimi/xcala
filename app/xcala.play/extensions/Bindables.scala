@@ -5,9 +5,51 @@ import play.api.mvc.JavascriptLiteral
 import play.api.mvc.PathBindable
 import play.api.mvc.QueryStringBindable
 
+import org.joda.time.{DateTime, LocalDate}
 import reactivemongo.api.bson.BSONObjectID
 
 object Bindables {
+
+  implicit def jodaDateTimeBinder: QueryStringBindable[DateTime] = new QueryStringBindable[DateTime] {
+
+    def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, DateTime]] = {
+      try {
+        Some(Right(new DateTime(params.get(key).get.head.toLong)))
+      } catch {
+        case _: IllegalArgumentException | _: NumberFormatException =>
+          Some(Left("Invalid date time format. Use a long number as milliseconds since midnight Jan 1, 1970"))
+      }
+    }
+
+    def unbind(key: String, value: DateTime): String = key + "=" + value.getMillis.toString
+  }
+
+  implicit def jodaLocalDateBinder: QueryStringBindable[LocalDate] = new QueryStringBindable[LocalDate] {
+
+    def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, LocalDate]] = {
+      try {
+        Some(Right(new LocalDate(params.get(key).get.head)))
+      } catch {
+        case _: IllegalArgumentException | _: NumberFormatException => Some(Left("Invalid local date format"))
+      }
+    }
+
+    def unbind(key: String, value: LocalDate): String = key + "=" + value.toString
+  }
+
+  implicit def jodaOptionalLocalDateBinder: QueryStringBindable[Option[LocalDate]] =
+    new QueryStringBindable[Option[LocalDate]] {
+
+      def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Option[LocalDate]]] = {
+        try {
+          Some(Right(params.get(key).map(a => new LocalDate(a.head))))
+        } catch {
+          case _: IllegalArgumentException | _: NumberFormatException => Some(Left("Invalid local date format"))
+        }
+      }
+
+      def unbind(key: String, value: Option[LocalDate]): String = value.map(key + "=" + _.toString).getOrElse("")
+    }
 
   implicit def optionBindable[T: PathBindable]: PathBindable[Option[T]] = new PathBindable[Option[T]] {
 

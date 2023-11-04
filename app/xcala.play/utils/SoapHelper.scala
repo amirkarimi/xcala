@@ -1,4 +1,4 @@
-package xcala.play
+package xcala.play.utils
 
 import scala.xml.Elem
 import scala.xml.Node

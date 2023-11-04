@@ -1,6 +1,6 @@
 package xcala.play.postgres.controllers
 
-import xcala.play.postgres.extensions.FormHelper._
+import xcala.play.extensions.FormHelper._
 
 import play.api.data.{Form, FormBinding}
 import play.api.i18n.Messages

@@ -24,10 +24,11 @@ trait WithMultilangCriteria[A <: WithLang, B]
 
     readService.find(criteriaOpt, queryOptions).map { dataWithTotalCount =>
       Paginated(
-        dataWithTotalCount = dataWithTotalCount,
-        queryOptions       = queryOptions,
-        criteria           = criteriaOpt,
-        criteriaForm       = criteriaForm
+        dataWithTotalCount    = dataWithTotalCount,
+        queryOptions          = queryOptions,
+        criteria              = criteriaOpt,
+        criteriaForm          = criteriaForm,
+        rowToAttributesMapper = None
       )
     }
   }

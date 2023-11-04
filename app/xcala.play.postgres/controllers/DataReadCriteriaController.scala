@@ -1,8 +1,8 @@
 package xcala.play.postgres.controllers
 
-import xcala.play.postgres.models._
+import xcala.play.models._
 import xcala.play.postgres.services._
-import xcala.play.postgres.utils.WithExecutionContext
+import xcala.play.utils.WithExecutionContext
 
 import play.api.data.Form
 import play.api.i18n.MessagesProvider
@@ -36,20 +36,21 @@ trait DataReadCriteriaController[A, B]
         case None           =>
           Future.successful(
             Paginated(
-              dataWithTotalCount = DataWithTotalCount[A](Nil, 0),
-              queryOptions = queryOptions,
-              criteria = None,
-              criteriaForm = criteriaForm
+              dataWithTotalCount    = DataWithTotalCount[A](Nil, 0),
+              queryOptions          = queryOptions,
+              criteria              = None,
+              criteriaForm          = criteriaForm,
+              rowToAttributesMapper = None
             )
           )
         case Some(criteria) =>
           val transformedCriteria = transformCriteria(criteria)
           readCriteriaService.find(transformedCriteria, queryOptions).map { dataWithTotalCount =>
             Paginated(
-              dataWithTotalCount = dataWithTotalCount,
-              queryOptions = queryOptions,
-              criteria = Some(transformedCriteria),
-              criteriaForm = criteriaForm,
+              dataWithTotalCount    = dataWithTotalCount,
+              queryOptions          = queryOptions,
+              criteria              = Some(transformedCriteria),
+              criteriaForm          = criteriaForm,
               rowToAttributesMapper = rowToAttributesMapper
             )
           }

@@ -3,10 +3,11 @@ package xcala.play.models
 import play.api.data.Form
 
 final case class Paginated[A](
-    data        : Seq[A],
-    totalCount  : Long,
-    queryOptions: QueryOptions,
-    args        : Map[String, String] = Map.empty
+    data                 : Seq[A],
+    totalCount           : Long,
+    queryOptions         : QueryOptions,
+    args                 : Map[String, String] = Map.empty,
+    rowToAttributesMapper: Option[A => Seq[(String, String)]]
 ) {
   def pageCount  : Int     = math.ceil(totalCount.toDouble / queryOptions.pageSize.toDouble).toInt
   def hasNextPage: Boolean = queryOptions.page < pageCount
@@ -40,12 +41,30 @@ final case class Paginated[A](
       .mkString("&")
   }
 
+  def withRowToAttributesMapper(mapper: A => Seq[(String, String)]): Paginated[A] =
+    copy(rowToAttributesMapper = Some(mapper))
+
 }
 
 object Paginated {
 
-  def apply[A](dataWithTotalCount: DataWithTotalCount[A], queryOptions: QueryOptions): Paginated[A] = {
-    apply(data = dataWithTotalCount.data, totalCount = dataWithTotalCount.totalCount, queryOptions = queryOptions)
+  def apply[A, B](
+      dataWithTotalCount   : DataWithTotalCount[A],
+      queryOptions         : QueryOptions,
+      criteria             : Option[B],
+      criteriaForm         : Form[B],
+      rowToAttributesMapper: Option[A => Seq[(String, String)]]
+  ): Paginated[A] = {
+    // Form data contains all request data but we just need criteria data
+    val criteriaArgs = criteria.map(c => criteriaForm.fill(c).data).getOrElse(Map.empty)
+
+    Paginated(
+      data                  = dataWithTotalCount.data,
+      totalCount            = dataWithTotalCount.totalCount,
+      queryOptions          = queryOptions,
+      args                  = criteriaArgs,
+      rowToAttributesMapper = rowToAttributesMapper
+    )
   }
 
   def apply[A, B](
@@ -53,16 +72,13 @@ object Paginated {
       queryOptions      : QueryOptions,
       criteria          : Option[B],
       criteriaForm      : Form[B]
-  ): Paginated[A] = {
-    // Form data contains all request data but we just need criteria data
-    val criteriaArgs = criteria.map(c => criteriaForm.fill(c).data).getOrElse(Map.empty)
-
-    apply(
-      data         = dataWithTotalCount.data,
-      totalCount   = dataWithTotalCount.totalCount,
-      queryOptions = queryOptions,
-      args         = criteriaArgs
+  ): Paginated[A] =
+    Paginated(
+      dataWithTotalCount    = dataWithTotalCount,
+      queryOptions          = queryOptions,
+      criteria              = criteria,
+      criteriaForm          = criteriaForm,
+      rowToAttributesMapper = None
     )
-  }
 
 }

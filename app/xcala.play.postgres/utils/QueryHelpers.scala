@@ -1,6 +1,7 @@
 package xcala.play.postgres.utils
 
-import xcala.play.postgres.models.{QueryOptions, SortOptionsBase}
+import xcala.play.models._
+import xcala.play.models.SortOptionsBase
 
 import slick.lifted._
 
@@ -43,18 +44,18 @@ object QueryHelpers {
     }
 
     def multiSortPaginated[V <: Enumeration](
-        queryOptions: QueryOptions,
+        queryOptions   : QueryOptions,
         sortEnumeration: V
     )(
-        f: E => sortEnumeration.Value => ColumnOrdered[_]
+        f              : E => sortEnumeration.Value => ColumnOrdered[_]
     ): Query[E, U, C] =
       multiSort(queryOptions, sortEnumeration)(f.andThen(_.andThen(Seq(_)))).paginated(queryOptions)
 
     def multiSortPaginated2[V <: Enumeration](
-        queryOptions: QueryOptions,
+        queryOptions   : QueryOptions,
         sortEnumeration: V
     )(
-        f: E => sortEnumeration.Value => Seq[ColumnOrdered[_]]
+        f              : E => sortEnumeration.Value => Seq[ColumnOrdered[_]]
     ): Query[E, U, C] =
       multiSort(queryOptions, sortEnumeration)(f).paginated(queryOptions)
 

@@ -9,7 +9,7 @@ trait JodaSlickExtras {
   import slick.lifted.Rep
 
   val toLocalDate: Rep[DateTime] => Rep[LocalDate]
-  def dateDiff(unit: String): (Rep[LocalDate], Rep[LocalDate]) => Rep[Int]
+  def dateDiff(unit    : String): (Rep[LocalDate], Rep[LocalDate]) => Rep[Int]
   def datetimeDiff(unit: String): (Rep[DateTime], Rep[DateTime]) => Rep[Int]
 }
 
@@ -27,9 +27,9 @@ object PostgresJodaSlickExtras extends JodaSlickExtras {
   }
 
   private def tDiff(
-      unit: String,
-      node1: Node,
-      node2: Node,
+      unit        : String,
+      node1       : Node,
+      node2       : Node,
       queryBuilder: JdbcStatementBuilderComponent#QueryBuilder
   ): SQLBuilder = {
     queryBuilder.sqlBuilder += s"DATE_PART('${unit}', "
@@ -67,9 +67,9 @@ object H2JodaSlickExtras extends JodaSlickExtras {
   }
 
   private def tDiff(
-      unit: String,
-      node1: Node,
-      node2: Node,
+      unit        : String,
+      node1       : Node,
+      node2       : Node,
       queryBuilder: JdbcStatementBuilderComponent#QueryBuilder
   ): SQLBuilder = {
     queryBuilder.sqlBuilder += s"DATEDIFF('${unit}', "

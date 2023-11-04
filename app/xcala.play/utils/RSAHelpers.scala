@@ -1,4 +1,4 @@
-package xcala.play.postgres.utils
+package xcala.play.utils
 
 import java.io.StringReader
 import java.math.BigInteger

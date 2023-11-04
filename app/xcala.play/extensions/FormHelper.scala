@@ -1,10 +1,12 @@
 package xcala.play.extensions
 
+import xcala.play.models.Range
 import xcala.play.utils.KeywordExtractor
 
 import play.api.data.Form
 import play.api.data.FormError
 import play.api.data.Forms
+import play.api.data.Forms._
 import play.api.data.Mapping
 import play.api.data.format.Formatter
 import play.api.i18n.Messages
@@ -162,5 +164,20 @@ object FormHelper {
     }
 
   }
+
+  lazy val dateRangeMapping: Mapping[Range[Option[LocalDate]]] = mapping(
+    "from" -> optional(jodaLocalDateMappingWithYearRestriction(pattern = "yyyy-MM-dd")),
+    "to"   -> optional(jodaLocalDateMappingWithYearRestriction(pattern = "yyyy-MM-dd"))
+  )(Range.apply[Option[LocalDate]])(Range.unapply[Option[LocalDate]])
+
+  lazy val dateRangeMappingNonOptional: Mapping[Range[LocalDate]] = mapping(
+    "from" -> jodaLocalDateMappingWithYearRestriction(pattern = "yyyy-MM-dd"),
+    "to"   -> jodaLocalDateMappingWithYearRestriction(pattern = "yyyy-MM-dd")
+  )(Range.apply[LocalDate])(Range.unapply[LocalDate])
+
+  lazy val dateTimeRangeMapping: Mapping[Range[Option[DateTime]]] = mapping(
+    "from" -> optional(jodaDateTimeMappingWithYearRestriction(pattern = "yyyy-MM-dd HH:mm")),
+    "to"   -> optional(jodaDateTimeMappingWithYearRestriction(pattern = "yyyy-MM-dd HH:mm"))
+  )(Range.apply[Option[DateTime]])(Range.unapply[Option[DateTime]])
 
 }
