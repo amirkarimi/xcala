@@ -6,8 +6,8 @@ final case class Paginated[A](
     data                 : Seq[A],
     totalCount           : Long,
     queryOptions         : QueryOptions,
-    args                 : Map[String, String] = Map.empty,
-    rowToAttributesMapper: Option[A => Seq[(String, String)]]
+    args                 : Map[String, String]                = Map.empty,
+    rowToAttributesMapper: Option[A => Seq[(String, String)]] = None
 ) {
   def pageCount  : Int     = math.ceil(totalCount.toDouble / queryOptions.pageSize.toDouble).toInt
   def hasNextPage: Boolean = queryOptions.page < pageCount
@@ -78,6 +78,18 @@ object Paginated {
       queryOptions          = queryOptions,
       criteria              = criteria,
       criteriaForm          = criteriaForm,
+      rowToAttributesMapper = None
+    )
+
+  def apply[A, B](
+      dataWithTotalCount: DataWithTotalCount[A],
+      queryOptions      : QueryOptions
+  ): Paginated[A] =
+    Paginated(
+      data                  = dataWithTotalCount.data,
+      totalCount            = dataWithTotalCount.totalCount,
+      queryOptions          = queryOptions,
+      args                  = Map.empty,
       rowToAttributesMapper = None
     )
 
