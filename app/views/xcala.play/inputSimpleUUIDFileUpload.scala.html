@@ -1,0 +1,19 @@
+@(field: Field, fileCall: UUID => Call, args: (Symbol, Any)*)(implicit fieldConstructor: views.html.helper.FieldConstructor, messages: Messages)
+
+@helper.input(field, (args :+ (Symbol("_ignoreFormControlClass") -> true)):_*) { (_, _, _, args) =>
+	<div class="row">
+		<div class="col-xs-8">
+				@defining(field("_autoupload")) { fileUploadField =>
+					<input type="file" name="@fileUploadField.name" id="@fileUploadField.id" @toHtmlArgs(args)>
+				}
+				@inputHidden(field)
+		</div>
+		<div class="col-xs-4">
+			@field.value.map(UUID.fromString).map { id =>
+				<a class="btn btn-warning btn-sm @args.find(_._1 == Symbol("_linkClass")).map(_._2)" target="_blank" href="@fileCall(id)">
+					<span class="glyphicon glyphicon-download-alt"></span> @messages("download")
+				</a>	
+			}
+		</div>
+	</div>
+}

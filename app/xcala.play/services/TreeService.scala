@@ -9,13 +9,13 @@ import scala.concurrent.Future
 
 import reactivemongo.api.bson._
 
-trait TreeService[A, B <: TreeModelBase[B]]
-    extends DataReadServiceImpl[A]
-    with DataDocumentHandler[A]
+trait TreeService[Doc <: DocumentWithId, Model <: TreeModelBase[Model]]
+    extends DataReadSimpleServiceImpl[Doc]
+    with DataDocumentHandler[Doc]
     with WithExecutionContext {
-  def getModel(entity: A, children: List[B]): B
+  def getModel(entity: Doc, children: List[Model]): Model
 
-  def find(lang: Option[Lang], initialDocument: BSONDocument = BSONDocument()): Future[List[B]] = {
+  def find(lang: Option[Lang], initialDocument: BSONDocument = BSONDocument()): Future[List[Model]] = {
     findItemsUnder(initialDocument = initialDocument, parentId = None, lang = lang)
   }
 
@@ -23,7 +23,7 @@ trait TreeService[A, B <: TreeModelBase[B]]
       initialDocument: BSONDocument,
       parentId       : Option[BSONObjectID],
       lang           : Option[Lang] = None
-  ): Future[List[B]] = {
+  ): Future[List[Model]] = {
     val query = (parentId, lang) match {
       case (None, lang) =>
         initialDocument ++ BSONDocument("lang" -> lang.map(_.code), "parentId" -> BSONDocument("$exists" -> false))
@@ -36,7 +36,7 @@ trait TreeService[A, B <: TreeModelBase[B]]
     findItemsUnder(query, initialDocument)
   }
 
-  protected def findItemsUnder(query: BSONDocument, initialDocument: BSONDocument): Future[List[B]] = {
+  protected def findItemsUnder(query: BSONDocument, initialDocument: BSONDocument): Future[List[Model]] = {
     val itemsFuture = findQuery(query).flatMap { query =>
       query.sort(BSONDocument("order" -> 1)).cursor[BSONDocument]().collect[List]()
     }
@@ -55,7 +55,7 @@ trait TreeService[A, B <: TreeModelBase[B]]
 
   def getAllOptions(lang: Option[Lang], exclude: Option[BSONObjectID] = None): Future[List[(String, String)]] = {
     def getOptions(
-        items      : List[B],
+        items      : List[Model],
         exclude    : Option[BSONObjectID],
         parentTitle: Option[String] = None
     ): List[(String, String)] = {

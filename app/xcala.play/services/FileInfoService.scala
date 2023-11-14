@@ -5,6 +5,8 @@ import s3.FileStorageService
 import s3.FileStorageService.FileS3Object
 import xcala.play.extensions.BSONHandlers._
 import xcala.play.models.FileInfo
+import xcala.play.services.DataRemoveServiceImpl
+import xcala.play.services.DataSaveServiceImpl
 
 import java.io.InputStream
 import javax.inject.Inject
@@ -38,7 +40,9 @@ class FileInfoService @Inject() (
     fileStorageService: FileStorageService,
     val databaseConfig: DefaultDatabaseConfig,
     implicit val ec   : ExecutionContext
-) extends DataCrudService[FileInfo] {
+) extends DataReadSimpleServiceImpl[FileInfo]
+    with DataRemoveServiceImpl[FileInfo]
+    with DataSaveServiceImpl[FileInfo] {
 
   val collectionName : String                        = "files"
   val documentHandler: BSONDocumentHandler[FileInfo] = Macros.handler[FileInfo]
@@ -58,7 +62,10 @@ class FileInfoService @Inject() (
   }
 
   def renameFile(id: BSONObjectID, newName: String): Future[Some[WriteResult]] = {
-    update(selector = BSONDocument("_id" -> id), update = BSONDocument("$set" -> BSONDocument("fileName" -> newName)))
+    update(
+      selector = BSONDocument("_id" -> id),
+      update   = BSONDocument("$set" -> BSONDocument("fileName" -> newName))
+    )
       .map(Some(_))
   }
 

@@ -7,4 +7,4 @@ final case class Folder(
     @Key("_id") id: Option[BSONObjectID],
     name          : String,
     parent        : Option[BSONObjectID]
-)
+) extends DocumentWithId

@@ -1,16 +1,22 @@
 package xcala.play.postgres.controllers
 
+import xcala.play.controllers.WithComposableActions
+import xcala.play.controllers.WithFormBinding
+import xcala.play.controllers.WithMainPageResults
 import xcala.play.postgres.models.EntityWithId
 import xcala.play.postgres.services._
 import xcala.play.utils.WithExecutionContext
 
 import play.api.data.Form
 import play.api.i18n.I18nSupport
+import play.api.i18n.Messages
 import play.api.mvc._
 
 import scala.concurrent.Future
 
-trait DataCudController[A <: EntityWithId]
+import org.postgresql.util.PSQLException
+
+trait DataCudController[Id, Entity <: EntityWithId[Id], Model]
     extends InjectedController
     with WithMainPageResults
     with WithFormBinding
@@ -18,13 +24,15 @@ trait DataCudController[A <: EntityWithId]
     with WithExecutionContext
     with I18nSupport {
 
-  protected def crudService: DataCrudService[A]
+  protected def cudService: DataReadSimpleService[Id, Entity, Model]
+    with DataRemoveService[Id, Entity]
+    with DataSaveService[Id, Entity, Model]
 
-  def defaultForm: Form[A]
+  def defaultForm: Form[Model]
 
-  def createView(form: Form[A])(implicit request: RequestType[_]): Future[Result]
+  def createView(form: Form[Model])(implicit request: RequestType[_]): Future[Result]
 
-  def editView(form: Form[A], model: A)(implicit request: RequestType[_]): Future[Result]
+  def editView(form: Form[Model], model: Model)(implicit request: RequestType[_]): Future[Result]
 
   def create: Action[AnyContent] = action.async { implicit request =>
     createView(defaultForm.bindFromRequest().discardingErrors)
@@ -39,28 +47,35 @@ trait DataCudController[A <: EntityWithId]
           createView(formWithErrors)
         },
         model => {
-          crudService
+          cudService
             .insert(model)
             .map { _ =>
               successfulResult("message.successfulSave")
             }
-            .recoverWith { case throwable: Throwable =>
-              recoverSaveError(throwable, filledForm)
+            .recoverWith {
+              case psqlException: PSQLException
+                  if psqlException.getMessage.contains("duplicate key value violates unique constraint") =>
+                Future.successful(
+                  failedResult(Messages("error.thisItemAlreadyExists"))
+                )
+
+              case throwable: Throwable =>
+                recoverSaveError(throwable, filledForm)
             }
         }
       )
     }
   }
 
-  def edit(id: Long): Action[AnyContent] = action.async { implicit request =>
-    crudService.findById(id).flatMap {
+  def edit(id: Id): Action[AnyContent] = action.async { implicit request =>
+    cudService.findById(id).flatMap {
       case Some(model) => editView(defaultForm.fill(model), model)
       case None        => Future.successful(defaultNotFound)
     }
   }
 
-  def editPost(id: Long): Action[AnyContent] = action.async { implicit request =>
-    crudService.findById(id).flatMap {
+  def editPost(id: Id): Action[AnyContent] = action.async { implicit request =>
+    cudService.findById(id).flatMap {
       case None        => Future.successful(defaultNotFound)
       case Some(model) =>
         val boundForm        = defaultForm.fill(model)
@@ -72,7 +87,7 @@ trait DataCudController[A <: EntityWithId]
               editView(formWithErrors, model)
             },
             model =>
-              crudService
+              cudService
                 .update(model)
                 .map { _ =>
                   successfulResult("message.successfulSave")
@@ -85,14 +100,14 @@ trait DataCudController[A <: EntityWithId]
     }
   }
 
-  protected def recoverSaveError(throwable: Throwable, filledForm: Form[A])(implicit
+  protected def recoverSaveError(throwable: Throwable, filledForm: Form[Model])(implicit
       request: RequestType[_]
   ): Future[Result] = {
     createView(filledForm.withGlobalError(throwable.getMessage()))
   }
 
-  def delete(id: Long): Action[AnyContent] = action.async { implicit request =>
-    crudService.delete(id).map {
+  def delete(id: Id): Action[AnyContent] = action.async { implicit request =>
+    cudService.delete(id).map {
       case 1 => successfulResult("message.successfulDelete")
       case _ => defaultNotFound
     }

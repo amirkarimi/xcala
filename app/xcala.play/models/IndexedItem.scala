@@ -12,6 +12,7 @@ final case class IndexedItem(
     title         : String,
     content       : String,
     updateTime    : DateTime
-) extends WithLang
+) extends DocumentWithId
+    with WithLang
 
 final case class IndexedItemCriteria(lang: Option[String], query: Option[String])

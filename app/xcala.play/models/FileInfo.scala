@@ -13,6 +13,6 @@ final case class FileInfo(
     createTime    : DateTime,
     folderId      : Option[BSONObjectID],
     isHidden      : Boolean
-) {
+) extends DocumentWithId {
   def isImage: Boolean = contentType.startsWith("image/")
 }
