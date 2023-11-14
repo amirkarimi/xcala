@@ -4,27 +4,32 @@ import xcala.play.postgres.models._
 import xcala.play.utils.WithExecutionContext
 
 import scala.concurrent.Future
+import scala.language.reflectiveCalls
 
 /** Decorator service.
   */
-trait DataCrudServiceDecorator[A <: EntityWithId, B <: EntityWithId]
-    extends DataCrudService[B]
+trait DataCrudServiceDecorator[Id, Entity <: EntityWithId[Id], Model <: { val id: Option[Id] }]
+    extends DataReadSimpleService[Id, Entity, Model]
+    with DataSaveService[Id, Entity, Model]
+    with DataRemoveService[Id, Entity]
     with WithExecutionContext {
 
-  val service: DataCrudService[A]
+  val service: DataReadSimpleService[Id, Entity, Entity]
+    with DataSaveService[Id, Entity, Entity]
+    with DataRemoveService[Id, Entity]
 
-  def mapModel(source     : A): Future[B]
-  def mapBackModel(source : B): Future[A]
-  def copyBackModel(source: B, destination: A): Future[A]
+  def mapModel(source     : Entity): Future[Model]
+  def mapBackModel(source : Model): Future[Entity]
+  def copyBackModel(source: Model, destination: Entity): Future[Entity]
 
-  def findById(id: Long): Future[Option[B]] = {
+  def findById(id: Id): Future[Option[Model]] = {
     service.findById(id).flatMap {
       case None         => Future.successful(None)
       case Some(entity) => mapModel(entity).map(Some(_))
     }
   }
 
-  def findAll: Future[Seq[B]] = {
+  def findAll: Future[Seq[Model]] = {
     service.findAll.flatMap { items =>
       Future.sequence(
         items.map(mapModel)
@@ -32,11 +37,11 @@ trait DataCrudServiceDecorator[A <: EntityWithId, B <: EntityWithId]
     }
   }
 
-  def insert(model: B): Future[Long] = {
+  def insert(model: Model): Future[Id] = {
     mapBackModel(model).flatMap(service.insert)
   }
 
-  def insertMany(models: Seq[B]): Future[Int] =
+  def insertMany(models: Seq[Model]): Future[Int] =
     Future
       .sequence {
         models.map(mapBackModel)
@@ -45,11 +50,11 @@ trait DataCrudServiceDecorator[A <: EntityWithId, B <: EntityWithId]
         service.insertMany(entities)
       }
 
-  def updateOrInsert(model: B): Future[Option[Long]] = {
+  def updateOrInsert(model: Model): Future[Option[Id]] = {
     mapBackModel(model).flatMap(service.updateOrInsert)
   }
 
-  def update(model: B): Future[Int] = {
+  def update(model: Model): Future[Int] = {
     model.id
       .map { id =>
         service.findById(id).flatMap {
@@ -60,5 +65,5 @@ trait DataCrudServiceDecorator[A <: EntityWithId, B <: EntityWithId]
       .getOrElse(Future.successful(0))
   }
 
-  def delete(id: Long): Future[Int] = service.delete(id)
+  def delete(id: Id): Future[Int] = service.delete(id)
 }

@@ -1,5 +1,7 @@
 package xcala.play.services
 
+import xcala.play.models.DocumentWithId
+
 import scala.concurrent.Future
 
 import reactivemongo.api.bson.BSONDocument
@@ -7,7 +9,7 @@ import reactivemongo.api.bson.BSONObjectID
 import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.commands.WriteResult
 
-trait WithSafeDelete extends DataCollectionService with DataRemoveService {
+trait WithSafeDelete[Doc <: DocumentWithId] extends DataCollectionService with DataRemoveService[Doc] {
 
   /** Specifies the list of tuples containing the collection name and a function to build a query on the specified
     * collection that will prevent from deleting the entity if the query matched

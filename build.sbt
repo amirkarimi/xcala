@@ -2,7 +2,7 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "0.31.4"
+version := "1.0.0"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -51,6 +51,8 @@ libraryDependencies ++= Seq(
   "com.github.tminglei"          %% "slick-pg"                   % "0.21.1",
   "com.lightbend.akka"           %% "akka-stream-alpakka-slick"  % "6.0.1",
   "com.ibm.icu"                   % "icu4j"                      % "73.2",
+  "com.typesafe.play"            %% "play-json"                  % "2.10.1",
+  "com.typesafe.play"            %% "play-json-joda"             % "2.10.1",
   specs2                          % Test
 )
 
@@ -94,7 +96,8 @@ TwirlKeys.templateImports ++= Seq(
   "_root_.xcala.play.models._",
   "reactivemongo.api.gridfs.ReadFile",
   "_root_.xcala.play.extensions.PersianUtils._",
-  "_root_.xcala.play.extensions.MultilangHelper._"
+  "_root_.xcala.play.extensions.MultilangHelper._",
+  "java.util.UUID"
 )
 
 scalacOptions ++= Seq(

@@ -2,6 +2,8 @@ package xcala.play.services
 
 import xcala.play.models.FileInfo
 import xcala.play.models.Folder
+import xcala.play.services.DataRemoveServiceImpl
+import xcala.play.services.DataSaveServiceImpl
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,7 +18,9 @@ class FolderService @Inject() (
     fileInfoService   : FileInfoService,
     val databaseConfig: DefaultDatabaseConfig,
     implicit val ec   : ExecutionContext
-) extends DataCrudService[Folder] {
+) extends DataReadSimpleServiceImpl[Folder]
+    with DataSaveServiceImpl[Folder]
+    with DataRemoveServiceImpl[Folder] {
   val collectionName : String                      = "folders"
   val documentHandler: BSONDocumentHandler[Folder] = Macros.handler[Folder]
 

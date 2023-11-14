@@ -1,9 +1,9 @@
-package xcala.play.controllers
+package xcala.play.postgres.controllers
 
-import xcala.play.models.DocumentWithId
-import xcala.play.models.Paginated
-import xcala.play.models.QueryOptions
-import xcala.play.services._
+import xcala.play.controllers.WithComposableActions
+import xcala.play.models._
+import xcala.play.postgres.models.EntityWithId
+import xcala.play.postgres.services._
 import xcala.play.utils.WithExecutionContext
 
 import play.api.i18n.MessagesProvider
@@ -11,14 +11,14 @@ import play.api.mvc._
 
 import scala.concurrent.Future
 
-trait DataReadController[Doc <: DocumentWithId, Model]
+trait DataReadController[Id, Entity <: EntityWithId[Id], Model]
     extends InjectedController
     with WithComposableActions
     with WithExecutionContext {
 
   implicit val messagesProvider: MessagesProvider
 
-  protected def readService: DataReadService[Doc]
+  protected def readService: DataReadService[Id, Entity]
 
   def indexView(paginated: Paginated[Model])(implicit request: RequestType[_]): Future[Result]
 

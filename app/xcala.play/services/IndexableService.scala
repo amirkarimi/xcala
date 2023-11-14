@@ -1,6 +1,7 @@
 package xcala.play.services
 
 import xcala.play.extensions.BSONHandlers._
+import xcala.play.models.DocumentWithId
 import xcala.play.models.Indexable
 import xcala.play.models.IndexedItem
 
@@ -14,12 +15,12 @@ import reactivemongo.api.bson.collection.BSONCollection
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.indexes._
 
-trait IndexableService[A <: Indexable]
+trait IndexableService[Doc <: DocumentWithId with Indexable]
     extends DataService
     with DataCollectionService
-    with DataRemoveService
-    with DataSaveService[A]
-    with DataDocumentHandler[A] {
+    with DataRemoveService[Doc]
+    with DataSaveService[Doc, Doc]
+    with DataDocumentHandler[Doc] {
   implicit val indexedItemHandler: BSONDocumentHandler[IndexedItem] = Macros.handler[IndexedItem]
 
   lazy val indexedItemCollection: Future[BSONCollection] = {
@@ -41,7 +42,7 @@ trait IndexableService[A <: Indexable]
     coll
   }
 
-  abstract override def save(model: A): Future[BSONObjectID] = {
+  abstract override def save(model: Doc): Future[BSONObjectID] = {
     documentHandler.writeTry(model) match {
       case Success(_) =>
         val result = super.save(model)
@@ -62,7 +63,7 @@ trait IndexableService[A <: Indexable]
       removeItem(itemId = id)
     }
 
-  private def saveItem(id: BSONObjectID, model: A): Future[WriteResult] = {
+  private def saveItem(id: BSONObjectID, model: Doc): Future[WriteResult] = {
     val existingItem: Future[Option[IndexedItem]] =
       indexedItemCollection
         .flatMap(
@@ -87,7 +88,7 @@ trait IndexableService[A <: Indexable]
   private def updateOrNewIndexedItem(
       indexedItem: Option[IndexedItem],
       id         : BSONObjectID,
-      model      : A
+      model      : Doc
   ): IndexedItem = IndexedItem(
     id         = indexedItem.flatMap(_.id),
     itemType   = model.itemType,

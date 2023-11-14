@@ -1,7 +1,7 @@
 package xcala.play.controllers
 
 import xcala.play.models._
-import xcala.play.services._
+import xcala.play.services.DataReadSimpleService
 import xcala.play.utils.WithExecutionContext
 
 import play.api.i18n.I18nSupport
@@ -13,15 +13,16 @@ import scala.concurrent.Future
 
 import reactivemongo.api.bson._
 
-trait MultilangDataSingleViewController[A <: WithLang]
+trait MultilangDataSingleViewController[Doc <: DocumentWithId with WithLang, Model <: WithLang]
     extends Results
     with WithComposableActions
     with WithExecutionContext
     with I18nSupport {
-  implicit val messagesApi : MessagesApi
-  protected val readService: DataReadService[A]
+  implicit val messagesApi: MessagesApi
 
-  def singleView(model: A)(implicit request: RequestType[_]): Future[Result]
+  protected val readService: DataReadSimpleService[Doc, Model]
+
+  def singleView(model: Model)(implicit request: RequestType[_]): Future[Result]
 
   def defaultNotFound(implicit request: RequestType[_]): Result
 

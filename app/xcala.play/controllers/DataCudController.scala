@@ -1,5 +1,6 @@
 package xcala.play.controllers
 
+import xcala.play.models.DocumentWithId
 import xcala.play.services._
 import xcala.play.utils.WithExecutionContext
 
@@ -13,25 +14,27 @@ import scala.concurrent.Future
 import reactivemongo.api.bson.BSONObjectID
 import reactivemongo.api.commands.WriteResult
 
-trait DataCudController[A, BodyType]
+trait DataCudController[Doc <: DocumentWithId, Model, BodyType]
     extends InjectedController
     with WithMainPageResults
     with WithFormBinding
     with WithComposableActions
     with WithExecutionContext
     with I18nSupport {
-  protected def cudService: DataReadService[A] with DataSaveService[A] with DataRemoveService
+
+  protected def cudService
+      : DataReadSimpleService[Doc, Model] with DataRemoveService[Doc] with DataSaveService[Doc, Model]
 
   val bodyParser: BodyParser[BodyType]
 
-  def defaultForm: Form[A]
+  def defaultForm: Form[Model]
 
   @annotation.nowarn
-  def modelValidation(model: A): Future[Either[String, Unit]] = Future.successful(Right(model))
+  def modelValidation(model: Model): Future[Either[String, Unit]] = Future.successful(Right(model))
 
   def postBindFormValidation(
-      f: A => Future[Result]
-  )(implicit requestHeader: RequestHeader): A => Future[Result] = { model =>
+      f: Model => Future[Result]
+  )(implicit requestHeader: RequestHeader): Model => Future[Result] = { model =>
     modelValidation(model).flatMap {
       case Right(_)           =>
         f(model)
@@ -40,9 +43,9 @@ trait DataCudController[A, BodyType]
     }
   }
 
-  def createView(form: Form[A])(implicit request: RequestType[_]): Future[Result]
+  def createView(form: Form[Model])(implicit request: RequestType[_]): Future[Result]
 
-  def editView(form: Form[A], model: A)(implicit request: RequestType[_]): Future[Result]
+  def editView(form: Form[Model], model: Model)(implicit request: RequestType[_]): Future[Result]
 
   def create: Action[AnyContent] = action.async { implicit request =>
     createView(defaultForm.bindFromRequest().discardingErrors)
@@ -104,7 +107,7 @@ trait DataCudController[A, BodyType]
     }
   }
 
-  protected def recoverSaveError(throwable: Throwable, filledForm: Form[A])(implicit
+  protected def recoverSaveError(throwable: Throwable, filledForm: Form[Model])(implicit
       request: RequestType[_]
   ): Future[Result] = {
     createView(filledForm.withGlobalError(throwable.getMessage))

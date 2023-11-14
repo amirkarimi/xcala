@@ -1,19 +1,22 @@
 package xcala.play.services
 
 import xcala.play.models._
+import xcala.play.models.DocumentWithId
 
 import scala.concurrent.Future
 
 import reactivemongo.api.bson.BSONDocument
 
-trait DataReadCriteriaService[A, B] extends DataReadService[A] {
-  def find(criteriaOpt: Option[B], queryOptions: QueryOptions): Future[DataWithTotalCount[A]]
+trait DataReadWithCriteriaService[Doc <: DocumentWithId, Model, Criteria] extends DataReadService[Doc] {
+  def find(criteriaOpt: Option[Criteria], queryOptions: QueryOptions): Future[DataWithTotalCount[Model]]
 }
 
-trait DataReadCriteriaServiceImpl[A, B] extends DataReadCriteriaService[A, B] {
-  def query(criteria: B): BSONDocument
+trait DataReadWithCriteriaServiceImpl[Doc <: DocumentWithId, Model, Criteria]
+    extends DataReadWithCriteriaService[Doc, Model, Criteria]
+    with DataReadSimpleService[Doc, Model] {
+  def query(criteria: Criteria): BSONDocument
 
-  def find(criteriaOpt: Option[B], queryOptions: QueryOptions): Future[DataWithTotalCount[A]] = {
+  def find(criteriaOpt: Option[Criteria], queryOptions: QueryOptions): Future[DataWithTotalCount[Model]] = {
     val queryDocument = criteriaOpt.map(query).getOrElse(BSONDocument())
     find(queryDocument, queryOptions)
   }

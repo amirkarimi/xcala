@@ -1,6 +1,7 @@
 package xcala.play.controllers
 
-import xcala.play.services.DataReadService
+import xcala.play.models.DocumentWithId
+import xcala.play.services.DataReadSimpleService
 import xcala.play.utils.WithExecutionContext
 
 import play.api.mvc.{Action, AnyContent, Result, Results}
@@ -9,11 +10,14 @@ import scala.concurrent.Future
 
 import reactivemongo.api.bson.BSONObjectID
 
-trait DataSingleViewController[A] extends Results with WithComposableActions with WithExecutionContext {
+trait DataSingleViewController[Doc <: DocumentWithId, Model]
+    extends Results
+    with WithComposableActions
+    with WithExecutionContext {
 
-  protected val readService: DataReadService[A]
+  protected val readService: DataReadSimpleService[Doc, Model]
 
-  def singleView(model: A)(implicit request: RequestType[_]): Future[Result]
+  def singleView(model: Model)(implicit request: RequestType[_]): Future[Result]
 
   def view(id: BSONObjectID): Action[AnyContent] = action.async { implicit request =>
     readService.findById(id).flatMap {

@@ -1,5 +1,6 @@
 package xcala.play.services
 
+import xcala.play.models.DocumentWithId
 import xcala.play.utils.WithExecutionContext
 
 import scala.concurrent.Future
@@ -7,23 +8,23 @@ import scala.concurrent.Future
 import reactivemongo.api.bson._
 import reactivemongo.api.commands.WriteResult
 
-trait DataCrudServiceDecorator[A, B]
-    extends DataReadServiceDecorator[A, B]
-    with DataRemoveService
-    with DataSaveService[B]
+trait DataCrudServiceDecorator[Doc <: DocumentWithId, Model]
+    extends DataReadServiceDecorator[Doc, Model]
+    with DataSaveService[Doc, Model]
+    with DataRemoveService[Doc]
     with WithExecutionContext {
 
-  val service: DataDocumentHandler[A] with DataReadService[A] with DataRemoveService with DataSaveService[A]
+  val service: DataReadSimpleService[Doc, Doc] with DataSaveService[Doc, Doc] with DataRemoveService[Doc]
 
-  def mapBackModel(source: B): Future[A]
+  def mapBackModel(source: Model): Future[Doc]
 
-  def copyBackModel(source: B, destination: A): Future[A]
+  def copyBackModel(source: Model, destination: Doc): Future[Doc]
 
   def remove(query: BSONDocument): Future[WriteResult] = service.remove(query)
 
-  def insert(model: B): Future[BSONObjectID] = mapBackModel(model).flatMap(service.insert)
+  def insert(model: Model): Future[BSONObjectID] = mapBackModel(model).flatMap(service.insert)
 
-  def save(model: B): Future[BSONObjectID] = {
+  def save(model: Model): Future[BSONObjectID] = {
     getIdFromModel(model) match {
       case Some(id) =>
         service.findById(id).flatMap {

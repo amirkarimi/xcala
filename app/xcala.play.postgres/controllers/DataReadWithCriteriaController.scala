@@ -1,6 +1,9 @@
 package xcala.play.postgres.controllers
 
+import xcala.play.controllers.WithComposableActions
+import xcala.play.controllers.WithFormBinding
 import xcala.play.models._
+import xcala.play.postgres.models.EntityWithId
 import xcala.play.postgres.services._
 import xcala.play.utils.WithExecutionContext
 
@@ -10,33 +13,34 @@ import play.api.mvc._
 
 import scala.concurrent.Future
 
-trait DataReadCriteriaController[A, B]
+trait DataReadWithCriteriaController[Id, Entity <: EntityWithId[Id], Model, Criteria]
     extends InjectedController
+    with DataReadController[Id, Entity, Model]
     with WithComposableActions
     with WithFormBinding
     with WithExecutionContext {
 
   implicit val messagesProvider: MessagesProvider
 
-  protected def readCriteriaService: DataReadCriteriaService[A, B]
+  protected val readService: DataReadWithCriteriaService[Id, Entity, Model, Criteria]
 
-  def criteriaForm: Form[B]
+  def criteriaForm: Form[Criteria]
 
-  def indexView(paginated: Paginated[A])(implicit request: RequestType[_]): Future[Result]
+  def indexView(paginated: Paginated[Model])(implicit request: RequestType[_]): Future[Result]
 
-  def indexResultView(paginated: Paginated[A])(implicit request: RequestType[_]): Future[Result]
+  def indexResultView(paginated: Paginated[Model])(implicit request: RequestType[_]): Future[Result]
 
-  def transformCriteria(criteria: B)(implicit @annotation.nowarn request: RequestType[_]): B = criteria
+  def transformCriteria(criteria: Criteria)(implicit @annotation.nowarn request: RequestType[_]): Criteria = criteria
 
-  val rowToAttributesMapper: Option[A => Seq[(String, String)]] = None
+  val rowToAttributesMapper: Option[Model => Seq[(String, String)]] = None
 
-  def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_]): Future[Paginated[A]] = {
+  def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_]): Future[Paginated[Model]] = {
     bindForm(criteriaForm).flatMap { filledCriteriaForm =>
       filledCriteriaForm.value match {
         case None           =>
           Future.successful(
             Paginated(
-              dataWithTotalCount    = DataWithTotalCount[A](Nil, 0),
+              dataWithTotalCount    = DataWithTotalCount[Model](Nil, 0),
               queryOptions          = queryOptions,
               criteria              = None,
               criteriaForm          = criteriaForm,
@@ -45,7 +49,7 @@ trait DataReadCriteriaController[A, B]
           )
         case Some(criteria) =>
           val transformedCriteria = transformCriteria(criteria)
-          readCriteriaService.find(transformedCriteria, queryOptions).map { dataWithTotalCount =>
+          readService.find(transformedCriteria, queryOptions).map { dataWithTotalCount =>
             Paginated(
               dataWithTotalCount    = dataWithTotalCount,
               queryOptions          = queryOptions,
@@ -54,17 +58,6 @@ trait DataReadCriteriaController[A, B]
               rowToAttributesMapper = rowToAttributesMapper
             )
           }
-      }
-    }
-  }
-
-  def index: Action[AnyContent] = action.async { implicit request =>
-    val queryOptions = QueryOptions.getFromRequest()
-
-    getPaginatedData(queryOptions).flatMap { paginated =>
-      request.headers.get("X-Requested-With") match {
-        case Some(_) => indexResultView(paginated)
-        case None    => indexView(paginated)
       }
     }
   }
