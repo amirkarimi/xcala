@@ -9,7 +9,7 @@ import scala.concurrent.Future
 
 import reactivemongo.api.bson._
 
-trait TreeService[Doc <: DocumentWithId, Model <: TreeModelBase[Model]]
+trait TreeService[Doc <: DocumentWithId, Model <: TreeModelBase[BSONObjectID, Model]]
     extends DataReadSimpleServiceImpl[Doc]
     with DataDocumentHandler[Doc]
     with WithExecutionContext {

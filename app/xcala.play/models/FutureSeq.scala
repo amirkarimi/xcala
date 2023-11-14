@@ -1,4 +1,4 @@
-package xcala.play.postgres.models
+package xcala.play.models
 
 import scala.concurrent.Future
 

@@ -1,10 +1,8 @@
 package xcala.play.models
 
-import reactivemongo.api.bson.BSONObjectID
-
-trait TreeModelBase[A <: TreeModelBase[_]] { this: DocumentWithId =>
-  def id          : Option[BSONObjectID]
-  def parentId    : Option[BSONObjectID]
+trait TreeModelBase[Id, A <: TreeModelBase[Id, _]] {
+  def id          : Option[Id]
+  def parentId    : Option[Id]
   def generalTitle: String
   def children    : List[A]
 }
