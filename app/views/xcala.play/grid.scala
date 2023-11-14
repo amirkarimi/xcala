@@ -3,6 +3,7 @@ package views.html.xcala.play
 import xcala.play.models._
 
 import play.api.i18n.Messages
+import play.api.mvc.Call
 import play.twirl.api.Html
 import play.twirl.api.HtmlFormat
 
@@ -17,11 +18,12 @@ object grid {
   }
 
   def renderGrid[A](
-      paginated    : Paginated[A],
-      updateTarget : String,
-      columns      : Seq[Col[A]],
-      messages     : Messages,
-      rowAttributes: Seq[A => (String, String)] = Nil
+      paginated      : Paginated[A],
+      updateTarget   : String,
+      columns        : Seq[Col[A]],
+      messages       : Messages,
+      rowAttributes  : Seq[A => (String, String)] = Nil,
+      maybeCreateCall: Option[Call]               = None
   ): HtmlFormat.Appendable = {
     val rows =
       paginated.data.map { row: A =>
@@ -29,7 +31,7 @@ object grid {
           (c, c.fieldMapper(row), c.cssClass(row))
         } -> rowAttributes.map(_(row))
       }
-    views.html.xcala.play.gridView(columns, rows, paginated, updateTarget)(messages)
+    views.html.xcala.play.gridView(columns, rows, paginated, updateTarget, maybeCreateCall)(messages)
   }
 
 }
@@ -37,28 +39,24 @@ object grid {
 object gridWithPager {
 
   def apply[A](
-      paginated            : Paginated[A],
-      renderSinglePagePager: Boolean                    = true,
-      updateTarget         : String                     = "",
-      rowAttributes        : Seq[A => (String, String)] = Nil
+      paginated      : Paginated[A],
+      updateTarget   : String                     = "",
+      rowAttributes  : Seq[A => (String, String)] = Nil,
+      maybeCreateCall: Option[Call]               = None
   )(
-      columns              : Col[A]*
+      columns        : Col[A]*
   )(implicit messages: Messages): HtmlFormat.Appendable = {
     Html(
       grid
         .renderGrid(
-          paginated     = paginated,
-          updateTarget  = updateTarget,
-          columns       = columns,
-          messages      = messages,
-          rowAttributes = rowAttributes
+          paginated       = paginated,
+          updateTarget    = updateTarget,
+          columns         = columns,
+          messages        = messages,
+          rowAttributes   = rowAttributes,
+          maybeCreateCall = maybeCreateCall
         )
-        .body +
-      (if (!renderSinglePagePager && paginated.pageCount <= 1) {
-         ""
-       } else {
-         pager(paginated).body
-       })
+        .body + pager(paginated).body
     )
   }
 

@@ -1,9 +1,16 @@
-@(columns: Seq[Col[_]], rows: Seq[(Seq[(Col[_], String, Option[String])], Seq[(String, String)])], paginated: Paginated[_], updateTarget: String)(implicit messages: Messages)
-
+@(columns: Seq[Col[_]], rows: Seq[(Seq[(Col[_], String, Option[String])], Seq[(String, String)])], paginated: Paginated[_], updateTarget: String, maybeCreateCall: Option[Call])(implicit messages: Messages)
+@import _root_.xcala.play.extensions.PaginatedPersistor._
 <div class="pull-right">
 	<label>@Messages("foundResult"):</label>
 	<span>@{"%,d".format(paginated.totalCount)}</span>
 </div>
+
+@maybeCreateCall.map { createCall =>
+<div class="pull-left" style="margin-top: -15px">
+    <a href=@createCall.paginatedUrl(paginated) class='btn btn-default'>@Messages("new")</a>
+</div>
+}
+
 
 <table class="table table-striped table-bordered table-thin table-hover">
 	<tr>
