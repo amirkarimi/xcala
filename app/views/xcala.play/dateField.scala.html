@@ -1,0 +1,19 @@
+@(field: Field, args: (Symbol,Any)*)(implicit messages: Messages)
+
+@htmlArgs = @{args.filter(arg => !arg._1.name.startsWith("_") && arg._1 != Symbol("id")).toMap}
+
+<input type="text"
+    class="form-control datetime-datepicker"
+    id="@(field.id)DatePicker"
+    name="@(field.name)DatePicker"
+    autocomplete="off"
+    @toHtmlArgs(htmlArgs)>
+<input type="hidden"
+	class="datetimepicker"
+	id="@field.id"
+	name="@field.name"
+	data-datepickerculture="@if(messages.lang.code=="fa"){fa}else{en}"
+	data-datepicker="@(field.id)DatePicker"
+	@field.value.map{value=>value="@value"}>
+
+
