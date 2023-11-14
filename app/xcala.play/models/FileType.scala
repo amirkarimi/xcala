@@ -1,4 +1,4 @@
-package xcala.play.postgres.models
+package xcala.play.models
 
 object FileType {
   val Image: String = "image"
