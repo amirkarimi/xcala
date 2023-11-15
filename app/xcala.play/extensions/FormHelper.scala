@@ -39,6 +39,10 @@ object FormHelper {
     mapping.transform[String](a => convertStringOfPersianNumbersToEnglish(a.trim), a => a)
   }
 
+  def convertPersianNumbersToEnglishOptional(mapping: Mapping[Option[String]]): Mapping[Option[String]] = {
+    mapping.transform[Option[String]](a => a.map(b => convertStringOfPersianNumbersToEnglish(b.trim)), a => a)
+  }
+
   def jodaLocalDateFormatterWithYearRestriction(minYear: Int, maxYear: Int, pattern: String): Formatter[LocalDate] =
     new Formatter[LocalDate] {
 
