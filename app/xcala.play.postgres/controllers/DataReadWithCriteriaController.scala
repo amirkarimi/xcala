@@ -44,7 +44,7 @@ trait DataReadWithCriteriaController[Id, Entity <: EntityWithId[Id], Model, Crit
               queryOptions          = queryOptions,
               criteria              = None,
               criteriaForm          = criteriaForm,
-              rowToAttributesMapper = None
+              rowToAttributesMapper = rowToAttributesMapper
             )
           )
         case Some(criteria) =>

@@ -43,7 +43,7 @@ trait DataReadWithCriteriaController[Doc <: DocumentWithId, Model, Criteria]
           queryOptions          = queryOptions,
           criteria              = criteriaOpt,
           criteriaForm          = criteriaForm,
-          rowToAttributesMapper = None
+          rowToAttributesMapper = rowToAttributesMapper
         )
       }
     }
