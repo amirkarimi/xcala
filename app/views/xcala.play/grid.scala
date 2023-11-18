@@ -22,14 +22,12 @@ object grid {
       updateTarget   : String,
       columns        : Seq[Col[A]],
       messages       : Messages,
-      rowAttributes  : Seq[A => (String, String)] = Nil,
-      maybeCreateCall: Option[Call]               = None
+      maybeCreateCall: Option[Call] = None
   ): HtmlFormat.Appendable = {
     val rows =
       paginated.data.map { row: A =>
-        columns.map { c =>
-          (c, c.fieldMapper(row), c.cssClass(row))
-        } -> rowAttributes.map(_(row))
+        val dataAttributes = paginated.rowToAttributesMapper.map(_(row)).getOrElse(Nil)
+        columns.map(c => (c, c.fieldMapper(row), c.cssClass(row))) -> dataAttributes
       }
     views.html.xcala.play.gridView(columns, rows, paginated, updateTarget, maybeCreateCall)(messages)
   }
@@ -40,9 +38,8 @@ object gridWithPager {
 
   def apply[A](
       paginated      : Paginated[A],
-      updateTarget   : String                     = "",
-      rowAttributes  : Seq[A => (String, String)] = Nil,
-      maybeCreateCall: Option[Call]               = None
+      updateTarget   : String       = "",
+      maybeCreateCall: Option[Call] = None
   )(
       columns        : Col[A]*
   )(implicit messages: Messages): HtmlFormat.Appendable = {
@@ -53,7 +50,6 @@ object gridWithPager {
           updateTarget    = updateTarget,
           columns         = columns,
           messages        = messages,
-          rowAttributes   = rowAttributes,
           maybeCreateCall = maybeCreateCall
         )
         .body + pager(paginated).body
