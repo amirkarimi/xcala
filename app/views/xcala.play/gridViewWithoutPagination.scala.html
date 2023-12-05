@@ -1,0 +1,28 @@
+@(columns: Seq[Col[_]], rows: Seq[Seq[(Col[_], String, Option[String])]], maybeCreateCall: Option[Call])(implicit messages: Messages)
+
+
+@maybeCreateCall.map { createCall =>
+<div class="pull-left" style="margin-top: -15px">
+    <a href=@createCall class='btn btn-default'>@Messages("new")</a>
+</div>
+}
+
+
+<table class="table table-striped table-bordered table-thin table-hover">
+	<tr>
+		@columns.map { column => 
+			<th@column.headerCssClass.map(c => Html(s" class='${c}'"))>
+				@gridHeader(column.name)
+			</th>
+		}
+	</tr>
+	@rows.map { case row =>
+		<tr>
+			@row.map { case (_, value, css) =>
+				<td@css.map(c => Html(s" class='${c}'"))>
+					@Html(value)
+				</td>
+			}
+		</tr> 
+	}
+</table>
