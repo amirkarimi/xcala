@@ -32,6 +32,19 @@ object grid {
     views.html.xcala.play.gridView(columns, rows, paginated, updateTarget, maybeCreateCall)(messages)
   }
 
+  def renderGridWithoutPagination[A](
+      data           : Seq[A],
+      columns        : Seq[Col[A]],
+      messages       : Messages,
+      maybeCreateCall: Option[Call] = None
+  ): HtmlFormat.Appendable = {
+    val rows =
+      data.map { row: A =>
+        columns.map(c => (c, c.fieldMapper(row), c.cssClass(row)))
+      }
+    views.html.xcala.play.gridViewWithoutPagination(columns, rows, maybeCreateCall)(messages)
+  }
+
 }
 
 object gridWithPager {
@@ -53,6 +66,28 @@ object gridWithPager {
           maybeCreateCall = maybeCreateCall
         )
         .body + pager(paginated).body
+    )
+  }
+
+}
+
+object gridWithoutPager {
+
+  def apply[A](
+      data           : Seq[A],
+      maybeCreateCall: Option[Call] = None
+  )(
+      columns        : Col[A]*
+  )(implicit messages: Messages): HtmlFormat.Appendable = {
+    Html(
+      grid
+        .renderGridWithoutPagination(
+          data            = data,
+          columns         = columns,
+          messages        = messages,
+          maybeCreateCall = maybeCreateCall
+        )
+        .body
     )
   }
 
@@ -85,6 +120,13 @@ object gridHeader {
 
         Html(link + icon)
     }
+  }
+
+  def apply(name: String)(implicit
+      messages: Messages
+  ): Html = {
+    val colLabel = messages(name)
+    Html(s"$colLabel")
   }
 
 }
