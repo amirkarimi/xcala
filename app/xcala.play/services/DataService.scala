@@ -82,6 +82,14 @@ trait DataReadSimpleService[Doc <: DocumentWithId, Model] extends DataReadServic
   def find(query: BSONDocument, queryOptions: QueryOptions): Future[DataWithTotalCount[Model]]
 
   def find(query: BSONDocument, sortOptions: SortOptions): Future[Seq[Model]]
+
+  def findInIds(ids: Seq[BSONObjectID]): Future[List[Model]] =
+    find(
+      BSONDocument(
+        "_id" -> BSONDocument("$in" -> ids)
+      )
+    )
+
 }
 
 /** Represents the Read service implementation
@@ -155,6 +163,7 @@ trait DataReadSimpleServiceImpl[Doc <: DocumentWithId]
   }
 
   protected def defaultSort: Seq[SortInfo] = Nil
+
 }
 
 /** Represents the create or update functionality of the Crud service.
