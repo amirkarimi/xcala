@@ -2,7 +2,7 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "1.0.6"
+version := "1.0.7"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -25,34 +25,34 @@ credentials += Credentials(
 libraryDependencies ++= Seq(
   guice,
   ws,
-  ehcache,
+  caffeine,
   filters,
   jodaForms,
   "org.reactivemongo"            %% "reactivemongo"              % "1.0.10",
   "com.nappin"                   %% "play-recaptcha"             % "2.5",
-  "com.typesafe.akka"            %% "akka-actor-typed"           % "2.8.5",
-  "com.typesafe.akka"            %% "akka-testkit"               % "2.8.5" % "test",
-  "com.typesafe.akka"            %% "akka-serialization-jackson" % "2.8.5",
-  "com.typesafe.akka"            %% "akka-stream"                % "2.8.5",
-  "com.typesafe.akka"            %% "akka-slf4j"                 % "2.8.5",
-  "com.bahmanm"                  %% "persianutils"               % "4.0",
+  "com.typesafe.akka"            %% "akka-actor-typed"           % "2.9.0",
+  "com.typesafe.akka"            %% "akka-testkit"               % "2.9.0" % "test",
+  "com.typesafe.akka"            %% "akka-serialization-jackson" % "2.9.0",
+  "com.typesafe.akka"            %% "akka-stream"                % "2.9.0",
+  "com.typesafe.akka"            %% "akka-slf4j"                 % "2.9.0",
+  "com.bahmanm"                  %% "persianutils"               % "5.0",
   "io.lemonlabs"                 %% "scala-uri"                  % "4.0.3",
-  "org.apache.tika"               % "tika-core"                  % "2.9.0",
-  "ch.qos.logback"                % "logback-classic"            % "1.4.8", // watchout for 1.4.9+ changes
-  "io.sentry"                     % "sentry-logback"             % "6.29.0",
-  "io.minio"                      % "minio"                      % "8.5.6",
-  "commons-io"                    % "commons-io"                 % "2.14.0",
-  "com.sksamuel.scrimage"        %% "scrimage-scala"             % "4.1.0",
-  "com.sksamuel.scrimage"         % "scrimage-webp"              % "4.1.0",
-  "com.fasterxml.jackson.module" %% "jackson-module-scala"       % "2.15.2",
-  "org.postgresql"                % "postgresql"                 % "42.6.0",
-  "com.typesafe.play"            %% "play-slick"                 % "5.1.0",
+  "org.apache.tika"               % "tika-core"                  % "2.9.1",
+  "ch.qos.logback"                % "logback-classic"            % "1.4.14",
+  "io.sentry"                     % "sentry-logback"             % "7.0.0",
+  "io.minio"                      % "minio"                      % "8.5.7",
+  "commons-io"                    % "commons-io"                 % "2.15.1",
+  "com.sksamuel.scrimage"        %% "scrimage-scala"             % "4.1.1",
+  "com.sksamuel.scrimage"         % "scrimage-webp"              % "4.1.1",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala"       % "2.16.0",
+  "org.postgresql"                % "postgresql"                 % "42.7.1",
+  "com.typesafe.play"            %% "play-slick"                 % "5.2.0",
   "com.github.tototoshi"         %% "slick-joda-mapper"          % "2.8.0",
   "com.github.tminglei"          %% "slick-pg"                   % "0.21.1",
-  "com.lightbend.akka"           %% "akka-stream-alpakka-slick"  % "6.0.1",
-  "com.ibm.icu"                   % "icu4j"                      % "73.2",
-  "com.typesafe.play"            %% "play-json"                  % "2.10.1",
-  "com.typesafe.play"            %% "play-json-joda"             % "2.10.1",
+  "com.lightbend.akka"           %% "akka-stream-alpakka-slick"  % "7.0.1",
+  "com.ibm.icu"                   % "icu4j"                      % "74.1",
+  "com.typesafe.play"            %% "play-json"                  % "2.10.3",
+  "com.typesafe.play"            %% "play-json-joda"             % "2.10.3",
   specs2                          % Test
 )
 
@@ -118,7 +118,7 @@ Test / javaOptions ++= Seq("--add-opens=java.base/java.lang=ALL-UNNAMED")
 ThisBuild / scalafixScalaBinaryVersion :=
   CrossVersion.binaryScalaVersion(scalaVersion.value)
 
-addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.8.10" cross CrossVersion.full)
+addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.8.14" cross CrossVersion.full)
 
 scalacOptions ++= List(
   "-Yrangepos",
