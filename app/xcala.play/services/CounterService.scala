@@ -11,7 +11,11 @@ trait CounterService extends DataCollectionService with WithExecutionContext {
 
   def increment(key: String): Future[WriteResult] = {
     collectionFuture.flatMap(
-      _.update.one(BSONDocument("key" -> key), BSONDocument("$inc" -> BSONDocument("count" -> 1)), upsert = true)
+      _.update.one(
+        BSONDocument("key"  -> key),
+        BSONDocument("$inc" -> BSONDocument("count" -> 1)),
+        upsert = true
+      )
     )
   }
 

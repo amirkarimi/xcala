@@ -11,8 +11,8 @@ import reactivemongo.api.commands.WriteResult
 
 trait WithSafeDelete[Doc <: DocumentWithId] extends DataCollectionService with DataRemoveService[Doc] {
 
-  /** Specifies the list of tuples containing the collection name and a function to build a query on the specified
-    * collection that will prevent from deleting the entity if the query matched
+  /** Specifies the list of tuples containing the collection name and a function to build a query on the
+    * specified collection that will prevent from deleting the entity if the query matched
     * @return
     */
   def checkOnDelete: Seq[(String, BSONObjectID => BSONDocument)]
@@ -35,7 +35,11 @@ trait WithSafeDelete[Doc <: DocumentWithId] extends DataCollectionService with D
               val collection: BSONCollection = db.collection(collectionName)
               collection.count(selector = Some(query)).map { count =>
                 if (count > 0)
-                  throw new DeleteConstraintError(collectionName = collectionName, query = query, id = deletingId)
+                  throw new DeleteConstraintError(
+                    collectionName = collectionName,
+                    query          = query,
+                    id             = deletingId
+                  )
               }
             }
           }
@@ -50,4 +54,5 @@ trait WithSafeDelete[Doc <: DocumentWithId] extends DataCollectionService with D
 
 }
 
-class DeleteConstraintError(val collectionName: String, val query: BSONDocument, val id: BSONObjectID) extends Throwable
+class DeleteConstraintError(val collectionName: String, val query: BSONDocument, val id: BSONObjectID)
+    extends Throwable

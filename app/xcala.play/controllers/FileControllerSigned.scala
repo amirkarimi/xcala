@@ -78,7 +78,11 @@ trait FileControllerSigned extends FileControllerBase {
       protectedAccess: Boolean,
       expireTime     : Option[DateTime]
   ): Action[AnyContent] =
-    imageProtectionCheck(expectedToBeProtected = protectedAccess, signature = signature, expireTime = expireTime)(
+    imageProtectionCheck(
+      expectedToBeProtected = protectedAccess,
+      signature             = signature,
+      expireTime            = expireTime
+    )(
       unverifiedId
     ) { verifiedId =>
       (if (protectedAccess) protectedAction else Action).async {
@@ -162,7 +166,11 @@ trait FileControllerSigned extends FileControllerBase {
       protectedAccess: Boolean,
       expireTime     : Option[DateTime]
   ): Action[AnyContent] =
-    fileProtectionCheck(expectedToBeProtected = protectedAccess, signature = signature, expireTime = expireTime)(
+    fileProtectionCheck(
+      expectedToBeProtected = protectedAccess,
+      signature             = signature,
+      expireTime            = expireTime
+    )(
       unverifiedId
     ) { verifiedId =>
       (if (protectedAccess) protectedAction else Action).async {

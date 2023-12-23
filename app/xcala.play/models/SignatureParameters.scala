@@ -21,7 +21,11 @@ sealed abstract class SignatureParameters(implicit val configuration: Configurat
 
 }
 
-sealed abstract class ImageSignatureParameters(id: BSONObjectID, isProtected: Boolean, expiryTime: Option[DateTime])(
+sealed abstract class ImageSignatureParameters(
+    id                    : BSONObjectID,
+    isProtected           : Boolean,
+    expiryTime            : Option[DateTime]
+)(
     implicit configuration: Configuration
 ) extends SignatureParameters {
 
@@ -33,7 +37,11 @@ sealed abstract class ImageSignatureParameters(id: BSONObjectID, isProtected: Bo
 
 }
 
-sealed abstract class FileSignatureParameters(id: BSONObjectID, isProtected: Boolean, expiryTime: Option[DateTime])(
+sealed abstract class FileSignatureParameters(
+    id                    : BSONObjectID,
+    isProtected           : Boolean,
+    expiryTime            : Option[DateTime]
+)(
     implicit configuration: Configuration
 ) extends SignatureParameters {
   def asRawText(): String = s"${id.stringify}-file-${if (isProtected) "protected" else "public"}"

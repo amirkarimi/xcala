@@ -41,7 +41,8 @@ object Formats {
       case JsString(s) =>
         BSONObjectID.parse(s) match {
           case Success(d) => JsSuccess(d)
-          case Failure(_) => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId.format"))))
+          case Failure(_) =>
+            JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId.format"))))
         }
       case _           => JsError(Seq(JsPath() -> Seq(JsonValidationError("error.expected.objectId"))))
     }

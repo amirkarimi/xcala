@@ -13,8 +13,11 @@ object QueryHelpers {
       block(query).getOrElse(query)
     }
 
-    def multiSort[V <: Enumeration, A <: SortOptionsBase[A]](sortOptions: SortOptionsBase[A], sortEnumeration: V)(
-        f: E => sortEnumeration.Value => Seq[ColumnOrdered[_]]
+    def multiSort[V <: Enumeration, A <: SortOptionsBase[A]](
+        sortOptions    : SortOptionsBase[A],
+        sortEnumeration: V
+    )(
+        f              : E => sortEnumeration.Value => Seq[ColumnOrdered[_]]
     ): Query[E, U, C] = {
       sortOptions.sortInfos.foldLeft(query) { (q, sortInfo) =>
         try {

@@ -75,7 +75,11 @@ trait IndexableService[Doc <: DocumentWithId with Indexable]
         updateOrNewIndexedItem(existingItem, id, model)
       }
       .flatMap { indexedItem: IndexedItem =>
-        indexedItemCollection.flatMap(_.update.one(BSONDocument("_id" -> indexedItem.id), indexedItem, upsert = true))
+        indexedItemCollection.flatMap(_.update.one(
+          BSONDocument("_id" -> indexedItem.id),
+          indexedItem,
+          upsert = true
+        ))
       }
   }
 

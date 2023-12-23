@@ -30,11 +30,14 @@ trait DataReadWithCriteriaController[Id, Entity <: EntityWithId[Id], Model, Crit
 
   def indexResultView(paginated: Paginated[Model])(implicit request: RequestType[_]): Future[Result]
 
-  def transformCriteria(criteria: Criteria)(implicit @annotation.nowarn request: RequestType[_]): Criteria = criteria
+  def transformCriteria(criteria: Criteria)(implicit @annotation.nowarn request: RequestType[_]): Criteria =
+    criteria
 
   val rowToAttributesMapper: Option[Model => Seq[(String, String)]] = None
 
-  def getPaginatedData(queryOptions: QueryOptions)(implicit request: RequestType[_]): Future[Paginated[Model]] = {
+  def getPaginatedData(queryOptions: QueryOptions)(implicit
+      request: RequestType[_]
+  ): Future[Paginated[Model]] = {
     bindForm(criteriaForm).flatMap { filledCriteriaForm =>
       filledCriteriaForm.value match {
         case None           =>

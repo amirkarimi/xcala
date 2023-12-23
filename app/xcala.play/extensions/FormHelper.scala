@@ -43,7 +43,11 @@ object FormHelper {
     mapping.transform[Option[String]](a => a.map(b => convertStringOfPersianNumbersToEnglish(b.trim)), a => a)
   }
 
-  def jodaLocalDateFormatterWithYearRestriction(minYear: Int, maxYear: Int, pattern: String): Formatter[LocalDate] =
+  def jodaLocalDateFormatterWithYearRestriction(
+      minYear: Int,
+      maxYear: Int,
+      pattern: String
+  ): Formatter[LocalDate] =
     new Formatter[LocalDate] {
 
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] =
@@ -69,7 +73,11 @@ object FormHelper {
 
     }
 
-  def jodaDateTimeFormatterWithYearRestriction(minYear: Int, maxYear: Int, pattern: String): Formatter[DateTime] =
+  def jodaDateTimeFormatterWithYearRestriction(
+      minYear: Int,
+      maxYear: Int,
+      pattern: String
+  ): Formatter[DateTime] =
     new Formatter[DateTime] {
 
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], DateTime] =
@@ -152,8 +160,8 @@ object FormHelper {
 
   implicit class FixedLanguageForm[A](val form: Form[A]) extends AnyVal {
 
-    /** When the language is Persian, converts incorrect used Arabic characters like "ي" and "ك" to correct Persian
-      * ones.
+    /** When the language is Persian, converts incorrect used Arabic characters like "ي" and "ك" to correct
+      * Persian ones.
       */
     def fixLanguageChars(implicit messages: Messages): Form[A] = {
       if (messages.lang.code == "fa") {

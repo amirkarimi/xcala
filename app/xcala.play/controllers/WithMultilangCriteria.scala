@@ -13,7 +13,9 @@ trait WithMultilangCriteria[Doc <: DocumentWithId with WithLang, Model, Criteria
     extends MultilangDataReadController[Doc, Model]
     with WithExecutionContext
     with I18nSupport {
-  protected val readService: DataReadWithCriteriaService[Doc, Model, Criteria] with DataReadSimpleService[Doc, Model]
+
+  protected val readService: DataReadWithCriteriaService[Doc, Model, Criteria]
+    with DataReadSimpleService[Doc, Model]
 
   def criteriaForm: Form[Criteria]
 
@@ -21,8 +23,8 @@ trait WithMultilangCriteria[Doc <: DocumentWithId with WithLang, Model, Criteria
       queryOptions: QueryOptions
   )(implicit request: RequestType[_]): Future[Paginated[Model]] = {
     val requestCriteriaData = criteriaForm.bindFromRequest().data
-    val modifiedData        = requestCriteriaData.filter(_._1 != "lang") + ("lang" -> request2Messages.lang.code)
-    val criteriaOpt         = criteriaForm.bind(modifiedData.toMap).value
+    val modifiedData = requestCriteriaData.filter(_._1 != "lang") + ("lang" -> request2Messages.lang.code)
+    val criteriaOpt  = criteriaForm.bind(modifiedData.toMap).value
 
     readService.find(criteriaOpt, queryOptions).map { dataWithTotalCount =>
       Paginated(

@@ -13,7 +13,7 @@ class DbConfig @Inject() (
     dbConfigProvider: DatabaseConfigProvider,
     val profile     : xcala.play.postgres.utils.MyPostgresProfile
 ) {
-  val db          : JdbcBackend#DatabaseDef = dbConfigProvider.get[xcala.play.postgres.utils.MyPostgresProfile].db
-  lazy val session: SlickSession            = SlickSession.forDbAndProfile(db, profile)
+  val db: JdbcBackend#DatabaseDef = dbConfigProvider.get[xcala.play.postgres.utils.MyPostgresProfile].db
+  lazy val session: SlickSession = SlickSession.forDbAndProfile(db, profile)
 
 }

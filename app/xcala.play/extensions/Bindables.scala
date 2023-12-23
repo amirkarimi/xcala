@@ -44,11 +44,14 @@ object Bindables {
         try {
           Some(Right(params.get(key).map(a => new LocalDate(a.head))))
         } catch {
-          case _: IllegalArgumentException | _: NumberFormatException => Some(Left("Invalid local date format"))
+          case _: IllegalArgumentException | _: NumberFormatException =>
+            Some(Left("Invalid local date format"))
         }
       }
 
-      def unbind(key: String, value: Option[LocalDate]): String = value.map(key + "=" + _.toString).getOrElse("")
+      def unbind(key: String, value: Option[LocalDate]): String =
+        value.map(key + "=" + _.toString).getOrElse("")
+
     }
 
   implicit def optionBindable[T: PathBindable]: PathBindable[Option[T]] = new PathBindable[Option[T]] {
@@ -68,7 +71,9 @@ object Bindables {
   implicit def optionJavascriptLiteral[T]: JavascriptLiteral[Option[T]] =
     (value: Option[T]) => value.map(_.toString).getOrElse("")
 
-  implicit def bsonObjectIDPathBinder(implicit stringBinder: PathBindable[String]): PathBindable[BSONObjectID] =
+  implicit def bsonObjectIDPathBinder(implicit
+      stringBinder: PathBindable[String]
+  ): PathBindable[BSONObjectID] =
     new PathBindable[BSONObjectID] {
 
       override def bind(key: String, value: String): Either[String, BSONObjectID] = {
@@ -89,10 +94,14 @@ object Bindables {
   ): QueryStringBindable[BSONObjectID] =
     new QueryStringBindable[BSONObjectID] {
 
-      override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, BSONObjectID]] = {
+      override def bind(
+          key   : String,
+          params: Map[String, Seq[String]]
+      ): Option[Either[String, BSONObjectID]] = {
         val id = stringBinder.bind(key, params)
         id match {
-          case Some(Right(id)) if id != "" => Some(BSONObjectID.parse(id).toOption.toRight("Invalid BSON object ID"))
+          case Some(Right(id)) if id != "" =>
+            Some(BSONObjectID.parse(id).toOption.toRight("Invalid BSON object ID"))
           case _                           => None
         }
       }
@@ -103,7 +112,9 @@ object Bindables {
 
     }
 
-  implicit def langQueryStringBinder(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[Lang] =
+  implicit def langQueryStringBinder(implicit
+      stringBinder: QueryStringBindable[String]
+  ): QueryStringBindable[Lang] =
     new QueryStringBindable[Lang] {
 
       override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Lang]] = {
@@ -122,11 +133,12 @@ object Bindables {
 
   implicit object LangPathBindable extends PathBindable[Lang] {
 
-    def bind(key: String, value: String): Either[String, Lang] = try {
-      Right(Lang(value))
-    } catch {
-      case _: Exception => Left("Cannot parse parameter '" + key + "' as Lang")
-    }
+    def bind(key: String, value: String): Either[String, Lang] =
+      try {
+        Right(Lang(value))
+      } catch {
+        case _: Exception => Left("Cannot parse parameter '" + key + "' as Lang")
+      }
 
     def unbind(key: String, value: Lang): String = value.code
   }

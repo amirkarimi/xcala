@@ -256,7 +256,8 @@ class FileStorageService @Inject() (
   private def defaultBucketName: String =
     bucketName
 
-  /** Clean deformed path Ex: Some("folder1/") => folder1/ Some("folder1") => folder1/ Some("") => "" None => ""
+  /** Clean deformed path Ex: Some("folder1/") => folder1/ Some("folder1") => folder1/ Some("") => "" None =>
+    * ""
     *
     * @param path
     *   Option[String]

@@ -47,7 +47,10 @@ class FileInfoService @Inject() (
   val collectionName : String                        = "files"
   val documentHandler: BSONDocumentHandler[FileInfo] = Macros.handler[FileInfo]
 
-  def getFilesUnderFolder(folderId: Option[BSONObjectID], fileType: Option[String] = None): Future[Seq[FileInfo]] = {
+  def getFilesUnderFolder(
+      folderId: Option[BSONObjectID],
+      fileType: Option[String] = None
+  ): Future[Seq[FileInfo]] = {
     find(
       BSONDocument(
         "$and" ->
