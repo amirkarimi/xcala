@@ -10,7 +10,20 @@ import org.joda.time.DateTime
 object PersianUtils {
 
   private final val monthNames: IndexedSeq[String] =
-    IndexedSeq("فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند")
+    IndexedSeq(
+      "فروردین",
+      "اردیبهشت",
+      "خرداد",
+      "تیر",
+      "مرداد",
+      "شهریور",
+      "مهر",
+      "آبان",
+      "آذر",
+      "دی",
+      "بهمن",
+      "اسفند"
+    )
 
   implicit class PersianDateConverter(val dateTime: DateTime) extends AnyVal {
 
@@ -24,7 +37,11 @@ object PersianUtils {
     ): String = {
       if (messages.lang.code == "fa") {
         val gDate =
-          SimpleDate(year = dateTime.year.get, month = dateTime.monthOfYear.get, day = dateTime.dayOfMonth.get)
+          SimpleDate(
+            year  = dateTime.year.get,
+            month = dateTime.monthOfYear.get,
+            day   = dateTime.dayOfMonth.get
+          )
         val pDate = gregorianToPersian(gDate)
         val parts: Seq[String] =
           Seq(
@@ -84,7 +101,8 @@ object PersianUtils {
       * @return
       */
     def toJalaliDateTimeString(addTime: Boolean = true): String = {
-      val gDate = SimpleDate(year = dateTime.year.get, month = dateTime.monthOfYear.get, day = dateTime.dayOfMonth.get)
+      val gDate =
+        SimpleDate(year = dateTime.year.get, month = dateTime.monthOfYear.get, day = dateTime.dayOfMonth.get)
       val pDate = gregorianToPersian(gDate)
       s"${pDate.year}-${pDate.month.toString.reverse.padTo(2, '0').reverse.mkString}-${pDate.day.toString.reverse.padTo(2, '0').reverse.mkString}" +
       (if (addTime) { " " + dateTime.toString("HH:mm") }
@@ -94,14 +112,19 @@ object PersianUtils {
     def toGlobalLongDateTimeString(implicit messages: Messages, addTime: Boolean = true): String = {
       if (messages.lang.code == "fa") {
         val gDate =
-          SimpleDate(year = dateTime.year.get, month = dateTime.monthOfYear.get, day = dateTime.dayOfMonth.get)
+          SimpleDate(
+            year  = dateTime.year.get,
+            month = dateTime.monthOfYear.get,
+            day   = dateTime.dayOfMonth.get
+          )
         val pDate = gregorianToPersian(gDate)
         s"${pDate.day} ${monthNames(pDate.month - 1)} ${pDate.year}" +
         (if (addTime) { " " + dateTime.toString("HH:mm") }
          else { "" })
       } else {
-        dateTime.toString("MMMM dd, yyyy" + (if (addTime) { " HH:mm" }
-                                             else { "" }))
+        dateTime.toString("MMMM dd, yyyy" +
+          (if (addTime) { " HH:mm" }
+           else { "" }))
       }
     }
 
@@ -117,7 +140,11 @@ object PersianUtils {
     def toGlobalYear(implicit messages: Messages): Int = {
       if (messages.lang.code == "fa") {
         val gDate =
-          SimpleDate(year = dateTime.year.get, month = dateTime.monthOfYear.get, day = dateTime.dayOfMonth.get)
+          SimpleDate(
+            year  = dateTime.year.get,
+            month = dateTime.monthOfYear.get,
+            day   = dateTime.dayOfMonth.get
+          )
         val pDate = gregorianToPersian(gDate)
         pDate.year
       } else {
@@ -128,7 +155,11 @@ object PersianUtils {
     def toGlobalMonthName(implicit messages: Messages): String = {
       if (messages.lang.code == "fa") {
         val gDate =
-          SimpleDate(year = dateTime.year.get, month = dateTime.monthOfYear.get, day = dateTime.dayOfMonth.get)
+          SimpleDate(
+            year  = dateTime.year.get,
+            month = dateTime.monthOfYear.get,
+            day   = dateTime.dayOfMonth.get
+          )
         val pDate = gregorianToPersian(gDate)
         monthNames(pDate.month - 1)
       } else {

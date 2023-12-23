@@ -27,7 +27,8 @@ final case class Paginated[A](
 
   def gotoPage(page: Int): Paginated[A] = copy(queryOptions = queryOptions.copy(page = page))
 
-  def sort(sortExpression: Option[String]): Paginated[A] = copy(queryOptions = queryOptions.sort(sortExpression))
+  def sort(sortExpression: Option[String]): Paginated[A] =
+    copy(queryOptions = queryOptions.sort(sortExpression))
 
   def toQueryString: String = {
     val encodedArgs = args.view.mapValues(java.net.URLEncoder.encode(_, "UTF-8"))

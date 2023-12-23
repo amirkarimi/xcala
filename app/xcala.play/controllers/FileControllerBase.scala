@@ -159,7 +159,9 @@ private[controllers] trait FileControllerBase
 
     folderNameOpt match {
       case Some(folderName) =>
-        folderService.insert(Folder(id = None, name = folderName, parent = currentFolderIDOpt)).map(_ => Ok("OK"))
+        folderService.insert(Folder(id = None, name = folderName, parent = currentFolderIDOpt)).map(_ =>
+          Ok("OK")
+        )
       case _                => Future.successful(BadRequest)
     }
   }
@@ -274,11 +276,13 @@ private[controllers] trait FileControllerBase
       body   = body
     ).withHeaders(
       CONTENT_LENGTH      -> file.contentLength.map(_.toString).getOrElse(""),
-      CONTENT_DISPOSITION -> (s"""$dispositionMode; filename="${java.net.URLEncoder
+      CONTENT_DISPOSITION ->
+        (s"""$dispositionMode; filename="${java.net.URLEncoder
+            .encode(file.name, "UTF-8")
+            .replace("+", "%20")}"; filename*=UTF-8''""" +
+        java.net.URLEncoder
           .encode(file.name, "UTF-8")
-          .replace("+", "%20")}"; filename*=UTF-8''""" + java.net.URLEncoder
-        .encode(file.name, "UTF-8")
-        .replace("+", "%20"))
+          .replace("+", "%20"))
     )
   }
 

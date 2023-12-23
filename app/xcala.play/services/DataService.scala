@@ -47,13 +47,18 @@ trait WithDbCommand extends DatabaseAccess {
 
   def dbCommand(commandDoc: BSONDocument)(implicit ec: ExecutionContext): Future[BSONDocument] =
     dbFuture.flatMap(
-      _.runCommand(commandDoc, FailoverStrategy.default).cursor[BSONDocument](ReadPreference.primaryPreferred).head
+      _.runCommand(commandDoc, FailoverStrategy.default).cursor[BSONDocument](
+        ReadPreference.primaryPreferred
+      ).head
     )
 
 }
 
 trait WithExternalCollectionAccess extends DatabaseAccess {
-  protected def collection(collectionName: String): Future[BSONCollection] = dbFuture.map(_.collection(collectionName))
+
+  protected def collection(collectionName: String): Future[BSONCollection] =
+    dbFuture.map(_.collection(collectionName))
+
 }
 
 /** Represents the document handler.
@@ -99,7 +104,8 @@ trait DataReadSimpleServiceImpl[Doc <: DocumentWithId]
     with DataDocumentHandler[Doc]
     with DataReadSimpleService[Doc, Doc] {
 
-  def findQuery(query: BSONDocument): Future[BSONCollection#QueryBuilder] = collectionFuture.map(_.find(query))
+  def findQuery(query: BSONDocument): Future[BSONCollection#QueryBuilder] =
+    collectionFuture.map(_.find(query))
 
   def findById(id: BSONObjectID): Future[Option[Doc]] =
     collectionFuture.flatMap(_.find(BSONDocument("_id" -> id)).cursor[Doc]().headOption)
@@ -150,7 +156,9 @@ trait DataReadSimpleServiceImpl[Doc <: DocumentWithId]
     val command = BSONDocument("distinct" -> collectionName, "key" -> fieldName, "query" -> query)
     dbFuture
       .flatMap(
-        _.runCommand(command, FailoverStrategy.default).cursor[BSONDocument](ReadPreference.primaryPreferred).head
+        _.runCommand(command, FailoverStrategy.default).cursor[BSONDocument](
+          ReadPreference.primaryPreferred
+        ).head
       )
       .map { doc =>
         doc.getAsOpt[BSONArray]("values").toSeq.flatMap(_.values)
@@ -193,7 +201,8 @@ trait DataSaveServiceImpl[Doc <: DocumentWithId]
     BSONDocument(
       doc.elements
         .filter(_.name != DataCrudService.UpdateTimeField)
-        .map(e => (e.name, e.value)) :+ (DataCrudService.UpdateTimeField -> BSONDateTime(updateTime.getMillis))
+        .map(e => (e.name, e.value)) :+
+        (DataCrudService.UpdateTimeField -> BSONDateTime(updateTime.getMillis))
     )
   }
 
@@ -219,7 +228,9 @@ trait DataSaveServiceImpl[Doc <: DocumentWithId]
     val (newDoc, objectId) = getDocWithId(model)
     val updateDoc          = setCreateAndUpdateTime(newDoc)
 
-    collectionFuture.flatMap(_.update.one(BSONDocument("_id" -> objectId), updateDoc, upsert = true)).map(_ => objectId)
+    collectionFuture.flatMap(_.update.one(BSONDocument("_id" -> objectId), updateDoc, upsert = true)).map(_ =>
+      objectId
+    )
   }
 
   def update(
@@ -233,9 +244,10 @@ trait DataSaveServiceImpl[Doc <: DocumentWithId]
       case false => update
       case true  =>
         val updateTime = DateTime.now
-        update ++ BSONDocument(
-          "$set" -> BSONDocument(DataCrudService.UpdateTimeField -> BSONDateTime(updateTime.getMillis))
-        )
+        update ++
+          BSONDocument(
+            "$set" -> BSONDocument(DataCrudService.UpdateTimeField -> BSONDateTime(updateTime.getMillis))
+          )
     }
 
     collectionFuture.flatMap(_.update.one(selector, finalUpdateDoc, upsert = upsert, multi = multi))

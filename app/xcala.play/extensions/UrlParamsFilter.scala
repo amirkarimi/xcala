@@ -16,7 +16,8 @@ object UrlParamsFilter {
 
 class UrlParamsFilter @Inject() (implicit val mat: Materializer) extends Filter {
 
-  override def apply(nextFilter: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
+  override def apply(nextFilter: RequestHeader => Future[Result])(requestHeader: RequestHeader)
+      : Future[Result] = {
     val filteredQueryMaps = requestHeader.target.queryMap.filter { case (_, values) =>
       values.forall(UrlParamsFilter.isUrlParamSafe)
     }

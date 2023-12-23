@@ -26,8 +26,7 @@ object Col {
               ""
             }
           }
-          .mkString +
-        "</div>",
+          .mkString + "</div>",
       sortExpression = "",
       cssClass       = _ => Some("command-column")
     )

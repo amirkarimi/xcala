@@ -45,21 +45,22 @@ class FormHelperSpec(cmd: CommandLine) extends Specification {
   )
 
   "FixedLanguageForm" should {
-    "return correct persian words on arabic inputs" >> new WithTestDb(hostName) {
+    "return correct persian words on arabic inputs" >>
+      new WithTestDb(hostName) {
 
-      implicit override val lang: Lang = Lang("fa")
+        implicit override val lang: Lang = Lang("fa")
 
-      val data: Map[String, String] = Map(
-        "field1" -> "كتاب",
-        "field2" -> "فارسي"
-      )
+        val data: Map[String, String] = Map(
+          "field1" -> "كتاب",
+          "field2" -> "فارسي"
+        )
 
-      val boundForm    : Form[(String, String)] = form.bind(data)
-      val correctedForm: Form[(String, String)] = boundForm.fixLanguageChars
+        val boundForm    : Form[(String, String)] = form.bind(data)
+        val correctedForm: Form[(String, String)] = boundForm.fixLanguageChars
 
-      val expectedData: (String, String) = ("کتاب", "فارسی")
-      correctedForm.value must beSome(expectedData)
-    }
+        val expectedData: (String, String) = ("کتاب", "فارسی")
+        correctedForm.value must beSome(expectedData)
+      }
   }
 
 }

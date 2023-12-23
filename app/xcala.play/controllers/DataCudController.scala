@@ -80,32 +80,33 @@ trait DataCudController[Doc <: DocumentWithId, Model, BodyType]
     }
   }
 
-  def editPost(id: BSONObjectID): Action[BodyType] = action.async(bodyParser) { implicit request: RequestType[_] =>
-    cudService.findById(id).flatMap {
-      case None        => Future.successful(NotFound)
-      case Some(model) =>
-        val boundForm        = defaultForm.fill(model)
-        val filledFormFuture = bindForm(boundForm)
+  def editPost(id: BSONObjectID): Action[BodyType] =
+    action.async(bodyParser) { implicit request: RequestType[_] =>
+      cudService.findById(id).flatMap {
+        case None        => Future.successful(NotFound)
+        case Some(model) =>
+          val boundForm        = defaultForm.fill(model)
+          val filledFormFuture = bindForm(boundForm)
 
-        filledFormFuture.flatMap { filledForm =>
-          filledForm.fold(
-            formWithErrors => {
-              editView(formWithErrors, model)
-            },
-            postBindFormValidation { model =>
-              cudService
-                .save(model)
-                .map { _ =>
-                  successfulResult(Messages("message.successfulSave"))
-                }
-                .recoverWith { case throwable: Throwable =>
-                  recoverSaveError(throwable, filledForm)
-                }
-            }
-          )
-        }
+          filledFormFuture.flatMap { filledForm =>
+            filledForm.fold(
+              formWithErrors => {
+                editView(formWithErrors, model)
+              },
+              postBindFormValidation { model =>
+                cudService
+                  .save(model)
+                  .map { _ =>
+                    successfulResult(Messages("message.successfulSave"))
+                  }
+                  .recoverWith { case throwable: Throwable =>
+                    recoverSaveError(throwable, filledForm)
+                  }
+              }
+            )
+          }
+      }
     }
-  }
 
   protected def recoverSaveError(throwable: Throwable, filledForm: Form[Model])(implicit
       request: RequestType[_]

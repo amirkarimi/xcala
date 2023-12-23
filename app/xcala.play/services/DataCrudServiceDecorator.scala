@@ -29,7 +29,7 @@ trait DataCrudServiceDecorator[Doc <: DocumentWithId, Model]
       case Some(id) =>
         service.findById(id).flatMap {
           case Some(originalModel) => copyBackModel(model, originalModel).flatMap(service.save)
-          case None                => Future.failed(new Throwable("Save error: Model ID not found to be updated."))
+          case None => Future.failed(new Throwable("Save error: Model ID not found to be updated."))
         }
       case _        =>
         mapBackModel(model).flatMap(service.save)

@@ -26,7 +26,8 @@ trait TreeService[Doc <: DocumentWithId, Model <: TreeModelBase[BSONObjectID, Mo
   ): Future[List[Model]] = {
     val query = (parentId, lang) match {
       case (None, lang) =>
-        initialDocument ++ BSONDocument("lang" -> lang.map(_.code), "parentId" -> BSONDocument("$exists" -> false))
+        initialDocument ++
+          BSONDocument("lang" -> lang.map(_.code), "parentId" -> BSONDocument("$exists" -> false))
 
       case (Some(id), None) =>
         initialDocument ++ BSONDocument("parentId" -> id)
@@ -53,7 +54,10 @@ trait TreeService[Doc <: DocumentWithId, Model <: TreeModelBase[BSONObjectID, Mo
     }
   }
 
-  def getAllOptions(lang: Option[Lang], exclude: Option[BSONObjectID] = None): Future[List[(String, String)]] = {
+  def getAllOptions(
+      lang   : Option[Lang],
+      exclude: Option[BSONObjectID] = None
+  ): Future[List[(String, String)]] = {
     def getOptions(
         items      : List[Model],
         exclude    : Option[BSONObjectID],
@@ -66,11 +70,12 @@ trait TreeService[Doc <: DocumentWithId, Model <: TreeModelBase[BSONObjectID, Mo
 
       filteredMenus.flatMap { item =>
         val itemTitle = parentTitle.map(_ + " » ").mkString + item.generalTitle
-        (item.id.get.stringify, itemTitle) +: getOptions(
-          items       = item.children,
-          exclude     = exclude,
-          parentTitle = Some(itemTitle)
-        )
+        (item.id.get.stringify, itemTitle) +:
+          getOptions(
+            items       = item.children,
+            exclude     = exclude,
+            parentTitle = Some(itemTitle)
+          )
       }
     }
 

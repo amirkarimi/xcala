@@ -42,61 +42,65 @@ class WithSafeDeleteSpec(cmd: CommandLine) extends Specification {
   import xcala.play.helpers.FutureHelpers._
 
   "Service with WithSafeDelete" should {
-    "allow delete when no related data found for remove by id" >> new WithTestDb(hostName) {
-      val personService = new PersonService()
-      val cardService   = new CardService()
-      val person: Person = Person(name = "test", age = 10)
-      personService.insert(person).awaitResult
-      val card  : Card   = Card(title = "test", personId = BSONObjectID.generate())
-      cardService.insert(card).awaitResult
+    "allow delete when no related data found for remove by id" >>
+      new WithTestDb(hostName) {
+        val personService = new PersonService()
+        val cardService   = new CardService()
+        val person: Person = Person(name = "test", age = 10)
+        personService.insert(person).awaitResult
+        val card  : Card   = Card(title = "test", personId = BSONObjectID.generate())
+        cardService.insert(card).awaitResult
 
-      personService.remove(person.id.get).awaitReady()
+        personService.remove(person.id.get).awaitReady()
 
-      personService.findById(person.id.get).awaitResult must beNone
-    }
+        personService.findById(person.id.get).awaitResult must beNone
+      }
 
-    "allow delete when no related data found for remove by query" >> new WithTestDb(hostName) {
-      val personService = new PersonService()
-      val cardService   = new CardService()
-      val person1: Person = Person(name = "test", age = 10)
-      personService.insert(person1).awaitResult
-      val person2: Person = Person(name = "test2", age = 12)
-      personService.insert(person2).awaitResult
-      val card   : Card   = Card(title = "test", personId = person2.id.get)
-      cardService.insert(card).awaitResult
+    "allow delete when no related data found for remove by query" >>
+      new WithTestDb(hostName) {
+        val personService = new PersonService()
+        val cardService   = new CardService()
+        val person1: Person = Person(name = "test", age = 10)
+        personService.insert(person1).awaitResult
+        val person2: Person = Person(name = "test2", age = 12)
+        personService.insert(person2).awaitResult
+        val card   : Card   = Card(title = "test", personId = person2.id.get)
+        cardService.insert(card).awaitResult
 
-      personService.remove(BSONDocument("name" -> "test")).awaitResult
+        personService.remove(BSONDocument("name" -> "test")).awaitResult
 
-      personService.findById(person1.id.get).awaitResult must beNone
-      personService.findById(person2.id.get).awaitResult must beSome(person2)
-    }
+        personService.findById(person1.id.get).awaitResult must beNone
+        personService.findById(person2.id.get).awaitResult must beSome(person2)
+      }
 
-    "not allow delete when there is related data for remove by id" >> new WithTestDb(hostName) {
-      val personService = new PersonService()
-      val cardService   = new CardService()
-      val person: Person = Person(name = "test", age = 10)
-      personService.insert(person).awaitResult
-      val card  : Card   = Card(title = "test", personId = person.id.get)
-      cardService.insert(card).awaitResult
+    "not allow delete when there is related data for remove by id" >>
+      new WithTestDb(hostName) {
+        val personService = new PersonService()
+        val cardService   = new CardService()
+        val person: Person = Person(name = "test", age = 10)
+        personService.insert(person).awaitResult
+        val card  : Card   = Card(title = "test", personId = person.id.get)
+        cardService.insert(card).awaitResult
 
-      personService.remove(person.id.get).awaitResult must throwA[DeleteConstraintError]
-      personService.findById(person.id.get).awaitResult must beSome(person)
-    }
+        personService.remove(person.id.get).awaitResult must throwA[DeleteConstraintError]
+        personService.findById(person.id.get).awaitResult must beSome(person)
+      }
 
-    "not allow delete when there is related data for remove by query" >> new WithTestDb(hostName) {
-      val personService = new PersonService()
-      val cardService   = new CardService()
-      val person1: Person = Person(name = "test", age = 10)
-      personService.insert(person1).awaitResult
-      val person2: Person = Person(name = "test2", age = 12)
-      personService.insert(person2).awaitResult
-      val card   : Card   = Card(title = "test", personId = person1.id.get)
-      cardService.insert(card).awaitResult
+    "not allow delete when there is related data for remove by query" >>
+      new WithTestDb(hostName) {
+        val personService = new PersonService()
+        val cardService   = new CardService()
+        val person1: Person = Person(name = "test", age = 10)
+        personService.insert(person1).awaitResult
+        val person2: Person = Person(name = "test2", age = 12)
+        personService.insert(person2).awaitResult
+        val card   : Card   = Card(title = "test", personId = person1.id.get)
+        cardService.insert(card).awaitResult
 
-      personService.remove(BSONDocument("name" -> "test")).awaitResult must throwA[DeleteConstraintError]
-      personService.findById(person1.id.get).awaitResult must beSome(person1)
-      personService.findById(person2.id.get).awaitResult must beSome(person2)
-    }
+        personService.remove(BSONDocument("name" -> "test")).awaitResult must throwA[DeleteConstraintError]
+        personService.findById(person1.id.get).awaitResult must beSome(person1)
+        personService.findById(person2.id.get).awaitResult must beSome(person2)
+      }
   }
 
 }

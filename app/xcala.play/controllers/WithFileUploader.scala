@@ -123,10 +123,11 @@ trait WithFileUploader extends WithExecutionContext {
                 checkResult match {
                   case Left(errorMessage) =>
                     (
-                      prevFormErrors :+ FormError(
-                        file.key.dropRight(AutoUploadSuffix.length + 1),
-                        errorMessage
-                      ),
+                      prevFormErrors :+
+                        FormError(
+                          file.key.dropRight(AutoUploadSuffix.length + 1),
+                          errorMessage
+                        ),
                       prevKeyValues
                     )
                   case Right(keyValues)   =>
@@ -215,17 +216,18 @@ trait WithFileUploader extends WithExecutionContext {
       }
 
     Future.sequence(fileKeyValueFutures).map { fileKeyValues: Seq[KeyValuesPair] =>
-      val flattenedKeyValues =
-        (fileKeyValues ++ additionalKeyValues).groupBy(_._1).view.mapValues(x => x.map(_._2).flatten).flatMap {
-          case (key, values) =>
-            if (values.size != 1 || key.endsWith("[]")) {
-              values.zipWithIndex.map { case (value, index) =>
-                s"${key.replace("[]", "")}[$index]" -> value
-              }
-            } else {
-              Seq(key -> values.head)
+      val flattenedKeyValues = (fileKeyValues ++ additionalKeyValues).groupBy(_._1).view.mapValues(x =>
+        x.map(_._2).flatten
+      ).flatMap {
+        case (key, values) =>
+          if (values.size != 1 || key.endsWith("[]")) {
+            values.zipWithIndex.map { case (value, index) =>
+              s"${key.replace("[]", "")}[$index]" -> value
             }
-        }
+          } else {
+            Seq(key -> values.head)
+          }
+      }
       val newData            = form.data ++ flattenedKeyValues
 
       formErrors match {
@@ -235,7 +237,8 @@ trait WithFileUploader extends WithExecutionContext {
     }
   }
 
-  protected def saveFile(filePart: MultipartFormData.FilePart[TemporaryFile]): Future[Option[BSONObjectID]] = {
+  protected def saveFile(filePart: MultipartFormData.FilePart[TemporaryFile])
+      : Future[Option[BSONObjectID]] = {
     val fileExtension = FilenameUtils.getExtension(filePart.filename)
 
     val fileInfo = FileInfo(

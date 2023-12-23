@@ -11,8 +11,9 @@ object briefHtml {
       original
     } else {
       val truncated = original.split(" ").take(wordCount).mkString(" ")
-      truncated + (if (truncated.length != original.length && addEllipsis) { " ..." }
-                   else { "" })
+      truncated +
+      (if (truncated.length != original.length && addEllipsis) { " ..." }
+       else { "" })
     }
   }
 

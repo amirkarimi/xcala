@@ -15,7 +15,9 @@ import reactivemongo.api.bson._
 trait DataReadServiceDecorator[Doc <: DocumentWithId, Model]
     extends DataReadSimpleService[Doc, Model]
     with WithExecutionContext {
-  protected val service: DataReadSimpleService[Doc, Doc] with DataSaveService[Doc, Doc] with DataRemoveService[Doc]
+
+  protected val service: DataReadSimpleService[Doc, Doc] with DataSaveService[Doc, Doc]
+    with DataRemoveService[Doc]
 
   def mapModel(source: Doc): Future[Model]
 
@@ -32,7 +34,8 @@ trait DataReadServiceDecorator[Doc <: DocumentWithId, Model]
 
   def find(query: BSONDocument): Future[List[Model]] = service.find(query).flatMap(mapSeq)
 
-  def find(query: BSONDocument, sort: BSONDocument): Future[List[Model]] = service.find(query, sort).flatMap(mapSeq)
+  def find(query: BSONDocument, sort: BSONDocument): Future[List[Model]] =
+    service.find(query, sort).flatMap(mapSeq)
 
   def findOne(query: BSONDocument): Future[Option[Model]] = service.findOne(query).flatMap(mapOptional)
 
@@ -58,7 +61,9 @@ object DataReadServiceDecorator {
       val innerModelService: DataReadSimpleService[_, InnerModel]
   ) {
 
-    def innerModelFinder(ids: Seq[BSONObjectID])(implicit ec: ExecutionContext): Future[Map[BSONObjectID, InnerModel]] =
+    def innerModelFinder(ids: Seq[BSONObjectID])(implicit
+        ec: ExecutionContext
+    ): Future[Map[BSONObjectID, InnerModel]] =
       innerModelService.findInIds(ids).map { models =>
         models.groupBy(_.id.get).view.mapValues(_.head).toMap
       }

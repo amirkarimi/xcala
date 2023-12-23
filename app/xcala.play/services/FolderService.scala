@@ -52,7 +52,8 @@ class FolderService @Inject() (
     for {
       files             <- fileInfoService.getFilesUnderFolder(Some(folderId))
       folders           <- getFoldersUnderFolder(Some(folderId))
-      filesUnderFolders <- Future.sequence(folders.map(f => getFilesUnderFolderRecursive(f.id.get))).map(_.flatten)
+      filesUnderFolders <-
+        Future.sequence(folders.map(f => getFilesUnderFolderRecursive(f.id.get))).map(_.flatten)
     } yield {
       files ++ filesUnderFolders
     }
@@ -62,7 +63,8 @@ class FolderService @Inject() (
     for {
       folder            <- findById(folderId)
       folders           <- getFoldersUnderFolder(Some(folderId))
-      filesUnderFolders <- Future.sequence(folders.map(f => getFoldersUnderFolderRecursive(f.id.get))).map(_.flatten)
+      filesUnderFolders <-
+        Future.sequence(folders.map(f => getFoldersUnderFolderRecursive(f.id.get))).map(_.flatten)
     } yield {
       folder.toSeq ++ folders ++ filesUnderFolders
     }
@@ -91,7 +93,10 @@ class FolderService @Inject() (
   }
 
   def renameFolder(id: BSONObjectID, newName: String): Future[WriteResult] = {
-    update(selector = BSONDocument("_id" -> id), update = BSONDocument("$set" -> BSONDocument("name" -> newName)))
+    update(
+      selector = BSONDocument("_id" -> id),
+      update   = BSONDocument("$set" -> BSONDocument("name" -> newName))
+    )
   }
 
   private def removeFolderUnderFolder(folderId: BSONObjectID): Future[Seq[WriteResult]] = {

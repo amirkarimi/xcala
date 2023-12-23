@@ -109,7 +109,8 @@ trait DataReadSimpleServiceImpl[Id, Entity <: EntityWithId[Id]]
 
 /** Represents the read functionality of the service with criteria support.
   */
-trait DataReadWithCriteriaService[Id, Entity <: EntityWithId[Id], Model, Criteria] extends DataReadService[Id, Entity] {
+trait DataReadWithCriteriaService[Id, Entity <: EntityWithId[Id], Model, Criteria]
+    extends DataReadService[Id, Entity] {
 
   def find(criteria: Criteria, queryOptions: QueryOptions)(implicit
       request: Request[_]
@@ -117,7 +118,8 @@ trait DataReadWithCriteriaService[Id, Entity <: EntityWithId[Id], Model, Criteri
 
 }
 
-trait DataReadWithoutCriteriaService[Id, Entity <: EntityWithId[Id], Model] extends DataReadService[Id, Entity] {
+trait DataReadWithoutCriteriaService[Id, Entity <: EntityWithId[Id], Model]
+    extends DataReadService[Id, Entity] {
 
   def find(queryOptions: QueryOptions)(implicit
       request: Request[_]

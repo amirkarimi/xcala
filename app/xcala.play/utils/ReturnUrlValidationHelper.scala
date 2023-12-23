@@ -9,7 +9,9 @@ object ReturnUrlValidationHelper {
     !uri.isAbsolute
   }
 
-  def withReturnUrlValidation[A](maybeReturnUrl: Option[String])(validatedReturnUrlToResult: Option[String] => A): A = {
+  def withReturnUrlValidation[A](
+      maybeReturnUrl: Option[String]
+  )(validatedReturnUrlToResult: Option[String] => A): A = {
     val validatedReturnUrl = maybeReturnUrl.filter { returnUrl =>
       isRelativeUrl(returnUrl) && !returnUrl.toLowerCase.contains("javascript")
     }

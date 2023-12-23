@@ -27,7 +27,8 @@ trait DataReadWithCriteriaController[Doc <: DocumentWithId, Model, Criteria]
 
   def indexResultView(paginated: Paginated[Model])(implicit request: RequestType[_]): Future[Result]
 
-  def transformCriteria(criteria: Criteria)(implicit @annotation.nowarn request: RequestType[_]): Criteria = criteria
+  def transformCriteria(criteria: Criteria)(implicit @annotation.nowarn request: RequestType[_]): Criteria =
+    criteria
 
   val rowToAttributesMapper: Option[Model => Seq[(String, String)]] = None
 
