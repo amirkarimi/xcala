@@ -56,88 +56,381 @@ trait DataReadServiceDecorator[Doc <: DocumentWithId, Model]
 
 object DataReadServiceDecorator {
 
-  final case class RelationMapper[Doc <: DocumentWithId, InnerModel <: DocumentWithId](
-      val idLocator        : Doc => Option[BSONObjectID],
-      val innerModelService: DataReadSimpleService[_, InnerModel]
-  ) {
-
-    def innerModelFinder(ids: Seq[BSONObjectID])(implicit
-        ec: ExecutionContext
-    ): Future[Map[BSONObjectID, InnerModel]] =
-      innerModelService.findInIds(ids).map { models =>
-        models.groupBy(_.id.get).view.mapValues(_.head).toMap
-      }
-
-  }
-
-  trait WithMapSeq[Doc <: DocumentWithId, Model] {
-
-    def mapSeq(seq: Seq[Doc]): Future[List[Model]]
-
-  }
-
-  def mapSeqMaker[Doc <: DocumentWithId, Model, IM1 <: DocumentWithId](
-      relationMapper1: RelationMapper[Doc, IM1]
-  )(
-      finalMapper    : Doc => Option[IM1] => Model
-  )(implicit ec: ExecutionContext): WithMapSeq[Doc, Model] =
-    new WithMapSeq[Doc, Model] {
-
-      def mapSeq(docs: Seq[Doc]): Future[List[Model]] = {
-
-        val relation1UsedIds: Seq[BSONObjectID] =
-          docs.map(doc => relationMapper1.idLocator(doc)).flatten.distinct
-
-        relationMapper1
-          .innerModelFinder(relation1UsedIds)
-          .map { innerModelHashMap1: Map[BSONObjectID, IM1] =>
-            docs.map { doc: Doc =>
-              val maybeId        : Option[BSONObjectID] = relationMapper1.idLocator(doc)
-              val maybeInnerModel: Option[IM1]          = maybeId.map(x => innerModelHashMap1(x))
-
-              finalMapper(doc)(maybeInnerModel)
-            }.toList
+  /*
+    optional and sequence can be used as values for innerModelIterableMapper parameters
+   */
+  val optional: Option[_] => IterableOnce[_] =
+    (x: Option[_]) =>
+      x match {
+        case None        => None
+        case Some(value) =>
+          value match {
+            case seq: Seq[_] => seq.headOption
+            case _ => ???
           }
       }
 
-    }
-
-  def mapSeqMaker[Doc <: DocumentWithId, Model, IM1 <: DocumentWithId, IM2 <: DocumentWithId](
-      relationMapper1: RelationMapper[Doc, IM1],
-      relationMapper2: RelationMapper[Doc, IM2]
-  )(
-      finalMapper    : Doc => (Option[IM1], Option[IM2]) => Model
-  )(implicit ec: ExecutionContext): WithMapSeq[Doc, Model] =
-    new WithMapSeq[Doc, Model] {
-
-      def mapSeq(docs: Seq[Doc]): Future[List[Model]] = {
-
-        val relation1UsedIds: Seq[BSONObjectID] =
-          docs.map(doc => relationMapper1.idLocator(doc)).flatten.distinct
-
-        val relation2UsedIds: Seq[BSONObjectID] =
-          docs.map(doc => relationMapper2.idLocator(doc)).flatten.distinct
-
-        for {
-          innerModelHashMap1 <- relationMapper1
-            .innerModelFinder(relation1UsedIds)
-
-          innerModelHashMap2 <- relationMapper2
-            .innerModelFinder(relation2UsedIds)
-        } yield {
-          docs.map { doc: Doc =>
-            val maybeId1        : Option[BSONObjectID] = relationMapper1.idLocator(doc)
-            val maybeInnerModel1: Option[IM1]          = maybeId1.map(x => innerModelHashMap1(x))
-
-            val maybeId2        : Option[BSONObjectID] = relationMapper2.idLocator(doc)
-            val maybeInnerModel2: Option[IM2]          = maybeId2.map(x => innerModelHashMap2(x))
-
-            finalMapper(doc)(maybeInnerModel1, maybeInnerModel2)
-          }.toList
-        }
-
+  val sequence: Option[_] => IterableOnce[_] =
+    (x: Option[_]) =>
+      x match {
+        case None        => Seq.empty
+        case Some(value) =>
+          value match {
+            case seq: Seq[_] => seq
+            case _ => ???
+          }
       }
 
+  final case class RelationMapper[Doc, InnerModel, +K[_] <: IterableOnce[_]](
+      val docToKeySet                 : Doc => Set[BSONObjectID],
+      val allKeysToKeySetToInnerModels: Set[BSONObjectID] => Future[Map[Set[BSONObjectID], Seq[InnerModel]]]
+  )(
+      val innerModelIterableMapper    : Option[_] => IterableOnce[_]
+  ) {
+
+    def docsToAllKeySetToInnerModelsMap(docs: Seq[Doc]): Future[Map[Set[BSONObjectID], Seq[InnerModel]]] = {
+      val allKeys: Set[BSONObjectID] = docs.flatMap { doc =>
+        docToKeySet(doc)
+      }.toSet
+
+      allKeysToKeySetToInnerModels(allKeys)
     }
+
+  }
+
+  object RelationMapper {
+
+    def apply[Doc, InnerModel, K[_] <: IterableOnce[_]](
+        docToKeySet             : Doc => Set[BSONObjectID],
+        findAllInnerModelsInKeys: Set[BSONObjectID] => Future[Seq[InnerModel]],
+        innerModelToKeySet      : InnerModel => Set[BSONObjectID]
+    )(
+        innerModelIterableMapper: Option[_] => IterableOnce[_]
+    )(implicit ec: ExecutionContext): RelationMapper[Doc, InnerModel, K] =
+      new RelationMapper(
+        docToKeySet                  = docToKeySet,
+        allKeysToKeySetToInnerModels = { ids: Set[BSONObjectID] =>
+          findAllInnerModelsInKeys(ids).map { models: Seq[InnerModel] =>
+            models.groupBy(innerModel => innerModelToKeySet(innerModel))
+          }
+        }
+      )(innerModelIterableMapper)
+
+    def apply[Doc, InnerModel, K[_] <: IterableOnce[_]](
+        docToKeySet             : Doc => Set[BSONObjectID],
+        innerModelService       : DataReadSimpleService[_, InnerModel],
+        innerModelToKeySet      : InnerModel => Set[BSONObjectID]
+    )(
+        innerModelIterableMapper: Option[_] => IterableOnce[_]
+    )(implicit ec: ExecutionContext): RelationMapper[Doc, InnerModel, K] =
+      new RelationMapper(
+        docToKeySet                  = docToKeySet,
+        allKeysToKeySetToInnerModels = { ids: Set[BSONObjectID] =>
+          innerModelService.findInIds(ids).map { models: Seq[InnerModel] =>
+            models.groupBy(innerModel => innerModelToKeySet(innerModel))
+          }
+        }
+      )(innerModelIterableMapper)
+
+  }
+
+  private def mapSeqMakerCore[
+      Doc,
+      Model,
+      K[_] <: IterableOnce[_]
+  ](docs: Seq[Doc])(
+      relationMappers: List[RelationMapper[Doc, _, K]]
+  )(
+      finalMapper    : Doc => List[IterableOnce[_]] => Future[Model]
+  )(implicit ec: ExecutionContext): Future[List[Model]] =
+    Future
+      .traverse(relationMappers) { relationMapper =>
+        relationMapper.docsToAllKeySetToInnerModelsMap(docs)
+      }
+      .flatMap { listOfRelationMaps =>
+        val arrayOfRelationMaps: Array[Map[Set[BSONObjectID], Seq[Any]]] = listOfRelationMaps.toArray
+
+        Future.traverse(docs.toList) { doc =>
+          finalMapper(doc)(
+            relationMappers.zipWithIndex
+              .map { case (relationMapper, index) =>
+                val innerModelHashMap: Map[Set[BSONObjectID], Seq[Any]] = arrayOfRelationMaps(index)
+                val docKeys          : Set[BSONObjectID]                = relationMapper.docToKeySet(doc)
+                relationMapper.innerModelIterableMapper(innerModelHashMap.get(docKeys))
+              }
+          )
+        }
+      }
+
+  def mapSeqMaker[
+      Doc,
+      Model,
+      IM1,
+      K1[_] <: IterableOnce[_]
+  ](docs: Seq[Doc])(
+      relationMapper1: RelationMapper[Doc, IM1, K1]
+  )(
+      finalMapper    : Doc => K1[IM1] => Future[Model]
+  )(implicit ec: ExecutionContext): Future[List[Model]] =
+    mapSeqMakerCore(docs)(
+      List(relationMapper1)
+    ) { doc =>
+      {
+        case innerModel1 :: Nil =>
+          finalMapper(doc)(innerModel1.asInstanceOf[K1[IM1]])
+        case _                  =>
+          ???
+      }
+    }
+
+  def mapSeqMaker[
+      Doc,
+      Model,
+      IM1,
+      IM2,
+      K1[_] <: IterableOnce[_],
+      K2[_] <: IterableOnce[_]
+  ](docs: Seq[Doc])(
+      relationMapper1: RelationMapper[Doc, IM1, K1],
+      relationMapper2: RelationMapper[Doc, IM2, K2]
+  )(
+      finalMapper    : Doc => (K1[IM1], K2[IM2]) => Future[Model]
+  )(implicit ec: ExecutionContext): Future[List[Model]] =
+    mapSeqMakerCore(docs)(
+      List(relationMapper1, relationMapper2)
+    ) { doc =>
+      {
+        case innerModel1 :: innerModel2 :: Nil =>
+          finalMapper(doc)(
+            innerModel1.asInstanceOf[K1[IM1]],
+            innerModel2.asInstanceOf[K2[IM2]]
+          )
+        case _                                 =>
+          ???
+      }
+    }
+
+  def mapSeqMaker[
+      Doc,
+      Model,
+      IM1,
+      IM2,
+      IM3,
+      K1[_] <: IterableOnce[_],
+      K2[_] <: IterableOnce[_],
+      K3[_] <: IterableOnce[_]
+  ](docs: Seq[Doc])(
+      relationMapper1: RelationMapper[Doc, IM1, K1],
+      relationMapper2: RelationMapper[Doc, IM2, K2],
+      relationMapper3: RelationMapper[Doc, IM3, K3]
+  )(
+      finalMapper    : Doc => (K1[IM1], K2[IM2], K3[IM3]) => Future[Model]
+  )(implicit ec: ExecutionContext): Future[List[Model]] =
+    mapSeqMakerCore(docs)(
+      List(relationMapper1, relationMapper2, relationMapper3)
+    ) { doc =>
+      {
+        case innerModel1 :: innerModel2 :: innerModel3 :: Nil =>
+          finalMapper(doc)(
+            innerModel1.asInstanceOf[K1[IM1]],
+            innerModel2.asInstanceOf[K2[IM2]],
+            innerModel3.asInstanceOf[K3[IM3]]
+          )
+        case _                                                =>
+          ???
+      }
+    }
+
+  def mapSeqMaker[
+      Doc,
+      Model,
+      IM1,
+      IM2,
+      IM3,
+      IM4,
+      K1[_] <: IterableOnce[_],
+      K2[_] <: IterableOnce[_],
+      K3[_] <: IterableOnce[_],
+      K4[_] <: IterableOnce[_]
+  ](docs: Seq[Doc])(
+      relationMapper1: RelationMapper[Doc, IM1, K1],
+      relationMapper2: RelationMapper[Doc, IM2, K2],
+      relationMapper3: RelationMapper[Doc, IM3, K3],
+      relationMapper4: RelationMapper[Doc, IM4, K4]
+  )(
+      finalMapper    : Doc => (K1[IM1], K2[IM2], K3[IM3], K4[IM4]) => Future[Model]
+  )(implicit ec: ExecutionContext): Future[List[Model]] = {
+
+    mapSeqMakerCore(docs)(
+      List(relationMapper1, relationMapper2, relationMapper3, relationMapper4)
+    ) { doc =>
+      {
+        case innerModel1 :: innerModel2 :: innerModel3 :: innerModel4 :: Nil =>
+          finalMapper(doc)(
+            innerModel1.asInstanceOf[K1[IM1]],
+            innerModel2.asInstanceOf[K2[IM2]],
+            innerModel3.asInstanceOf[K3[IM3]],
+            innerModel4.asInstanceOf[K4[IM4]]
+          )
+        case _                                                               =>
+          ???
+      }
+    }
+
+  }
+
+  def mapSeqMaker[
+      Doc,
+      Model,
+      IM1,
+      IM2,
+      IM3,
+      IM4,
+      IM5,
+      K1[_] <: IterableOnce[_],
+      K2[_] <: IterableOnce[_],
+      K3[_] <: IterableOnce[_],
+      K4[_] <: IterableOnce[_],
+      K5[_] <: IterableOnce[_]
+  ](docs: Seq[Doc])(
+      relationMapper1: RelationMapper[Doc, IM1, K1],
+      relationMapper2: RelationMapper[Doc, IM2, K2],
+      relationMapper3: RelationMapper[Doc, IM3, K3],
+      relationMapper4: RelationMapper[Doc, IM4, K4],
+      relationMapper5: RelationMapper[Doc, IM5, K5]
+  )(
+      finalMapper    : Doc => (K1[IM1], K2[IM2], K3[IM3], K4[IM4], K5[IM5]) => Future[Model]
+  )(implicit ec: ExecutionContext): Future[List[Model]] = {
+
+    mapSeqMakerCore(docs)(
+      List(relationMapper1, relationMapper2, relationMapper3, relationMapper4, relationMapper5)
+    ) { doc =>
+      {
+        case innerModel1 :: innerModel2 :: innerModel3 :: innerModel4 :: innerModel5 :: Nil =>
+          finalMapper(doc)(
+            innerModel1.asInstanceOf[K1[IM1]],
+            innerModel2.asInstanceOf[K2[IM2]],
+            innerModel3.asInstanceOf[K3[IM3]],
+            innerModel4.asInstanceOf[K4[IM4]],
+            innerModel5.asInstanceOf[K5[IM5]]
+          )
+        case _                                                                              =>
+          ???
+      }
+    }
+
+  }
+
+  def mapSeqMaker[
+      Doc,
+      Model,
+      IM1,
+      IM2,
+      IM3,
+      IM4,
+      IM5,
+      IM6,
+      K1[_] <: IterableOnce[_],
+      K2[_] <: IterableOnce[_],
+      K3[_] <: IterableOnce[_],
+      K4[_] <: IterableOnce[_],
+      K5[_] <: IterableOnce[_],
+      K6[_] <: IterableOnce[_]
+  ](docs: Seq[Doc])(
+      relationMapper1: RelationMapper[Doc, IM1, K1],
+      relationMapper2: RelationMapper[Doc, IM2, K2],
+      relationMapper3: RelationMapper[Doc, IM3, K3],
+      relationMapper4: RelationMapper[Doc, IM4, K4],
+      relationMapper5: RelationMapper[Doc, IM5, K5],
+      relationMapper6: RelationMapper[Doc, IM6, K6]
+  )(
+      finalMapper    : Doc => (K1[IM1], K2[IM2], K3[IM3], K4[IM4], K5[IM5], K6[IM6]) => Future[Model]
+  )(implicit ec: ExecutionContext): Future[List[Model]] = {
+
+    mapSeqMakerCore(docs)(
+      List(
+        relationMapper1,
+        relationMapper2,
+        relationMapper3,
+        relationMapper4,
+        relationMapper5,
+        relationMapper6
+      )
+    ) { doc =>
+      {
+        case innerModel1 :: innerModel2 :: innerModel3 :: innerModel4 :: innerModel5 :: innerModel6 :: Nil =>
+          finalMapper(doc)(
+            innerModel1.asInstanceOf[K1[IM1]],
+            innerModel2.asInstanceOf[K2[IM2]],
+            innerModel3.asInstanceOf[K3[IM3]],
+            innerModel4.asInstanceOf[K4[IM4]],
+            innerModel5.asInstanceOf[K5[IM5]],
+            innerModel6.asInstanceOf[K6[IM6]]
+          )
+        case _                                                                                             =>
+          ???
+      }
+    }
+
+  }
+
+  def mapSeqMaker[
+      Doc,
+      Model,
+      IM1,
+      IM2,
+      IM3,
+      IM4,
+      IM5,
+      IM6,
+      IM7,
+      K1[_] <: IterableOnce[_],
+      K2[_] <: IterableOnce[_],
+      K3[_] <: IterableOnce[_],
+      K4[_] <: IterableOnce[_],
+      K5[_] <: IterableOnce[_],
+      K6[_] <: IterableOnce[_],
+      K7[_] <: IterableOnce[_]
+  ](docs: Seq[Doc])(
+      relationMapper1: RelationMapper[Doc, IM1, K1],
+      relationMapper2: RelationMapper[Doc, IM2, K2],
+      relationMapper3: RelationMapper[Doc, IM3, K3],
+      relationMapper4: RelationMapper[Doc, IM4, K4],
+      relationMapper5: RelationMapper[Doc, IM5, K5],
+      relationMapper6: RelationMapper[Doc, IM6, K6],
+      relationMapper7: RelationMapper[Doc, IM7, K7]
+  )(
+      finalMapper    : Doc => (K1[IM1], K2[IM2], K3[IM3], K4[IM4], K5[IM5], K6[IM6], K7[IM7]) => Future[Model]
+  )(implicit ec: ExecutionContext): Future[List[Model]] = {
+
+    mapSeqMakerCore(docs)(
+      List(
+        relationMapper1,
+        relationMapper2,
+        relationMapper3,
+        relationMapper4,
+        relationMapper5,
+        relationMapper6,
+        relationMapper7
+      )
+    ) { doc =>
+      {
+        case innerModel1 :: innerModel2 :: innerModel3 :: innerModel4 :: innerModel5 :: innerModel6 ::
+            innerModel7 :: Nil =>
+          finalMapper(doc)(
+            innerModel1.asInstanceOf[K1[IM1]],
+            innerModel2.asInstanceOf[K2[IM2]],
+            innerModel3.asInstanceOf[K3[IM3]],
+            innerModel4.asInstanceOf[K4[IM4]],
+            innerModel5.asInstanceOf[K5[IM5]],
+            innerModel6.asInstanceOf[K6[IM6]],
+            innerModel7.asInstanceOf[K7[IM7]]
+          )
+        case _ =>
+          ???
+      }
+    }
+
+  }
 
 }

@@ -88,7 +88,7 @@ trait DataReadSimpleService[Doc <: DocumentWithId, Model] extends DataReadServic
 
   def find(query: BSONDocument, sortOptions: SortOptions): Future[Seq[Model]]
 
-  def findInIds(ids: Seq[BSONObjectID]): Future[List[Model]] =
+  def findInIds(ids: Set[BSONObjectID]): Future[List[Model]] =
     find(
       BSONDocument(
         "_id" -> BSONDocument("$in" -> ids)
