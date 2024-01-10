@@ -121,7 +121,7 @@ trait DataReadSimpleServiceImpl[Doc <: DocumentWithId]
   def count(query: BSONDocument): Future[Long] = collectionFuture.flatMap(_.count(selector = Some(query)))
 
   def find(query: BSONDocument, queryOptions: QueryOptions): Future[DataWithTotalCount[Doc]] = {
-    val sortDocs = applyDefaultSort(queryOptions.sortInfos + SortInfo("_id")).map { sortInfo =>
+    val sortDocs = applyDefaultSort(queryOptions.sortInfos :+ SortInfo("_id")).map { sortInfo =>
       sortInfo.field -> BSONInteger(sortInfo.direction)
     }
 
@@ -140,7 +140,7 @@ trait DataReadSimpleServiceImpl[Doc <: DocumentWithId]
   }
 
   def find(query: BSONDocument, sortOptions: SortOptions): Future[List[Doc]] = {
-    val sortDocs = applyDefaultSort(sortOptions.sortInfos + SortInfo("_id")).map { sortInfo =>
+    val sortDocs = applyDefaultSort(sortOptions.sortInfos :+ SortInfo("_id")).map { sortInfo =>
       sortInfo.field -> BSONInteger(sortInfo.direction)
     }
 
@@ -165,12 +165,13 @@ trait DataReadSimpleServiceImpl[Doc <: DocumentWithId]
       }
   }
 
-  protected def applyDefaultSort(sortInfos: Set[SortInfo]): Set[SortInfo] = sortInfos match {
-    case Nil => defaultSort
-    case _   => sortInfos
-  }
+  protected def applyDefaultSort(sortInfos: Seq[SortInfo]): Seq[SortInfo] =
+    sortInfos.filterNot(_.field == "_id") match {
+      case Nil => defaultSort
+      case _   => sortInfos
+    }
 
-  protected def defaultSort: Set[SortInfo] = Set.empty
+  protected def defaultSort: Seq[SortInfo] = Nil
 
 }
 

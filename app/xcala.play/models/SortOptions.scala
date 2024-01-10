@@ -6,8 +6,8 @@ import play.api.mvc.Request
 
 abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Option[String] = None) {
 
-  lazy val sortInfos: Set[SortInfo] =
-    sortExpression.toSet.flatMap((expr: String) => expr.split(",").map(s => SortInfo.fromExpression(s)))
+  lazy val sortInfos: Seq[SortInfo] =
+    sortExpression.toSeq.flatMap((expr: String) => expr.split(",").map(s => SortInfo.fromExpression(s)))
 
   def resetSort(sortExpression: Option[String], resetPagination: Boolean): A
 
@@ -32,7 +32,7 @@ abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Opti
             sortInfos.filter(_ != sortInfo)
           case _                                          =>
             // Add new one if not exists
-            sortInfos + SortInfo(sort)
+            sortInfos :+ SortInfo(sort)
         }
 
         resetSort(sortExpression = Some(newSortInfos.mkString(",")), resetPagination)
