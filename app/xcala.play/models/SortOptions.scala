@@ -11,38 +11,42 @@ abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Opti
 
   def resetSort(sortExpression: Option[String], resetPagination: Boolean): A
 
-  def sort(sortExpression: Option[String], resetPagination: Boolean = true): A = {
+  def sort(sortExpression: Option[String], addIdToSort: Boolean, resetPagination: Boolean = true): A = {
     sortExpression match {
       case None       => resetSort(sortExpression = None, resetPagination)
       case Some(sort) =>
         val existingSortInfo = sortInfos.find(s => s.field == sort)
 
-        val newSortInfos = existingSortInfo match {
-          case Some(sortInfo) if sortInfo.direction == 1  =>
-            // Toggle direction if exists and not descending
-            sortInfos.map { sortInfo =>
-              if (sortInfo.field == sort) {
-                sortInfo.toggleDirection
-              } else {
-                sortInfo
+        val newSortInfos: Seq[SortInfo] = {
+          existingSortInfo match {
+            case Some(sortInfo) if sortInfo.direction == 1  =>
+              // Toggle direction if exists and not descending
+              sortInfos.map { sortInfo =>
+                if (sortInfo.field == sort) {
+                  sortInfo.toggleDirection
+                } else {
+                  sortInfo
+                }
               }
-            }
-          case Some(sortInfo) if sortInfo.direction == -1 =>
-            // Remove sort info if it was descending
-            sortInfos.filter(_ != sortInfo)
-          case _                                          =>
-            // Add new one if not exists
-            sortInfos :+ SortInfo(sort)
-        }
+            case Some(sortInfo) if sortInfo.direction == -1 =>
+              // Remove sort info if it was descending
+              sortInfos.filter(_ != sortInfo)
+            case _                                          =>
+              // Add new one if not exists
+              sortInfos :+ SortInfo(sort)
+          }
+        } ++ { if (addIdToSort) Seq(SortInfo("_id")) else Nil }
 
         resetSort(sortExpression = Some(newSortInfos.mkString(",")), resetPagination)
     }
   }
 
-  def withDefaultSort(sortExpression: String): A = {
+  def withDefaultSort(sortExpression: String, addIdToSort: Boolean): A = {
     sortInfos match {
-      case Nil => sort(Some(sortExpression), resetPagination = false)
-      case _   => this.asInstanceOf[A]
+      case Nil =>
+        sort(sortExpression = Some(sortExpression), addIdToSort = addIdToSort, resetPagination = false)
+      case _   =>
+        this.asInstanceOf[A]
     }
   }
 

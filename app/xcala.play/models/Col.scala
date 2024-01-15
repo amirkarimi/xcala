@@ -7,7 +7,8 @@ final case class Col[A](
     fieldMapper   : A => String,
     sortExpression: Any                 = "",
     cssClass      : A => Option[String] = (_: A) => None,
-    headerCssClass: Option[String]      = None
+    headerCssClass: Option[String]      = None,
+    addIdToSort   : Boolean             = false
 )
 
 object Col {

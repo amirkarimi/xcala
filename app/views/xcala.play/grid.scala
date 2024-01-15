@@ -95,15 +95,25 @@ object gridWithoutPager {
 
 object gridHeader {
 
-  def apply(name: String, sortExpression: String, paginated: Paginated[_], updateTarget: String = "")(implicit
-      messages: Messages
+  def apply(
+      name          : String,
+      sortExpression: String,
+      addIdToSort   : Boolean,
+      paginated     : Paginated[_],
+      updateTarget  : String = ""
+  )(implicit
+      messages      : Messages
   ): Html = {
     val colLabel = messages(name)
 
     sortExpression match {
       case ""   => Html(s"$colLabel")
       case sort =>
-        val url = paginated.sort(Some(sort)).toQueryString
+        val url =
+          paginated.sort(
+            sortExpression = Some(sort),
+            addIdToSort    = addIdToSort
+          ).toQueryString
 
         val link = s"<a href='?$url' data-ajax='true' data-ajax-update-target='$updateTarget'>$colLabel</a>"
 

@@ -54,6 +54,14 @@ trait DataReadServiceDecorator[Doc <: DocumentWithId, Model]
 
 }
 
+trait MapSeqBasedMapModel[Doc <: DocumentWithId, Model] {
+  this: DataReadServiceDecorator[Doc, Model] =>
+
+  override def mapModel(source: Doc): Future[Model] =
+    mapSeq(Seq(source)).map(_.head)
+
+}
+
 object DataReadServiceDecorator {
 
   /*
