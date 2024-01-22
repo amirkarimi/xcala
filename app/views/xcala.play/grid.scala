@@ -27,9 +27,24 @@ object grid {
     val rows =
       paginated.data.map { row: A =>
         val dataAttributes = paginated.rowToAttributesMapper.map(_(row)).getOrElse(Nil)
-        columns.map(c => (c, c.fieldMapper(row), c.cssClass(row))) -> dataAttributes
+        columns
+          .map(c => (c, c.maybeFieldValueMapper(row), c.cssClass(row)))
+          .collect {
+            case (c, Some(value), cssClass) =>
+              (c, value, cssClass)
+          } -> dataAttributes
       }
-    views.html.xcala.play.gridView(columns, rows, paginated, updateTarget, maybeCreateCall)(messages)
+
+    val columnNamesWithData: Seq[String] = rows.flatMap {
+      case (columnsInfo, _) => columnsInfo.map {
+          case (column, _, _) => column.name
+        }
+    }.distinct
+
+    val filteredColumns: Seq[Col[A]] =
+      columns.filter(c => columnNamesWithData.contains(c.name))
+
+    views.html.xcala.play.gridView(filteredColumns, rows, paginated, updateTarget, maybeCreateCall)(messages)
   }
 
   def renderGridWithoutPagination[A](
@@ -40,9 +55,22 @@ object grid {
   ): HtmlFormat.Appendable = {
     val rows =
       data.map { row: A =>
-        columns.map(c => (c, c.fieldMapper(row), c.cssClass(row)))
+        columns.map(c => (c, c.maybeFieldValueMapper(row), c.cssClass(row))).collect {
+          case (c, Some(value), cssClass) => (c, value, cssClass)
+        }
       }
-    views.html.xcala.play.gridViewWithoutPagination(columns, rows, maybeCreateCall)(messages)
+
+    val columnNamesWithData: Seq[String] = rows.flatMap {
+      columnsInfo =>
+        columnsInfo.map {
+          case (column, _, _) => column.name
+        }
+    }.distinct
+
+    val filteredColumns: Seq[Col[A]] =
+      columns.filter(c => columnNamesWithData.contains(c.name))
+
+    views.html.xcala.play.gridViewWithoutPagination(filteredColumns, rows, maybeCreateCall)(messages)
   }
 
 }
