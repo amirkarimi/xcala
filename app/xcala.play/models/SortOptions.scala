@@ -41,7 +41,7 @@ abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Opti
     }
   }
 
-  def withDefaultSort(sortExpression: String, addIdToSort: Boolean): A = {
+  def withDefaultSort(sortExpression: String, addIdToSort: Boolean = false): A = {
     sortInfos match {
       case Nil =>
         sort(sortExpression = Some(sortExpression), addIdToSort = addIdToSort, resetPagination = false)
