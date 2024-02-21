@@ -1,7 +1,10 @@
 package xcala.play.models
 
+import xcala.play.utils.LanguageSafeFormBinding
+
 import play.api.data._
 import play.api.data.Forms._
+import play.api.i18n.Messages
 import play.api.mvc.Request
 
 final case class QueryOptions(
@@ -32,8 +35,11 @@ object QueryOptions {
     )(QueryOptions.apply)(QueryOptions.unapply)
   )
 
-  def getFromRequest()(implicit request: Request[_], formBinding: FormBinding): QueryOptions = {
-    form.bindFromRequest().value.getOrElse(QueryOptions())
-  }
+  def getFromRequest()(implicit
+      request    : Request[_],
+      formBinding: FormBinding,
+      messages   : Messages
+  ): QueryOptions =
+    LanguageSafeFormBinding.bindForm(form).value.getOrElse(QueryOptions())
 
 }

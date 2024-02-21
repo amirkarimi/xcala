@@ -1,6 +1,5 @@
 package xcala.play.postgres.controllers
 
-import xcala.play.controllers.WithFormBinding
 import xcala.play.models.Paginated
 import xcala.play.models.QueryOptions
 import xcala.play.postgres.models.EntityWithId
@@ -14,7 +13,6 @@ import scala.concurrent.Future
 trait DataReadWithoutCriteriaController[Id, Entity <: EntityWithId[Id], Model]
     extends InjectedController
     with DataReadController[Id, Entity, Model]
-    with WithFormBinding
     with WithExecutionContext {
   self: InjectedController =>
   protected def readService: DataReadWithoutCriteriaService[Id, Entity, Model]
