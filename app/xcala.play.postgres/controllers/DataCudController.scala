@@ -1,10 +1,10 @@
 package xcala.play.postgres.controllers
 
 import xcala.play.controllers.WithComposableActions
-import xcala.play.controllers.WithFormBinding
 import xcala.play.controllers.WithMainPageResults
 import xcala.play.postgres.models.EntityWithId
 import xcala.play.postgres.services._
+import xcala.play.utils.LanguageSafeFormBinding
 import xcala.play.utils.WithExecutionContext
 
 import play.api.data.Form
@@ -19,7 +19,6 @@ import org.postgresql.util.PSQLException
 trait DataCudController[Id, Entity <: EntityWithId[Id], Model]
     extends InjectedController
     with WithMainPageResults
-    with WithFormBinding
     with WithComposableActions
     with WithExecutionContext
     with I18nSupport {
@@ -35,36 +34,35 @@ trait DataCudController[Id, Entity <: EntityWithId[Id], Model]
   def editView(form: Form[Model], model: Model)(implicit request: RequestType[_]): Future[Result]
 
   def create: Action[AnyContent] = action.async { implicit request =>
-    createView(defaultForm.bindFromRequest().discardingErrors)
+    createView(LanguageSafeFormBinding.bindForm(defaultForm).discardingErrors)
   }
 
   def createPost: Action[AnyContent] = action.async { implicit request =>
-    val filledFormFuture = bindForm(defaultForm)
+    val filledForm = LanguageSafeFormBinding.bindForm(defaultForm)
 
-    filledFormFuture.flatMap { filledForm =>
-      filledForm.fold(
-        formWithErrors => {
-          createView(formWithErrors)
-        },
-        model => {
-          cudService
-            .insert(model)
-            .map { _ =>
-              successfulResult("message.successfulSave")
-            }
-            .recoverWith {
-              case psqlException: PSQLException
-                  if psqlException.getMessage.contains("duplicate key value violates unique constraint") =>
-                Future.successful(
-                  failedResult(Messages("error.thisItemAlreadyExists"))
-                )
+    filledForm.fold(
+      formWithErrors => {
+        createView(formWithErrors)
+      },
+      model => {
+        cudService
+          .insert(model)
+          .map { _ =>
+            successfulResult("message.successfulSave")
+          }
+          .recoverWith {
+            case psqlException: PSQLException
+                if psqlException.getMessage.contains("duplicate key value violates unique constraint") =>
+              Future.successful(
+                failedResult(Messages("error.thisItemAlreadyExists"))
+              )
 
-              case throwable: Throwable =>
-                recoverSaveError(throwable, filledForm)
-            }
-        }
-      )
-    }
+            case throwable: Throwable =>
+              recoverSaveError(throwable, filledForm)
+          }
+      }
+    )
+
   }
 
   def edit(id: Id): Action[AnyContent] = action.async { implicit request =>
@@ -78,25 +76,24 @@ trait DataCudController[Id, Entity <: EntityWithId[Id], Model]
     cudService.findById(id).flatMap {
       case None        => Future.successful(defaultNotFound)
       case Some(model) =>
-        val boundForm        = defaultForm.fill(model)
-        val filledFormFuture = bindForm(boundForm)
+        val boundForm  = defaultForm.fill(model)
+        val filledForm = LanguageSafeFormBinding.bindForm(boundForm)
 
-        filledFormFuture.flatMap { filledForm =>
-          filledForm.fold(
-            formWithErrors => {
-              editView(formWithErrors, model)
-            },
-            model =>
-              cudService
-                .update(model)
-                .map { _ =>
-                  successfulResult("message.successfulSave")
-                }
-                .recoverWith { case throwable: Throwable =>
-                  recoverSaveError(throwable, filledForm)
-                }
-          )
-        }
+        filledForm.fold(
+          formWithErrors => {
+            editView(formWithErrors, model)
+          },
+          model =>
+            cudService
+              .update(model)
+              .map { _ =>
+                successfulResult("message.successfulSave")
+              }
+              .recoverWith { case throwable: Throwable =>
+                recoverSaveError(throwable, filledForm)
+              }
+        )
+
     }
   }
 

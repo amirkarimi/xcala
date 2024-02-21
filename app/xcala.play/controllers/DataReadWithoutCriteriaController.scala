@@ -16,7 +16,6 @@ import reactivemongo.api.bson.BSONDocument
 trait DataReadWithoutCriteriaController[Doc <: DocumentWithId, Model]
     extends InjectedController
     with DataReadController[Doc, Model]
-    with WithFormBinding
     with WithExecutionContext {
   self: InjectedController =>
   protected def readService: DataReadSimpleService[Doc, Model]

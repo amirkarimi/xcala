@@ -6,6 +6,7 @@ import xcala.play.models.QueryOptions
 import xcala.play.services._
 import xcala.play.utils.WithExecutionContext
 
+import play.api.i18n.MessagesProvider
 import play.api.mvc._
 
 import scala.concurrent.Future
@@ -14,6 +15,7 @@ trait DataReadController[Doc <: DocumentWithId, Model]
     extends InjectedController
     with WithComposableActions
     with WithExecutionContext {
+  implicit val messagesProvider: MessagesProvider
 
   protected def readService: DataReadService[Doc]
 

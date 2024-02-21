@@ -1,8 +1,11 @@
 package services
 
+import xcala.play.utils.LanguageSafeFormBinding
+
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.FormBinding
+import play.api.i18n.Messages
 import play.api.mvc.AnyContent
 import play.api.mvc.Request
 
@@ -21,16 +24,17 @@ class RecaptchaService @Inject() (
   val isRecaptchaEnabled: Boolean = configuration.get[Boolean]("isRecaptchaEnabled")
 
   def bindActiveFormBinder[T](form: Form[T])(implicit
-      request: Request[AnyContent],
-      ec     : ExecutionContext,
-      binding: FormBinding
+      request : Request[AnyContent],
+      ec      : ExecutionContext,
+      binding : FormBinding,
+      messages: Messages
   ): Future[Form[T]] =
     isRecaptchaEnabled match {
       case true =>
         verifier.bindFromRequestAndVerify(form)
 
       case false =>
-        Future.successful(form.bindFromRequest())
+        Future.successful(LanguageSafeFormBinding.bindForm(form))
     }
 
 }

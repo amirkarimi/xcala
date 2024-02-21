@@ -1,7 +1,10 @@
 package xcala.play.models
 
+import xcala.play.utils.LanguageSafeFormBinding
+
 import play.api.data._
 import play.api.data.Forms._
+import play.api.i18n.Messages
 import play.api.mvc.Request
 
 abstract class SortOptionsBase[A <: SortOptionsBase[_]](val sortExpression: Option[String] = None) {
@@ -68,8 +71,11 @@ object SortOptions {
     )(SortOptions.apply)(SortOptions.unapply)
   )
 
-  def getFromRequest()(implicit request: Request[_], formBinding: FormBinding): SortOptions = {
-    form.bindFromRequest().value.getOrElse(SortOptions())
-  }
+  def getFromRequest()(implicit
+      request    : Request[_],
+      formBinding: FormBinding,
+      messages   : Messages
+  ): SortOptions =
+    LanguageSafeFormBinding.bindForm(form).value.getOrElse(SortOptions())
 
 }

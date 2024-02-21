@@ -3,6 +3,7 @@ package xcala.play.controllers
 import xcala.play.models._
 import xcala.play.models.DocumentWithId
 import xcala.play.services.DataReadWithCriteriaService
+import xcala.play.utils.LanguageSafeFormBinding
 import xcala.play.utils.WithExecutionContext
 
 import play.api.data.Form
@@ -14,7 +15,6 @@ import scala.concurrent.Future
 trait DataReadWithCriteriaController[Doc <: DocumentWithId, Model, Criteria]
     extends InjectedController
     with DataReadController[Doc, Model]
-    with WithFormBinding
     with WithExecutionContext {
   self: InjectedController =>
   implicit val messagesProvider: MessagesProvider
@@ -35,19 +35,19 @@ trait DataReadWithCriteriaController[Doc <: DocumentWithId, Model, Criteria]
   override def getPaginatedData(
       queryOptions: QueryOptions
   )(implicit request: RequestType[_]): Future[Paginated[Model]] = {
-    bindForm(criteriaForm).flatMap { filledCriteriaForm =>
-      val criteriaOpt = filledCriteriaForm.value.map(transformCriteria)
+    val filledCriteriaForm = LanguageSafeFormBinding.bindForm(criteriaForm)
+    val criteriaOpt        = filledCriteriaForm.value.map(transformCriteria)
 
-      readService.find(criteriaOpt, queryOptions).map { dataWithTotalCount =>
-        Paginated(
-          dataWithTotalCount    = dataWithTotalCount,
-          queryOptions          = queryOptions,
-          criteria              = criteriaOpt,
-          criteriaForm          = criteriaForm,
-          rowToAttributesMapper = rowToAttributesMapper
-        )
-      }
+    readService.find(criteriaOpt, queryOptions).map { dataWithTotalCount =>
+      Paginated(
+        dataWithTotalCount    = dataWithTotalCount,
+        queryOptions          = queryOptions,
+        criteria              = criteriaOpt,
+        criteriaForm          = criteriaForm,
+        rowToAttributesMapper = rowToAttributesMapper
+      )
     }
+
   }
 
 }

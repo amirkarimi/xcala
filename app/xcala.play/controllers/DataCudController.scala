@@ -2,6 +2,7 @@ package xcala.play.controllers
 
 import xcala.play.models.DocumentWithId
 import xcala.play.services._
+import xcala.play.utils.LanguageSafeFormBinding
 import xcala.play.utils.WithExecutionContext
 
 import play.api.data.Form
@@ -17,7 +18,6 @@ import reactivemongo.api.commands.WriteResult
 trait DataCudController[Doc <: DocumentWithId, Model, BodyType]
     extends InjectedController
     with WithMainPageResults
-    with WithFormBinding
     with WithComposableActions
     with WithExecutionContext
     with I18nSupport {
@@ -48,29 +48,28 @@ trait DataCudController[Doc <: DocumentWithId, Model, BodyType]
   def editView(form: Form[Model], model: Model)(implicit request: RequestType[_]): Future[Result]
 
   def create: Action[AnyContent] = action.async { implicit request =>
-    createView(defaultForm.bindFromRequest().discardingErrors)
+    createView(LanguageSafeFormBinding.bindForm(defaultForm).discardingErrors)
   }
 
   def createPost: Action[BodyType] = action.async(bodyParser) { implicit request: RequestType[_] =>
-    val filledFormFuture = bindForm(defaultForm)
+    val filledForm = LanguageSafeFormBinding.bindForm(defaultForm)
 
-    filledFormFuture.flatMap { filledForm =>
-      filledForm.fold(
-        formWithErrors => {
-          createView(formWithErrors)
-        },
-        postBindFormValidation { model =>
-          cudService
-            .insert(model)
-            .map { _ =>
-              successfulResult(Messages("message.successfulSave"))
-            }
-            .recoverWith { case throwable: Throwable =>
-              recoverSaveError(throwable, filledForm)
-            }
-        }
-      )
-    }
+    filledForm.fold(
+      formWithErrors => {
+        createView(formWithErrors)
+      },
+      postBindFormValidation { model =>
+        cudService
+          .insert(model)
+          .map { _ =>
+            successfulResult(Messages("message.successfulSave"))
+          }
+          .recoverWith { case throwable: Throwable =>
+            recoverSaveError(throwable, filledForm)
+          }
+      }
+    )
+
   }
 
   def edit(id: BSONObjectID): Action[AnyContent] = action.async { implicit request =>
@@ -85,26 +84,25 @@ trait DataCudController[Doc <: DocumentWithId, Model, BodyType]
       cudService.findById(id).flatMap {
         case None        => Future.successful(NotFound)
         case Some(model) =>
-          val boundForm        = defaultForm.fill(model)
-          val filledFormFuture = bindForm(boundForm)
+          val boundForm  = defaultForm.fill(model)
+          val filledForm = LanguageSafeFormBinding.bindForm(boundForm)
 
-          filledFormFuture.flatMap { filledForm =>
-            filledForm.fold(
-              formWithErrors => {
-                editView(formWithErrors, model)
-              },
-              postBindFormValidation { model =>
-                cudService
-                  .save(model)
-                  .map { _ =>
-                    successfulResult(Messages("message.successfulSave"))
-                  }
-                  .recoverWith { case throwable: Throwable =>
-                    recoverSaveError(throwable, filledForm)
-                  }
-              }
-            )
-          }
+          filledForm.fold(
+            formWithErrors => {
+              editView(formWithErrors, model)
+            },
+            postBindFormValidation { model =>
+              cudService
+                .save(model)
+                .map { _ =>
+                  successfulResult(Messages("message.successfulSave"))
+                }
+                .recoverWith { case throwable: Throwable =>
+                  recoverSaveError(throwable, filledForm)
+                }
+            }
+          )
+
       }
     }
 
