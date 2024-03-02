@@ -82,14 +82,14 @@ trait DataCudController[Doc <: DocumentWithId, Model, BodyType]
   def editPost(id: BSONObjectID): Action[BodyType] =
     action.async(bodyParser) { implicit request: RequestType[_] =>
       cudService.findById(id).flatMap {
-        case None        => Future.successful(NotFound)
-        case Some(model) =>
-          val boundForm  = defaultForm.fill(model)
+        case None           => Future.successful(NotFound)
+        case Some(oldModel) =>
+          val boundForm  = defaultForm.fill(oldModel)
           val filledForm = LanguageSafeFormBinding.bindForm(boundForm)
 
           filledForm.fold(
             formWithErrors => {
-              editView(formWithErrors, model)
+              editView(formWithErrors, oldModel)
             },
             postBindFormValidation { model =>
               cudService

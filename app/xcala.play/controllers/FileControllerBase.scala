@@ -3,6 +3,7 @@ package xcala.play.controllers
 import xcala.play.models._
 import xcala.play.services._
 import xcala.play.utils.BaseStorageUrls
+import xcala.play.utils.ImagePreResizingUtils
 import xcala.play.utils.WithExecutionContext
 
 import akka.actor.ActorSystem
@@ -27,7 +28,9 @@ import play.api.mvc.InjectedController
 import play.api.mvc.MultipartFormData
 import play.api.mvc.Result
 
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.net.SocketTimeoutException
 import java.nio.file.Files.readAllBytes
 import scala.concurrent._
@@ -104,8 +107,12 @@ private[controllers] trait FileControllerBase
     finalFolderId.flatMap(getList(_, fileType))
   }
 
-  def uploadResult(folderId: Option[BSONObjectID], body: MultipartFormData[Files.TemporaryFile])(implicit
-      requestHeader: RequestHeader
+  def uploadResult(
+      folderId        : Option[BSONObjectID],
+      body            : MultipartFormData[Files.TemporaryFile],
+      handlePreResizes: Boolean = false
+  )(implicit
+      requestHeader   : RequestHeader
   ): Future[Result] = {
     val resultsFuture: Future[Seq[String]] = Future.sequence(
       body.files.sortBy(_.filename).map { file =>
@@ -122,16 +129,30 @@ private[controllers] trait FileControllerBase
           folderId    = folderId,
           isHidden    = false
         )
+        val fileContentBytes: Array[Byte] = readAllBytes(file.ref.path)
 
-        fileInfoService.upload(fileInfo, readAllBytes(file.ref.path)).flatMap {
+        fileInfoService.upload(fileInfo, fileContentBytes).flatMap {
           case Right(fileId) =>
-            Future.successful(
+            {
+              if (handlePreResizes) {
+                ImagePreResizingUtils.uploadPreResizesRaw(
+                  imageFileId      = fileId,
+                  fileContent      = new ByteArrayInputStream(fileContentBytes),
+                  fileOriginalName = file.filename
+                )(
+                  ec                 = ec,
+                  fileStorageService = fileInfoService.fileStorageService
+                )
+              } else {
+                Future.successful(())
+              }
+            }.map { _ =>
               s"""{"id":"${fileId.stringify}", "label":"${fileInfo.name}", "url":"${if (fileInfo.isImage) {
                   publicStorageUrls.publicImageUrl(id = fileId).absoluteURL()
                 } else {
                   publicStorageUrls.publicFileUrl(fileId).absoluteURL()
                 }}"}"""
-            )
+            }
 
           case Left(errorMessage) =>
             val exception = new Throwable(errorMessage)
@@ -225,10 +246,16 @@ private[controllers] trait FileControllerBase
       }
   }
 
-  protected def renderFile(file: FileInfoService.FileObject, dispositionMode: String): Result = {
+  protected def renderInputStream(
+      inputStream    : InputStream,
+      contentLength  : Option[Long],
+      contentType    : Option[String],
+      fileName       : String,
+      dispositionMode: String
+  ): Result = {
     val res: Source[ByteString, Future[IOResult]] =
       StreamConverters
-        .fromInputStream(() => file.content)
+        .fromInputStream(() => inputStream)
         .idleTimeout(15.seconds)
         .initialTimeout(15.seconds)
         .completionTimeout(60.seconds)
@@ -236,7 +263,7 @@ private[controllers] trait FileControllerBase
           val hint = new Hint
           hint.set("hint", "on stream recover")
           Sentry.captureException(e, hint)
-          file.content.close()
+          inputStream.close()
           ByteString.empty
         }
 
@@ -244,7 +271,7 @@ private[controllers] trait FileControllerBase
     // Please note that this schedule will be cancelled once the stream is completed.
     val cancellable = actorSystem.scheduler.scheduleOnce(4.minutes) {
       try {
-        file.content.close()
+        inputStream.close()
       } catch {
         case e: Throwable =>
           val hint = new Hint
@@ -257,7 +284,7 @@ private[controllers] trait FileControllerBase
     val lazyFlow = Flow[ByteString]
       .concatLazy(Source.lazyFuture { () =>
         Future {
-          file.content.close()
+          inputStream.close()
           cancellable.cancel()
           ByteString.empty
         }
@@ -267,24 +294,34 @@ private[controllers] trait FileControllerBase
 
     val body = HttpEntity.Streamed.apply(
       data          = withCleanupRes,
-      contentLength = file.contentLength,
-      contentType   = file.contentType
+      contentLength = contentLength,
+      contentType   = contentType
     )
 
     Result(
       header = ResponseHeader(status = OK),
       body   = body
     ).withHeaders(
-      CONTENT_LENGTH      -> file.contentLength.map(_.toString).getOrElse(""),
+      CONTENT_LENGTH      -> contentLength.map(_.toString).getOrElse(""),
       CONTENT_DISPOSITION ->
         (s"""$dispositionMode; filename="${java.net.URLEncoder
-            .encode(file.name, "UTF-8")
+            .encode(fileName, "UTF-8")
             .replace("+", "%20")}"; filename*=UTF-8''""" +
         java.net.URLEncoder
-          .encode(file.name, "UTF-8")
+          .encode(fileName, "UTF-8")
           .replace("+", "%20"))
     )
+
   }
+
+  protected def renderFile(file: FileInfoService.FileObject, dispositionMode: String): Result =
+    renderInputStream(
+      inputStream     = file.content,
+      contentLength   = file.contentLength,
+      contentType     = file.contentType,
+      fileName        = file.name,
+      dispositionMode = dispositionMode
+    )
 
   protected def renderFile(id: BSONObjectID, dispositionMode: String): Future[Result] = {
     fileInfoService.findObjectById(id).transform {
