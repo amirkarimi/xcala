@@ -37,9 +37,9 @@ object FileInfoService {
 
 @Singleton
 class FileInfoService @Inject() (
-    fileStorageService: FileStorageService,
-    val databaseConfig: DefaultDatabaseConfig,
-    implicit val ec   : ExecutionContext
+    val fileStorageService: FileStorageService,
+    val databaseConfig    : DefaultDatabaseConfig,
+    implicit val ec       : ExecutionContext
 ) extends DataReadSimpleServiceImpl[FileInfo]
     with DataRemoveServiceImpl[FileInfo]
     with DataSaveServiceImpl[FileInfo] {
