@@ -471,7 +471,7 @@ trait WithFileUploader extends WithExecutionContext {
   ): Future[_] =
     Future.traverse(filesIds.flatMap(BSONObjectID.parse(_).toOption))(fileInfoService.removeFile)
 
-  private def saveFile[A](
+  protected def saveFile[A](
       filePart        : MultipartFormData.FilePart[TemporaryFile],
       maybeOldModel   : Option[A],
       handlePreResizes: Boolean

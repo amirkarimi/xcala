@@ -42,10 +42,10 @@ object Col {
     new Col[A](
       maybeFieldValueMapper = fieldMapper.andThen(Some(_)),
       name                  = name: String,
-      sortExpression: Any,
-      cssClass      : A => Option[String],
-      headerCssClass: Option[String],
-      addIdToSort   : Boolean
+      sortExpression        = sortExpression: Any,
+      cssClass              = cssClass: A => Option[String],
+      headerCssClass        = headerCssClass: Option[String],
+      addIdToSort           = addIdToSort: Boolean
     )
 
   def command[A](commands: (A => RowCommand)*)(implicit messages: Messages): Col[A] = {

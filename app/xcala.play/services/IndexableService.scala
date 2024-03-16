@@ -72,7 +72,7 @@ trait IndexableService[Doc <: DocumentWithId with Indexable]
 
     existingItem
       .map { case existingItem: Option[IndexedItem] =>
-        updateOrNewIndexedItem(existingItem, id, model)
+        updateOrNewIndexedItem(indexedItem = existingItem, id = id, model = model)
       }
       .flatMap { indexedItem: IndexedItem =>
         indexedItemCollection.flatMap(_.update.one(
