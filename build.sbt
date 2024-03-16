@@ -127,15 +127,18 @@ Test / javaOptions ++= Seq("--add-opens=java.base/java.lang=ALL-UNNAMED")
 ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
 
 // Semanticdb is only for better IDE experience. therefore we disable it in non-development environments
-scalacOptions ++= {
-  if (sys.props.getOrElse("ci", "") == "true") {
-    Nil
-  } else {
-    addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.9.2" cross CrossVersion.full)
-    List(
-      "-Yrangepos",
-      "-P:semanticdb:synthetics:on"
+if (sys.props.getOrElse("ci", "") != "true") {
+  new Def.SettingList(
+    Seq(
+      addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.9.2" cross CrossVersion.full),
+      scalacOptions ++=
+        List(
+          "-Yrangepos",
+          "-P:semanticdb:synthetics:on"
+        )
     )
-  }
+  )
 
+} else {
+  new Def.SettingList(Nil)
 }
