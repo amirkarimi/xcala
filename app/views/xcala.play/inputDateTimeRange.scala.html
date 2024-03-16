@@ -1,5 +1,5 @@
 @(field: Field, args: (Symbol, Any)*)(implicit messages: Messages)
 
 @inputRange(field, args:_*) { (field, args) =>
-    @dateTimeField(field, true, args:_*)
+    @dateTimeField(field, hasTimePicker = true, args:_*)
 }

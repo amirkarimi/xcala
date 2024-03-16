@@ -2,11 +2,11 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "1.0.24"
+version := "1.1.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.13.12"
+scalaVersion := "2.13.13"
 
 resolvers ++=
   Seq(
@@ -33,34 +33,34 @@ libraryDependencies ++=
     filters,
     jodaForms,
     "org.reactivemongo"            %% "reactivemongo"              % "1.0.10",
-    "com.nappin"                   %% "play-recaptcha"             % "2.5",
-    "com.typesafe.akka"            %% "akka-actor-typed"           % "2.9.0",
-    "com.typesafe.akka"            %% "akka-testkit"               % "2.9.0" % "test",
-    "com.typesafe.akka"            %% "akka-serialization-jackson" % "2.9.0",
-    "com.typesafe.akka"            %% "akka-stream"                % "2.9.0",
-    "com.typesafe.akka"            %% "akka-slf4j"                 % "2.9.0",
+    "com.nappin"                   %% "play-recaptcha"             % "2.6",
+    "com.typesafe.akka"            %% "akka-actor-typed"           % "2.9.2",
+    "com.typesafe.akka"            %% "akka-testkit"               % "2.9.2" % "test",
+    "com.typesafe.akka"            %% "akka-serialization-jackson" % "2.9.2",
+    "com.typesafe.akka"            %% "akka-stream"                % "2.9.2",
+    "com.typesafe.akka"            %% "akka-slf4j"                 % "2.9.2",
     "com.bahmanm"                  %% "persianutils"               % "5.0",
     "io.lemonlabs"                 %% "scala-uri"                  % "4.0.3",
     "org.apache.tika"               % "tika-core"                  % "2.9.1",
-    "ch.qos.logback"                % "logback-classic"            % "1.4.14",
-    "io.sentry"                     % "sentry-logback"             % "7.0.0",
-    "io.minio"                      % "minio"                      % "8.5.7",
+    "ch.qos.logback"                % "logback-classic"            % "1.5.3",
+    "io.sentry"                     % "sentry-logback"             % "7.6.0",
+    "io.minio"                      % "minio"                      % "8.5.9",
     "commons-io"                    % "commons-io"                 % "2.15.1",
     "com.sksamuel.scrimage"        %% "scrimage-scala"             % "4.1.1",
     "com.sksamuel.scrimage"         % "scrimage-webp"              % "4.1.1",
-    "com.fasterxml.jackson.module" %% "jackson-module-scala"       % "2.16.0",
-    "org.postgresql"                % "postgresql"                 % "42.7.1",
+    "com.fasterxml.jackson.module" %% "jackson-module-scala"       % "2.16.2",
+    "org.postgresql"                % "postgresql"                 % "42.7.2",
     "com.typesafe.play"            %% "play-slick"                 % "5.2.0",
     "com.github.tototoshi"         %% "slick-joda-mapper"          % "2.8.0",
     "com.github.tminglei"          %% "slick-pg"                   % "0.21.1",
     "com.lightbend.akka"           %% "akka-stream-alpakka-slick"  % "7.0.1",
-    "com.ibm.icu"                   % "icu4j"                      % "74.1",
-    "com.typesafe.play"            %% "play-json"                  % "2.10.3",
-    "com.typesafe.play"            %% "play-json-joda"             % "2.10.3",
+    "com.ibm.icu"                   % "icu4j"                      % "74.2",
+    "com.typesafe.play"            %% "play-json"                  % "2.10.4",
+    "com.typesafe.play"            %% "play-json-joda"             % "2.10.4",
     specs2                          % Test
   )
 
-ThisBuild / scapegoatVersion := "2.1.3"
+ThisBuild / scapegoatVersion := "2.1.5"
 
 scapegoatIgnoredFiles :=
   Seq(
@@ -126,10 +126,16 @@ Test / javaOptions ++= Seq("--add-opens=java.base/java.lang=ALL-UNNAMED")
 
 ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value)
 
-addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.8.14" cross CrossVersion.full)
+// Semanticdb is only for better IDE experience. therefore we disable it in non-development environments
+scalacOptions ++= {
+  if (sys.props.getOrElse("ci", "") == "true") {
+    Nil
+  } else {
+    addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.9.2" cross CrossVersion.full)
+    List(
+      "-Yrangepos",
+      "-P:semanticdb:synthetics:on"
+    )
+  }
 
-scalacOptions ++=
-  List(
-    "-Yrangepos",
-    "-P:semanticdb:synthetics:on"
-  )
+}

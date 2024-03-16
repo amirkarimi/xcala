@@ -25,7 +25,7 @@ xcala_play_test:
       alias: mongo
   script:
     - cd /opt
-    - sbt "testOnly * -- -Dtest.config=/opt/conf/docker-test.conf"
+    - sbt -Dci=true "testOnly * -- -Dtest.config=/opt/conf/docker-test.conf"
   retry: 2
   stage: test
 
@@ -33,6 +33,6 @@ xcala_play_publish:
   image: registry.hamdocker.ir/ketab/xcala-play-test:$CI_COMMIT_SHORT_SHA
   script:
     - cd /opt
-    - sbt publish
+    - sbt -Dci=true publish
   retry: 2
   stage: publish
