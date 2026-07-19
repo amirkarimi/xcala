@@ -2,9 +2,11 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "1.12.21"
+version := "1.12.22"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
+
+Compile / unmanagedResourceDirectories += baseDirectory.value / "shared-assets"
 
 scalaVersion := "2.13.16"
 
