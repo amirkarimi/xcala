@@ -12,8 +12,9 @@ ADD build.sbt   /opt/
 RUN sbt -Dci=true clean update
 
 # Prepare build
-ADD app     /opt/app
-ADD conf    /opt/conf
+ADD app           /opt/app
+ADD conf          /opt/conf
+ADD shared-assets /opt/shared-assets
 
 # Test image adds the test sources on top of the build image.
 FROM builder as test
