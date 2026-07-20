@@ -14,5 +14,8 @@ RUN sbt -Dci=true clean update
 # Prepare build
 ADD app     /opt/app
 ADD conf    /opt/conf
+
+# Test image adds the test sources on top of the build image.
+FROM builder as test
 ADD test    /opt/test
 

@@ -10,11 +10,14 @@ xcala_play_build:
   image: hub.hamdocker.ir/library/docker:29.5.3
   script:
     - echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USER" --password-stdin $REGISTRY
-    - docker build --build-arg NEXUS_KEY .
-    - export IMAGE="registry.hamdocker.ir/ketab/xcala-play-test"
-    - docker build --build-arg NEXUS_KEY -t $IMAGE:$CI_COMMIT_SHORT_SHA  -t $IMAGE:$CI_COMMIT_REF_SLUG --target builder .
+    - export IMAGE="registry.hamdocker.ir/ketab/xcala-play"
+    - export IMAGE_TEST="registry.hamdocker.ir/ketab/xcala-play-test"
+    - docker build --build-arg NEXUS_KEY -t $IMAGE:$CI_COMMIT_SHORT_SHA -t $IMAGE:$CI_COMMIT_REF_SLUG --target builder .
+    - docker build --build-arg NEXUS_KEY -t $IMAGE_TEST:$CI_COMMIT_SHORT_SHA -t $IMAGE_TEST:$CI_COMMIT_REF_SLUG --target test .
     - docker push $IMAGE:$CI_COMMIT_SHORT_SHA
     - docker push $IMAGE:$CI_COMMIT_REF_SLUG
+    - docker push $IMAGE_TEST:$CI_COMMIT_SHORT_SHA
+    - docker push $IMAGE_TEST:$CI_COMMIT_REF_SLUG
   retry: 2
   stage: build
 
@@ -30,7 +33,7 @@ xcala_play_test:
   stage: test
 
 xcala_play_publish:
-  image: registry.hamdocker.ir/ketab/xcala-play-test:$CI_COMMIT_SHORT_SHA
+  image: registry.hamdocker.ir/ketab/xcala-play:$CI_COMMIT_SHORT_SHA
   only:
     refs:
       - master
