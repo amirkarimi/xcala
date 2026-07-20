@@ -36,8 +36,10 @@ $(function () {
         }
     }
 
-    // Must be captured on click: by submit time the browser has already decided what the
-    // payload contains, and `event.submitter` is not available in older browsers.
+    // Fallback for browsers without `event.submitter` (see below): remember the last-clicked
+    // submit button per form. This is a direct binding, so it can miss when another script
+    // (e.g. a rich-text editor such as CKEditor) reworks the DOM after load — hence the
+    // native `submitter` is preferred at submit time.
     $('form').find(SUBMIT_SELECTOR).on('click', function () {
         $(this).closest('form').data('submitter', $(this));
     });
@@ -53,7 +55,12 @@ $(function () {
 
         isSubmitting = true;
 
-        const $submitter = $form.data('submitter');
+        // The browser sets `submitter` on the submit event for both mouse clicks and Enter-key
+        // submits, and it stays correct even when a rich-text editor reworks the DOM after our
+        // click handler was bound. Fall back to the click-captured button only when the native
+        // property is unavailable (older browsers) or the submit was triggered programmatically.
+        const nativeSubmitter = event.originalEvent && event.originalEvent.submitter;
+        const $submitter = nativeSubmitter ? $(nativeSubmitter) : $form.data('submitter');
         const name = $submitter && $submitter.attr('name');
 
         // Re-inject before disabling, otherwise this value is dropped from the POST body.
