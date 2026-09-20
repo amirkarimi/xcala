@@ -26,7 +26,12 @@
 
     function onRecaptchaSubmit(token) {
         if(isRecaptchaReady){
-            document.querySelector("[data-callback='onRecaptchaSubmit']").disabled = true;
+            var button = document.querySelector("[data-callback='onRecaptchaSubmit']");
+            button.disabled = true;
+            // form.submit() fires no submit event, so disableOnSubmit.js (if loaded) is called directly
+            if (window.showButtonLoading) {
+                window.showButtonLoading(button);
+            }
             document.getElementById("@formId").submit();
         }
     }

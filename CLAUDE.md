@@ -54,6 +54,10 @@ sbt publishLocal                       # installs to ~/.ivy2/local for local con
   `public/xcala/…` inside the jar.
 - Consuming apps load them with `@routes.Assets.at("xcala/…")` — Play's `Assets` controller resolves
   `/public/…` from the classpath, which includes this jar. No route wiring is needed downstream.
+- `xcala/javascripts/disableOnSubmit.js` — double-submit guard plus the "comet" loading indicator on the
+  clicked submit button (button keeps its size; CSS injected by the script; `window.showButtonLoading` for
+  native `form.submit()` paths such as `invisibleButtonExtended`; bfcache `pageshow` reset). Consumers include
+  it with `?v=N` — when it changes, consumers must bump `N` in every include as well as the xcala version.
 - **Gotcha:** the CI build image (`Dockerfile`) must `ADD` every source dir the build needs. It
   `ADD`s `project`, `build.sbt`, `app`, `conf`, `shared-assets`, `test`. If you add a new top-level
   dir that feeds packaging, add a matching `ADD` line — otherwise CI silently publishes a jar
