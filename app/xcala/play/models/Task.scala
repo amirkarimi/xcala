@@ -1,6 +1,4 @@
-package models
-
-import xcala.play.models.DocumentWithId
+package xcala.play.models
 
 import org.joda.time.DateTime
 import reactivemongo.api.bson._

@@ -14,17 +14,26 @@ views, BSON/Form extensions, and shared front-end assets.
 
 ## Source layout
 
-Directories use dotted names (each maps to that package):
+Every directory is one package segment, and every file's `package` matches its path (IntelliJ flags a mismatch;
+scalac does not). Never name a directory with a dot (`xcala.play/`): IntelliJ reads it as the single package
+`` `xcala.play` ``.
 
-- `app/xcala.play/` — core, **MongoDB/ReactiveMongo** based (~96 files): `controllers`, `services`,
-  `models`, `extensions`, `utils`.
-- `app/xcala.play.postgres/` — **PostgreSQL/Slick** variants: `controllers`, `services`, `entities`,
-  `models`, `utils`.
-- `app/xcala.play.cross/` — code shared between the Mongo and Postgres stacks.
-- `app/views/xcala.play/` — Twirl templates, referenced downstream as `views.html.xcala.play.*` /
-  helpers like `xcala.play.inputRich`, `xcala.play.bootstrap3.DefaultHelpers`.
+- `app/xcala/play/` — core, **MongoDB/ReactiveMongo** based: `controllers`, `services`, `models`, `extensions`,
+  `utils`.
+- `app/xcala/play/postgres/` — **PostgreSQL/Slick** variants: `controllers`, `services`, `entities`, `models`,
+  `utils`.
+- `app/xcala/play/cross/` — code shared between the Mongo and Postgres stacks.
+- `app/views/xcala/play/` — Twirl templates (`*.scala.html`), compiled to `views.html.xcala.play.*`; referenced in
+  templates as `xcala.play.inputRich` etc. Inside a template a bare `xcala.…` resolves to `views.html.xcala.…`, so
+  refer to Scala code as `_root_.xcala.play.…`.
+- `app/views/html/xcala/play/` — hand-written Scala helpers that live in the templates' package
+  `views.html.xcala.play[.bootstrap3]` (`grid`, `briefHtml`, `DefaultHelpers`, `InputParser`).
 - `shared-assets/public/…` — front-end assets served to consuming apps (see below).
 - `test/xcala/play/` — specs2 tests.
+- `Task`, `TaskLock`, `TaskStatus`, `TaskOwner`, `TaskBased`, `TaskBasedWithEither` are in `xcala.play.models`;
+  `TaskService`, `TaskLockService`, `RecaptchaService` in `xcala.play.services`. Up to 1.12.29 all but `TaskLock` /
+  `TaskLockService` (new in 1.12.30) were in the top-level `models` / `services`. `TaskLockService` keeps one lock per label (`taskLocks`, `_id` = the label): take it before starting a
+  background task that must not run twice at once.
 
 ## Build, test, run
 
