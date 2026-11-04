@@ -12,5 +12,4 @@ object TaskStatus extends Options {
     Running,
     Finished
   )
-
 }
