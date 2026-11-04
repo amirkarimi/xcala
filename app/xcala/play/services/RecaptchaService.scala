@@ -1,4 +1,4 @@
-package services
+package xcala.play.services
 
 import xcala.play.models.SentryExtendedBase
 

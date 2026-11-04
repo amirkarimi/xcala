@@ -1,4 +1,4 @@
-package models
+package xcala.play.models
 
 import play.api.libs.json.Json
 import play.api.libs.json.JsResult

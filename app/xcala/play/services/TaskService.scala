@@ -1,8 +1,7 @@
-package services
+package xcala.play.services
 
-import models._
 import xcala.play.extensions.BSONHandlers._
-import xcala.play.services._
+import xcala.play.models._
 
 import javax.inject.Inject
 import javax.inject.Singleton

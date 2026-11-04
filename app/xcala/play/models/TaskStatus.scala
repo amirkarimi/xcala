@@ -1,6 +1,4 @@
-package models
-
-import xcala.play.models.Options
+package xcala.play.models
 
 object TaskStatus extends Options {
   type Type = String
