@@ -2,13 +2,13 @@ name := """xcala.play"""
 
 organization := "com.xcala"
 
-version := "1.12.30"
+version := "1.12.31"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 Compile / unmanagedResourceDirectories += baseDirectory.value / "shared-assets"
 
-scalaVersion := "2.13.16"
+scalaVersion := "2.13.18"
 
 resolvers ++=
   Seq(
@@ -69,7 +69,7 @@ libraryDependencies ++=
 
 ThisBuild / versionScheme := Some("early-semver")
 
-ThisBuild / scapegoatVersion := "3.1.9"
+ThisBuild / scapegoatVersion := "3.2.3"
 
 scapegoatIgnoredFiles :=
   Seq(
@@ -132,7 +132,7 @@ Test / javaOptions ++= Seq("--add-opens=java.base/java.lang=ALL-UNNAMED")
 if (sys.props.getOrElse("ci", "") != "true") {
   new Def.SettingList(
     Seq(
-      addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.13.6" cross CrossVersion.full),
+      addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.13.9" cross CrossVersion.full),
       scalacOptions ++=
         List(
           "-Yrangepos",

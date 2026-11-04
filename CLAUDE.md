@@ -10,7 +10,7 @@ apps (paperds, icfi-reg, icfi-int-reg, icfi-subsidies, icfi-org-subsidies, …).
 CRUD controllers, data services, server-side pagination/criteria, localization, Bootstrap form/grid
 views, BSON/Form extensions, and shared front-end assets.
 
-- Scala **2.13.16**, sbt **1.10.11**, `PlayScala` plugin.
+- Scala **2.13.18**, sbt **1.13.1**, `PlayScala` plugin.
 
 ## Source layout
 

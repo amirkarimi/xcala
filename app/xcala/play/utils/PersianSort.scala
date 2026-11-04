@@ -7,7 +7,7 @@ import com.ibm.icu.text.Collator
 object PersianSort extends Ordering[String] {
 
   private val persianCollator: Collator =
-    Collator.getInstance(new Locale("fa")).freeze()
+    Collator.getInstance(Locale.forLanguageTag("fa")).freeze()
 
   override def compare(x: String, y: String): Int =
     persianCollator.compare(x, y)
