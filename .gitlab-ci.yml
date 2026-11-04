@@ -7,7 +7,7 @@ variables:
   IMAGE_USER: ketab
 
 xcala_play_build:
-  image: hub.hamdocker.ir/library/docker:29.5.3
+  image: hub.hamdocker.ir/library/docker:29.9.3
   script:
     - echo "$REGISTRY_PASSWORD" | docker login -u "$REGISTRY_USER" --password-stdin $REGISTRY
     - export IMAGE="registry.hamdocker.ir/ketab/xcala-play"
